@@ -1,0 +1,35 @@
+	 
+	  REAL(8) PCRL, PCRQ,PCRS,ET_demand,LCAI,COVER,CONVR
+	  Real(8) HourlyCarboUsed 
+	  REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
+	  REAL LAREAT, MaxRootDepth
+	  Integer ITIME, IDAWN, IDUSK
+	 
+      Common /ShootR/   PCRL,PCRQ,PCRS,HourlyCarboUsed, ET_demand,
+     !                  LCAI,COVER,CONVR,
+     !                  MaxRootDepth,SHADE,HEIGHT,LAI,AWUPS,
+     !                  NitroDemand,xBSTEM,yBSTEM,SGT,PSIM,
+     !                  LAREAT,POPROW,ROWSP,ROWANG,
+     !                  CEC,EORSCS,AWUPSS,SOLRAD,
+     !                  Total_Eor,Total_Pcrs,sincrsink,PSILD,
+     !                  OSMFAC,EOMULT,PSIL_,NDemandError, 
+     !                  CumulativeNDemandError,TotalRootWeight,
+     !                  ConstI(2),constK(2), Cmin0(2),
+     !                  ITIME,IDAWN,IDUSK
+	                 
+      Common /shtR_public/ RVR(NumEld), AWUP(NumEld),PSISM,PSILT,EOR,
+     !                     YRL(NumEld), RGCF(NumEld),iFavRoot(NumEld),
+     !                     AdjCellNum(NumEld, 4),PSIS(NumEld),
+     !                     TS(NumEld),COND(NumEld),PDWR(NumEld),
+     !                     DRL(NumEld),WUPM(NumEld),
+     !                     WUPN(NumEld),WUPT(NumEld),TPL,PPDRL(NumEld),
+     !                     ADWR(NumEld), AWR(NumEld), ADRL(NumEld),RTWL,
+     !                     RtMinWtPerUnitArea,Wl,Wa,Wr,Wb,ALPY,
+     !                     WidthE(NumEld),HeightE(NumEld),
+     !                  PILD,VMAX,vegsrc, potential_T,
+     !                   potential_T_EO,
+     !                  AWUPS_old, WUPMS, EORSCF,WUPDS, WUP2S, 
+     !                 WUP0S, DPSI02,SCF, PSIST,PROPAR,
+     !                 VUP(NumElD,2),FUP(NumEld,2)
+     
+     
