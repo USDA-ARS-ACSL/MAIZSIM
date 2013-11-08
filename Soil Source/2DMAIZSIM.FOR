@@ -5,6 +5,8 @@
 *                                                                      *
 *                              Release 04                              *
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
+C this is a test comment
+
       Include 'public.ins'
       include 'puplant.ins'
 	Include 'Puweath.ins'
