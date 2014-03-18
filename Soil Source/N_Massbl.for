@@ -10,6 +10,8 @@ Cdt N in 2DSOIL is nitrate (NO3) and the units are ug per cm3 or milligram/liter
      &    Min_N,Ammon_N,Org_N,Denitr,
      &    Mean1,Mean2,Mean3,Mean4,Mean5,All_N
         Integer ModNum
+C added something to test        
+        Integer Temp
         common /N_BAL/ModNum,CFlux,CFluxPrevious
 
       If (lInput.eq.1) then
