@@ -106,7 +106,7 @@ void _stdcall CROP(struct
 			//			 error_public->errPlant=1;
 			return;
 		}
-		CString Junk;
+		//CString Junk;
 		char ttmp[10];
 //DT for some reason need to read the buffer twice when reading text after a line of numbers
 // TODO - Plant density can be calculated from poprow and row spacing.
