@@ -1,4 +1,3 @@
-#pragma once
 #include "stdafx.h"
 #include "organ.h"
 #define CO2_MW 44.0098
