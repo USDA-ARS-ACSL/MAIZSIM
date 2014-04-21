@@ -4,11 +4,11 @@
 //
 
 #include <iostream>
-#include <tchar.h>
+//#include <tchar.h>
 // atlcoll is for arrays
-#include <atlcoll.h>
+//#include <atlcoll.h>
 // atlstr is for atl string functions
-#include <atlstr.h> 
+//#include <atlstr.h> 
 
 
 
