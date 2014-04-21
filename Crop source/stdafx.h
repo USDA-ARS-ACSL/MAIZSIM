@@ -10,6 +10,10 @@
 // atlstr is for atl string functions
 //#include <atlstr.h> 
 
+#ifndef WIN32
+#define _stdcall
+#endif
+
 #define __min(a, b) (((a)<(b))?(a):(b))
 #define __max(a, b) (((a)>(b))?(a):(b))
 
