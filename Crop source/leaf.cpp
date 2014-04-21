@@ -3,6 +3,7 @@
 #include "weather.h"
 #include "initinfo.h"
 #include <cmath>
+#include <algorithm>
 #define MINUTESPERDAY (24*60);
 using namespace std;
 
@@ -149,7 +150,7 @@ void CLeaf::update(CDevelopment * dv, double predawnlwp)
 			 // dropped
 	else
 	{
-		greenArea = max(0,area-senescentArea);  //To do- I don't know why we need two variables for this (DT)
+		greenArea = max(0.,area-senescentArea);  //To do- I don't know why we need two variables for this (DT)
 		actualgreenArea = greenArea;
 		FullyExpandedArea=max(area,FullyExpandedArea);
 	}
