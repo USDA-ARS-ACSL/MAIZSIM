@@ -457,7 +457,7 @@ void _stdcall CROP(struct
 				// set up accounting of N here.
 				// first hourly//Actual and needed N uptake in the last hour per plant per day
                 double HourlyActualNFromSoil =(NitrogenUptake-NitrogenUptakeOld)/PopSlab; //houly rate per day
-				double HourlyNitrogenDemand= max(U_P, 0)/pSC->getInitInfo().plantDensity/24.0; //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
+				double HourlyNitrogenDemand= max(U_P, 0.)/pSC->getInitInfo().plantDensity/24.0; //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
                 pSC->getPlant()->set_HourlyNitrogenSoilUptake(HourlyActualNFromSoil);
 				pSC->getPlant()->set_HourlyNitrogenDemand(HourlyNitrogenDemand);
 
