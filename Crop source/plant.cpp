@@ -839,5 +839,6 @@ void CPlant::writeNote(const TWeather & w)
 	{
         oStr << s << " "<< w.jday;
 	}
-	note.swap(oStr.str());
+	//note.swap(oStr.str());
+	note = oStr.str();
 }
