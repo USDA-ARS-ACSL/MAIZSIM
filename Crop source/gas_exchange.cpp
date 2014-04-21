@@ -131,7 +131,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
   Rd = Parms.Rd25*exp(Parms.Ear*(Tleaf-25)/(298*R*(Tleaf+273)));
 
   double CriticalNitrogen;
-  CriticalNitrogen=max(0.25,lfNContent);
+  CriticalNitrogen=__max(0.25,lfNContent);
   Parms.Vcm25 = Parms.Vcm25*(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
   Parms.Jm25 = Parms.Jm25*(2/  (1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
   Parms.Vpm25 = Parms.Vpm25*(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1); //in Sinclair and Horie, 1989 Crop sciences, it is 4 and 0.2; 
