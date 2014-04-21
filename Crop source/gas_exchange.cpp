@@ -29,7 +29,7 @@ inline double Min(double a, double b, double c) {return (__min(__min(a,b),c));}
 
 
 
-CGas_exchange::CGas_exchange(string sType_in, double n_content)
+CGas_exchange::CGas_exchange(std::string sType_in, double n_content)
 {
 	sType=sType_in;
 	lfNContent = n_content; 
