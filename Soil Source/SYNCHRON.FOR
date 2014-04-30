@@ -61,6 +61,6 @@
 *      write(*,*) Time
       Time = Time + Step
 *
-100    FORMAT(1x,G12.5\)
+100    FORMAT(1x,G12.5)
       Return
       End
