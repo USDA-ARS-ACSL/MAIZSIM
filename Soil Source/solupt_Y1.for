@@ -21,13 +21,13 @@ c         4  Michaelis-Menton uptake only
       Common  / SoluteM /  ThOld(NumNPD), Dmol(NumSD)
       Common  / PotNitr /  PotNitrogen_t
       Character * 40  UptakeN(6)
-      data UptakeN / 
-     !'Passive Mass Uptake (Mihaelson-Menton kinetics'
-     !,'Passive Mass Uptake (Mihaelson-Menton kinetics)&convetcive flux'
-     !,'Active  Mass Uptake  Cr = Croot',
-     !' ',
-     !' ',
-     !' ' / 
+c      data UptakeN / 
+c     !'Passive Mass Uptake (Mihaelson-Menton kinetics'
+c     !,'Passive Mass Uptake (Mihaelson-Menton kinetics)&convetcive flux'
+c     !,'Active  Mass Uptake  Cr = Croot',
+c     !' ',
+c     !' ',
+c     !' ' / 
 c       real qc(NumElD),DispM(2,NumElD)
 C *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * 
 	If(lInput.eq.1) then
