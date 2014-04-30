@@ -24,7 +24,11 @@ using namespace std;
            // fortran and C++ don't matter here because these are arguments and not
            // a function name. CROP must be upper case because it is a function
            // name
+#ifdef WIN32
 void _stdcall CROP(struct 
+#else
+void _stdcall crop_(struct 
+#endif
 				   ShootCommon        *SHOOTR, 
 				   WeathCommon        *Weather,
 				   GridCommon         *grid_public,
