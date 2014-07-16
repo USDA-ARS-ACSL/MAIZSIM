@@ -28,6 +28,7 @@ public:
 		Rmax_LTAR = 0.53;
 		DayLengthSensitive=true;
 		PhyllochronsToSilk=8;
+		
 	}
 	char description[255];
 	char cultivar[255];
@@ -42,7 +43,7 @@ public:
 	bool DayLengthSensitive; //1 if daylength sensitive
 	double Rmax_LIR, Rmax_LTAR; //  Maximum Leaf tip initiation and appearance rates
 	double PhyllochronsToSilk; //number of phyllochrons from tassel initiation for 50% silking. 
-	// routines for date manipulation from fortran
-	
+	//check units
+
 };
 #endif

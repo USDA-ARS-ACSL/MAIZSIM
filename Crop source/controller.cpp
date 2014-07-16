@@ -59,6 +59,7 @@ void CController::initialize()
 	Timer dConvert; //object to convert dates 
 	int mm, dd,yy;  // for calendar dates
 	char* Buffer=(char*)calloc(256,sizeof(char)); //to hold duumy strings from variety file
+	cout << "Initializing Controller object...." << endl <<endl <<endl ; 
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MaizeSim: A Simulation Model for Corn          *" << endl
@@ -154,15 +155,25 @@ void CController::initialize()
 		cfs.getline(Buffer, 255,'\n');
         cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
-        
+// Read root parameters
+/* 
+These are not read by 2dsoil delete this block when we are sure of the structure
+		cfs.getline(Buffer, 255,'\n');
+        cfs.getline(Buffer, 255,'\n');
+		cfs >>initInfo.RRRM >> initInfo.RRRY >> initInfo.RVRL
+			>> initInfo.ALPM >> initInfo.ALPY;
+		cfs.getline(Buffer, 255,'\n');
+		cfs >> initInfo.RTWL >> initInfo.RtMinWtPerUnitArea 
+			>> initInfo.Wl >>initInfo.Wa>> initInfo.Wr >>initInfo.Wb;
 
- 
+ */
 // end reading variety file
 
 
 	    dConvert.caldat(initInfo.sowingDay,mm,dd,yy);
 		if (cfs.eof()) cfs.close();
-		cout << "Reading variety file : " << varietyFile << endl <<endl;
+		cout << "Read variety file: " << varietyFile << endl <<endl;
+		cout << "Simulation information for:" << endl;
 		cout << setiosflags(ios::left)
 			<< setw(20) << "Description: " << initInfo.description << endl <<endl
 			<< setw(10)	<< "Cultivar: " << initInfo.cultivar << endl

@@ -84,7 +84,7 @@ void _stdcall CROP(struct
 		LeafFile[i]='\0'; // append null char to end of string
 
 
-		std::cout << "Initializing crop module..." << endl;
+		std::cout << "Crop object reading initials file..." << endl;
 		size=sizeof(file_public->InitialsFile);
 		char iniFile[132]; //only read here so we can create a temporary variable
 		for (i=0; i<size; i++)
@@ -173,7 +173,29 @@ void _stdcall CROP(struct
 		PopSlab=SHOOTR->PopRow/100.0*SHOOTR->EOMult;
             //PopSlab=SHOOTR->PopRow/100*SHOOTR->RowSp*SHOOTR->EOMult;
 		Popare=SHOOTR->PopRow*100.0/SHOOTR->RowSp;
+
+// A new plant model object is created and initialized (calls initialize function) here
+//  ***************************************************************************
  		pSC = new CController(varFile, GraphicFile, LeafFile, initInfo);
+//  ***************************************************************************
+
+		//can pass root parameters back to 2DSOIL here
+		/*
+		This block is not used now, all 2dsoil variables are read by 2dsoil 
+		This should be deleted after we are sure of the structure
+        SHOOTR->RRRM=initInfo.RRRM;
+		SHOOTR->RRRY=initInfo.RRRY;
+		SHOOTR->RVRL=initInfo.RVRL;
+		SHOOTR->ALPM=initInfo.ALPM;
+		SHOOTR->ALPY=initInfo.ALPY;
+        SHOOTR->RTWL=initInfo.RTWL;
+		SHOOTR->RtMinWtPerUnitArea=initInfo.RtMinWtPerUnitArea;
+        SHOOTR->Wl=initInfo.Wl;
+		SHOOTR->Wa=initInfo.Wa;
+	    SHOOTR->Wr=initInfo.Wr;
+		SHOOTR->Wb=initInfo.Wb;
+		*/
+// -----------
 		NitrogenUptake=pSC->getPlant()->get_N()*PopSlab; //initialize nitrogen uptake with what is already in the plant
 		//SK 8/20/10: this is curious but OK
 
@@ -333,13 +355,15 @@ void _stdcall CROP(struct
 			}
 
 			wthr.soilT=soilT/count;
-// the plant object is called here:
+// The model code to simulate growth ect begins here when the plant object is called :
+//TODO add some error catching code here
 			int ier = pSC->getErrStatus();
 			if ( ier == 0 ) 
 			{
 				ier = pSC->run(wthr, lwpd); //Pass both weather and leaf water potential into the "run" function
 				//of the controller pSC YY
-				// need to get rid of other run module (with only wthr)
+				// need to get rid of other run module (with only wthr) done?
+				// need to add lwpd to wthr structure
 			}
 
 
