@@ -1,0 +1,34 @@
+*** NITROGEN ROOT UPTAKE PARAMETER INFORMATION **************************
+ISINK    Rroot                                                                                   
+  0	 0.017      					            
+ConstI   Constk     Cmin0       		                                    
+35.0     0.50        .01
+17.2    0.75        .030
+DlngR(NumMat) cm2 hr-1
+0.01
+0.01
+0.01
+0.01
+comment 
+should be 2.8 and 1.5
+original values:
+ISINK    Rroot                                                                                   
+  2	 0.017      					            
+ConstI   Constk     Cmin0       		                                    
+0.028   500      .1
+0.015     25000       .01
+Sink=	
+
+         0  'passive root mass uptake' no kinetics
+         1   Plant regulation diffusive and convective uptake
+         2  'convective diffusive uptake no plant regulation (Constant IMax)
+         3  'diffusive uptake only, no effect of water movement 
+         4  Michaelis-Menton uptake only
+
+         4  'active root mass uptake'   rootflux=(Convective+Dispersive +Mihael-Menson kinetic) flux
+         5  'active root mass uptake'   rootflux=(DIspersive +Mihael-Menson kinetic) flux
+Rroot  - Root raduys (m)
+ConstI(2) - Mixael-Menson parameter  (ug/cm3/day/cm)  Root_M-M_kinetic FLux=ConstI*(C_root surface-Cmin0)/(ConstK+(C_root surface-Cmin0)) 1 -old root, 2- new roots
+ConstK(2) - Mixael-Menson parameter  (ug/cm3), 1 -old root, 2- new roots
+Cmin0(2)  - Max Concentration on the root surface (ug) then    Root_M-M_kinetic FLux=0, 1 -old root, 2- new roots
+DlngR-   HydroDispersivity constant for root mass transport (cm)

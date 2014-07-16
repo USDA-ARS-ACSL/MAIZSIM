@@ -1,0 +1,21 @@
+mkdir Biology
+mkdir Climate
+mkdir Element
+mkdir Graphics
+mkdir Grid
+mkdir Initials
+mkdir Management
+mkdir MassBal
+mkdir Nitrogen
+mkdir Nodal
+mkdir Root
+mkdir Soil
+mkdir Solute
+mkdir SoluteNitrogen
+mkdir Temperature
+mkdir Time
+mkdir Variety
+mkdir Water
+mkdir WaterBoundary
+mkdir Weather
+
