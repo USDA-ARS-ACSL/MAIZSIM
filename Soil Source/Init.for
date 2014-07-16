@@ -11,10 +11,7 @@ c     for writing frequency to output
 	read(9,'(A132)')ClimateFile
 	read(9,'(A132)')NitrogenFile
 	read(9,'(A132)')SoluteFile
-	read(9,'(A132)')SoluteNitrogenFile
-	read(9,'(A132)')RootFile
 	read(9,'(A132)')SoilFile
-	read(9,'(A132)')TemperatureFile
 	read(9,'(A132)')ManagementFile
 	read(9,'(A132)')WaterFile
 	read(9,'(A132)')WaterBoundaryFile

@@ -10,6 +10,7 @@ c         4  Michaelis-Menton uptake only
       IncLude 'Puplant.ins'
       Include 'Puweath.ins'
       real MMUpN, bi(3),ci(3),PotNitrogen_t
+      Character InString*132 ! to read input file
       Common  / SUP /  TotWSink,TotSSink,WincrSink,TotSSINK2
       Common  / Biom /  BM
       Common  / slpt /  Iflag
@@ -18,7 +19,8 @@ c         4  Michaelis-Menton uptake only
      !	CSink_M(NumElD),Cr_M(NumElD,2), LastCr_M(NumElD,2),
      !  TotalFUPM,TotalFUPY
    
-      Common  / SoluteM /  ThOld(NumNPD), Dmol(NumSD)
+      Common  / SoluteM /  ThOld(NumNPD), Dmol(NumSD),
+     !                     DLng(NMatD,NumSD),Dtrn(NMatD,NumSD)
       Common  / PotNitr /  PotNitrogen_t
       Character * 40  UptakeN(6)
       data UptakeN / 
@@ -45,7 +47,12 @@ C  Reading of the input files and initial calculations
 C
 		im = 430
 		il = 0
-		Open(40,file = SoluteNitrogenFile, status = 'old',ERR = 10)   
+		Open(40,file = VarietyFile, status = 'old',ERR = 10)
+! look for section with soil nitrogen information
+ 15       Read (40,'(A132)') InString
+          if (InString(1:14).ne.'[SoilNitrogen]') goto 15
+                  
+		
 		im = im + 1
 		il = il + 1
 		Read(40, * ,ERR = 10)
@@ -67,10 +74,7 @@ C
 		Read(40, * ,ERR = 10)
 		im = im + 1
 		il = il + 1
-		Do M = 1,NMat
-		 Read(40, * ,ERR = 10) DlngR(M)
-		 il = il + 1
-		enddo
+	
 		close(40)
 		do j=1, 2
 		 do e=1, NumEl
@@ -96,6 +100,9 @@ c     $     young     old    young     old      sum       sumSink'
       PotNitrogen_t=NitroDemand*62.0/14.0  ! go from nitrogen to nitrate ug no3 day-1 slab-1
       TotalFUPY=0                            !Total root length
       TotalFUPM=0
+      	Do M = 1,NMat
+		 DlngR(M)=Dlng(M,1)
+		enddo
 
 
      
@@ -293,4 +300,3 @@ c     !     (AlphaK(e,j),j=1,2),F_MM(e,1)+F_MM(e,2),SumSinkN
 	
 
 
-
