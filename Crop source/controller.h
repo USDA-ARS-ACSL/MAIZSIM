@@ -40,7 +40,7 @@ private:
 	CDevelopment*       develop;
 	InputDataFormat     weatherFormat;
 public:
-	CController(char*, char*, char*, TInitInfo);
+	CController(const char*, const char*, const char*, TInitInfo);
     ~CController();
 	void setErrStatus(int ier) {errorFlag = ier;}
 	int getErrStatus() {return errorFlag;}

@@ -50,56 +50,20 @@ void _stdcall crop_(struct
 	// DEL LATER ::NR dConvert;
 	ofstream ostr;
 	static CController* pSC; //SK, declare as static to ensure only one copy is instantiated during 2DSOIL execution
-	static char varFile[132], GraphicFile[132], LeafFile[132]; //need initials file name too?
 	// varFile contains variety information, GraphicFile holds output,LeafFile holds individual leaves
 
 	if (time_public->lInput==1) //SK, initialiing crop module
 	{
 // Parse the file names from the FORTRAN strings passed from 2dsoil
-		int size=sizeof(file_public->VarietyFile);
-		int i;
-		for (i=0 ;i<size;i++)
-		{
-			if (file_public->VarietyFile[i]!='\n')
-			{
-				varFile[i]=file_public->VarietyFile[i];
-			}
-		}
-		varFile[i]='\0'; // append null char to end of string
-
-		size=sizeof(file_public->GraphicsFile);
-		for (int i=0 ;i<size;i++)
-		{
-			if (file_public->GraphicsFile[i]!='\n')
-			{
-				GraphicFile[i]=file_public->GraphicsFile[i];
-			}
-		}
-		GraphicFile[i]='\0';
-   
-	    size=sizeof(file_public->LeafFileIn);
-		for (i=0 ;i<size;i++)
-		{
-			if (file_public->LeafFileIn[i]!='\n')
-			{
-				LeafFile[i]=file_public->LeafFileIn[i];
-			}
-		}
-		LeafFile[i]='\0'; // append null char to end of string
-
+//KY looks like GNU Fortran handle linebreak differently, making filename detection unusable
+//KY this new macro based on std::string should work on both platforms with smaller code
+#define SETSTR(s, n) std::string s(n, sizeof(n)); s.erase(s.find_last_not_of(" \n\r\t")+1);
+		SETSTR(varFile, file_public->VarietyFile);
+		SETSTR(GraphicFile, file_public->GraphicsFile);
+		SETSTR(LeafFile, file_public->LeafFileIn);
 
 		std::cout << "Crop object reading initials file..." << endl;
-		size=sizeof(file_public->InitialsFile);
-		char iniFile[132]; //only read here so we can create a temporary variable
-		for (i=0; i<size; i++)
-		{
-			if (file_public->InitialsFile[i]!='\n')
-			{
-				iniFile[i]=file_public->InitialsFile[i];
-			}
-		}
-		iniFile[i]='\0'; 
-		//  Read initial file.
+		SETSTR(iniFile, file_public->InitialsFile);
 
 		ifstream in(iniFile);
 		if (!in) 
@@ -180,7 +144,7 @@ void _stdcall crop_(struct
 
 // A new plant model object is created and initialized (calls initialize function) here
 //  ***************************************************************************
- 		pSC = new CController(varFile, GraphicFile, LeafFile, initInfo);
+ 		pSC = new CController(varFile.c_str(), GraphicFile.c_str(), LeafFile.c_str(), initInfo);
 //  ***************************************************************************
 
 		//can pass root parameters back to 2DSOIL here

@@ -23,7 +23,7 @@ using namespace std;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CController::CController(char* filename, char* outfile, char* LFile, TInitInfo iniInfo)
+CController::CController(const char* filename, const char* outfile, const char* LFile, TInitInfo iniInfo)
 {
 	time			 = NULL;
 	weather 		 = NULL;
