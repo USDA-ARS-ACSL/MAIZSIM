@@ -20,5 +20,6 @@ There are two subprojects, Crop Source and Soil Source.
 
 More documention is being prepared. 
 
-We will be adding input files during Novemeber.
+Input files for one test case are in the folder Test_Ver9.1
+
 

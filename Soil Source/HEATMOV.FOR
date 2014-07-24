@@ -1,62 +1,31 @@
       subroutine HeatMover ()
       Include 'public.ins'
       Double precision A,B,C,P,Sum
+      Real VSind, VClay, VOrgM, ThTot
       Integer tKod
-      Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD)  
+      Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD) 
       Common /HeatM/ ThOld(NumNPD),
-     !                NLevel,dt,epsi,
+     !                NLevel,dt,
      !                S(3,3),Ci(3),Bi(3),List(3),
      !                VxOld(NumNPD),VzOld(NumNPD),
      !                VxH(NumNPD),VzH(NumNPD),hOld(NumNPD),
      !                WeTab(3,2*NumElD),ThTot(NMatD),
      !                Ac(NumNPD),Fc(NumNPD),Qc(NumNPD),
-     !                VClay(NMatD),VSind(NMatD),VOrgM(NumNPD),
-     !                BlkDn(NMatD),CWat,TCSzz(NumNpd),
-     !                FracOM,FracSind,FracClay,HCS(NumNPD),
-     !                hCritA,RNS,Sc(NumNPD),Gc(NumNPD)
+     !                CWat,TCSzz(NumNpd),HCS(NumNPD),
+     !                VSind(NMatD), VClay(NMATD),VOrgM(NMatD),
+     !                RNS,Sc(NumNPD),Gc(NumNPD)
       If (lInput.eq.0) goto 11
 C
-C  Reading of the input files and initial calculations
+C  Initialization here
 C          
-      Open(41,file=TemperatureFile, status='old')  
       Nlevel=1
-      im=100
-      il=0
-*
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10) epsi,hCritA
-      if(epsi.lt.0.999) NLevel=2      
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)     
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(41,*,ERR=10)
       Do i=1,NMat
-        Read(41,*,ERR=10) BlkDn(i),FracOm,FracSind,FracClay
-        VSind(i)=BlkDn(i)*FracSind/2.65/100.
-        VClay(i)=BlkDn(i)*FracClay/2.65/100.
-        VOrgM(i)=BlkDn(i)*FracOm/1.0/100.
+        VSind(i)=BlkDn(i)*FracSind(i)/2.65/100.
+        VClay(i)=BlkDn(i)*FracClay(i)/2.65/100.
+        VOrgM(i)=BlkDn(i)*FracOm(i)/1.0/100.
         ThTot(i)=1-BlkDn(i)/2.65
         il=il+1
       Enddo     
-      Close(41)
 *       
       Do i=1,NumNP
         VxOld(i)=Vx(i)
@@ -77,14 +46,14 @@ C
       t=Time
       dt = Step
       Call Thermal(HCS,MatNumN,NMatD,NumNP,VSind,VClay,VOrgM,ThNew,
-     !               epsi,ThTot,CWat,Tmpr,TcSxx,TCSzz,hCritA,hnew)
+     !               EPSI_Heat,ThTot,CWat,Tmpr,TcSxx,TCSzz,hCritA,hnew)
       xMul=1.
-      alf=1.-epsi
+      alf=1.-EPSI_Heat
 c
 C      GR 1 line   
       newjjj = MBand
       Do 13 i=1,NumNP
-        Ac(i)= - ((ThOld(i)*Alf+epsi*Thnew(i))+HCS(i)/cWat)
+        Ac(i)= - ((ThOld(i)*Alf+EPSI_Heat*Thnew(i))+HCS(i)/cWat)
         Ds(i)=0.
         Fc(i)=0.
         Sc(i)=0.
@@ -93,7 +62,7 @@ C      GR 1 line
 C      GR
       if(lOrt) B1(i)= tmpr(i)
 
-       If(epsi.lt.0.001) then
+       If(EPSI_Heat.lt.0.001) then
           A(MBand,i)=0
         Else
           Do 12 j=1,MBandD
@@ -126,7 +95,7 @@ C
             VzH(i)=Vz(i)
           Enddo
           Call Thermal(HCS,MatNumN,NMatD,NumNP,VSind,VClay,VOrgM,ThNew,
-     &    epsi,ThTot,CWat,Tmpr,TcSxx,TCSzz,hCritA,hnew)
+     &    EPSI_Heat,ThTot,CWat,Tmpr,TcSxx,TCSzz,hCritA,hnew)
           Do n=1,NumEl
           NUS=4
             If(KX(n,3).eq.KX(n,4)) NUS=3
@@ -225,7 +194,7 @@ C     GR
 	           else
 	                iB=MBand+i2-i1
 	           endif
-                  A(iB,i1)=A(iB,i1)+epsi*S(j1,j2)
+                  A(iB,i1)=A(iB,i1)+EPSI_Heat*S(j1,j2)
                 Endif
 16            Continue
 17          Continue
@@ -238,7 +207,7 @@ C     GR
 	else
 	    if (lOrt) newjjj=IADD(i)
              A(newjjj,i)=A(newjjj,i)+DS(i)/dt           
-             b(i)=b(i)+ds(i)/dt*Tmpr(i)-epsi*F(i)/cWat
+             b(i)=b(i)+ds(i)/dt*Tmpr(i)-EPSI_Heat*F(i)/cWat
           Endif
 		 
 20      Continue
@@ -305,7 +274,7 @@ c   incorporated into it.
         If(tKod.eq.3) then
           B(i)=B(i)+(alf*Ph*tmpr(i)-Qh)/cWat
 	    if(lOrt) newjjj=IADD(i)
-          A(newjjj,i)=A(newjjj,i)-epsi*Ph/cWat
+          A(newjjj,i)=A(newjjj,i)-EPSI_Heat*Ph/cWat
         End if
       End if
 114   Continue
@@ -334,7 +303,7 @@ C
 C
 C Solve the global matrix equation for transport
 C
-      If(epsi.lt.0.001) then
+      If(EPSI_Heat.lt.0.001) then
 	  
         Do 22 i=1,NumNP
 	  if(lOrt) newjjj=IADD(i)
@@ -411,13 +380,13 @@ cSolve
 *
       Subroutine Thermal(HCS,MatNumN,NMatD,NumNP,VSind,
      !               VClay,VOrgM,ThNew,
-     !               epsi,ThTot,CWat,Tmpr,Tcsxx,TCSzz,hCritA,hNew)
+     !               EPSI_Heat,ThTot,CWat,Tmpr,Tcsxx,TCSzz,hCritA,hNew)
 C calculate thermal conducivity
       Dimension HCS(NumNP),MatNumN(NumNP),VSind(NMatD),VClay(NMatD),
      !          VOrgM(NMatD),ThNew(NumNP),ThTot(NMatD),Tmpr(NumNP),
      !          Tcsxx(NumNP),TCSzz(NumNP),hNew(NumNP)
 
-      alf=1.0-epsi
+      alf=1.0-EPSI_Heat
 C     ---- THERMAL CONDUCTIVITY OF WATER SATURATED AIR ----
       Do 10, i=1,NumNP
         m=MatNumN(i)

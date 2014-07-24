@@ -3,14 +3,30 @@
       Include 'public.ins'
       Include 'puplant.ins'
       Dimension iLoc(4)
+      Character InString*132
       Integer e,e1,SW10,SW20,SW30,SW40
       Real MECHR,RGCF1, RGCF2, RGCF3,RGCF4,RGCF5
       Real PDWR_TOTAL   !for debugging
+      Real RRRM,RRRY; ! root radial resistance for mature and young leaves (s-1 cm-1)
+	Real RVRL;    !root vascular resistance s-1 cm -1
+	Real RTWL;    !Root weight per unit length (g cm-1)
+	Real ALPM,ALPY; !relative growth rates for mature and young roots
+	Real RtMinWtPerUnitArea; !minimum root weight per length (g cm-1)
+	Real Wl,Wa,Wr,Wb; !Weighting parameters for root growth in grid used in Root_grow_c
+	integer ISink;        ! Determines mechanism of nitrogen uptake by root
+!	   /*      0  'passive root mass uptake' no kinetics
+!             1   Plant regulation diffusive and convective uptake
+!             2  'convective diffusive uptake no plant regulation (Constant IMax)
+!             3  'diffusive uptake only, no effect of water movement 
+!             4  Michaelis-Menton uptake only
+
+!   */
+      Real RootRadius;  !radius of root - avg in cm 
+	
       Common /CarbonPartition/ 
      !       VH2OC(NumElD),
      !       CXT(NumElD),PSIRD(NumElD),TPRD(NumElD),
      !       RRRM,RRRY,RVRL,ALPM,Conc_e(NumElD),
-     !       BlkDn(NMatD),
      !       SR(NumElD),
      !       OSMREG,
      !       PILOSM,PSILZ,
@@ -24,16 +40,30 @@ c      write(108,'(5A12)') 'Time','e','rgcf1','rgcf2','rgcf3'
 C
 C  Reading of the input files and initial calculations 
 C
-
+! initialize variables to deefault values
+        RRRM=166.7;
+		RRRY=31.3;
+		RVRL=0.73;
+		ALPM= 0.350;
+		ALPY= 0.04;
+		RTWL=1.059e-004; 
+        RtMinWtPerUnitArea=2.0e-004;
+		Wl=1.0;
+		Wa=1.0;
+		Wr=2.0;
+	  Wb=10.0;
       Do i=1,NumElD
         YRL(i)=0.
         RUTDEN(i)=0.
         RGCF(i)=0.
         iFavRoot(i)=0.
       Enddo
+     	Open(40,file = VarietyFile, status = 'old',ERR = 10)
+
       im=220
       il=0
-      Open(40,file=RootFile,status='old',ERR=10)
+15       Read (40,'(A132)') InString
+          if (InString(1:14).ne.'[SoilRoot]') goto 15
       im=im+1
       il=il+1
       Read(40,*,ERR=10)
@@ -55,15 +85,10 @@ C
       im=im+1
       il=il+1
       Read(40,*,ERR=10) Wl,Wa,Wr,Wb
-      im=im+1
+       im=im+1
       il=il+1
-      Read(40,*,ERR=10)
-      im=im+1
-      il=il+1
-      Read(40,*,ERR=10) (BlkDn(m),m=1,NMat)
-      close(40)
-      im=235
       il=0
+      Close (40)
       open(41,file=ElemGeomFile,status='old',ERR=10)
       im=im+1
       il=il+1
@@ -276,7 +301,7 @@ C
         ELSE If (TS(e).lt.20.0) THEN
           RGCF2 = (TS(e)/20.) **(1.66)
         ENDIF
-        RCGF2=1.0
+
 
 C
 C   CALCULATE PROPORTIONIAL REDUCTION OF ROOT GROWTH CAUSED BY

@@ -13,6 +13,12 @@ tmp/
 *~.nib
 *.suo
 *.ncb
+*.g01
+*.g02
+*.g03
+*.go4
+*.g05
+*.out
 local.properties
 .classpath
 .settings/

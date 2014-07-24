@@ -76,12 +76,12 @@
     double PCRL,PCRQ,PCRS,HourlyCarboUsed,ET_demand,LCAI,Cover,Convr;
 	float MaxRootDepth,Shade,Height,LAI,AWUPS,nitroDemand;
 	float xBStem,yBStem,SGT,PSIM,
-    LAREAT,PopRow,RowSp,RowAng,CEC,
-    EORSCS,AWUPSS,SolRad,Total_Eor,
-    Total_Pcrs,SIncrSink,Psild,
-    OsmFac, EOMult,psil_, NDemandError, CumulativeNDemandError, 
-	TotalRootWeight, ConstI[2],constK[2], Cmin0[2];
-	int iTime,iDawn,iDusk;
+      LAREAT,PopRow,RowSp,RowAng,CEC,
+      EORSCS,AWUPSS,SolRad,Total_Eor,
+      Total_Pcrs,SIncrSink,Psild,
+      OsmFac, EOMult,psil_, NDemandError, CumulativeNDemandError, 
+	  TotalRootWeight, ConstI[2],constK[2], Cmin0[2];
+    int iTime,iDawn,iDusk;
 	
 //	PILD,VMAX,vegsrc, AWUPS,
 //	AWUPS_old,WUPMS, EORSCF,WUPDS, WUP2S, WUP0S,
@@ -165,8 +165,8 @@
 	           double starter;
 	           char WeatherFile[132], TimeFile[132], BiologyFile[132],
                ClimateFile[132], NitrogenFile[132], SoluteFile[132],
-               SoluteNitrogenFile[132],RootFile[132], SoilFile[132], 
-               TemperatureFile[132], ManagementFile[132],
+               SoilFile[132], 
+               ManagementFile[132],
                WaterFile[132], WaterBoundaryFile[132], 
                GraphicsFile[132], InitialsFile[132],VarietyFile[132],
 			   NodeGraphics[132],ElemGraphics[132],NodeGeomFile[132],

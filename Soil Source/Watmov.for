@@ -19,7 +19,7 @@
       Dimension Bii(3),Cii(3)
       Common /WaterM/ ThOld(NumNPD),hOld(NumNPD),hTemp(NumNPD),
      !                ConAxx(NumElD),ConAzz(NumElD),ConAxz(NumElD),
-     !                MaxIt,TolTh,TolH,hCritS,hCritA,dt,dtOld,tOld,
+     !                MaxIt,TolTh,TolH,dt,dtOld,tOld,
      !                thR(NMatD),hSat(NMatD),thSat(NMatD),
      !                 isat(NumBPD),FreeD
       If (lInput.eq.0) goto 11  
@@ -48,7 +48,8 @@
       im=im+1
       il=il+1
       Read(40,*,ERR=10) MaxIt,TolTh,TolH,
-     !                  hCritA,hCritS,dtMx(1),hTab1,hTabN
+     !                  hCritA,hCritS,dtMx(1),hTab1,hTabN,EPSI_Heat,
+     !                   EPSI_Solute
         close(40) 
 c      hCritS=1.0e9        !needs to be high for ponded infiltration to work
                         ! need to remove it from the parameter file
@@ -57,8 +58,12 @@ c      hCritS=1.0e9        !needs to be high for ponded infiltration to work
       call IADMake(KX,NumNP,NumEl,NumElD,MBandD,IAD,IADN,IADD)
       
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
-     !                  hTemp,Explic,ThNew,hTab1,hTabN,
-     !                  hSat,ThSat,ThR, ThAvail,ThFull,SoilFile)
+     !                  BlkDn,hTemp,Explic,ThNew,hTab1,hTabN,
+     !                  hSat,ThSat,ThR, ThAvail,ThFull,
+     !                  FracOM, FracSind, FracClay,SoilFile)
+c  assign bulk density
+       
+             
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                   ConAxx,ConAzz,ConAxz,Vx,Vz)
 c   Calculate Total Available Water in Profile
@@ -172,8 +177,9 @@ C  SetMat: hydraulic properties for every node based on
 C  new values of pressure head
 C
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
-     !                  hTemp,Explic,ThNew,hTab1,hTabN,
-     !                  hSat,ThSat,ThR, ThAvail,ThFull,SoilFile)
+     !                  BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
+     !                  hSat,ThSat,ThR, ThAvail,ThFull,
+     !                  FracOM, FracSind, FracClay,SoilFile)
 
 c
 c  RESET: assembling of the matrixes
@@ -608,8 +614,9 @@ cdt - moved this here
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                  ConAxx,ConAzz,ConAxz,Vx,Vz)
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
-     !               hTemp,Explic,ThNew,hTab1,hTabN,
-     !                  hSat,ThSat,ThR, ThAvail,ThFull,SoilFile)
+     !               BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
+     !               hSat,ThSat,ThR, ThAvail,ThFull,
+     !               FracOM, FracSind, FracClay,SoilFile)
 
 
 

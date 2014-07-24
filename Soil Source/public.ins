@@ -12,15 +12,18 @@ c   will be transferred.
       Double precision  A1,B1,VRV,RES,RQI,RQ,QI,QQ,RQIDOT  
 	  Double precision  ECNVRG, RCNVRG,ACNVRG
 	  Double precision Starter
+      
+      Real BlkDn, FracSind, FracClay, FracOM, hCritS,hCritA
       Integer CodeW,CodeS,CodeT,CodeG,errPlant
 	  Integer MaxItO   
       Logical*1 lOrt
-      Integer DailyOutput, HourlyOutput,RunFlag,
+      Integer DailyOutput, HourlyOutput,RunFlag,  
      !  DailyWeather,HourlyWeather
-       character WeatherFile*132, TimeFile*132, BiologyFile*132,
+     
+        character WeatherFile*132, TimeFile*132, BiologyFile*132,
      !          ClimateFile*132, NitrogenFile*132, SoluteFile*132,
-     !          SoluteNitrogenFile*132,RootFile*132, SoilFile*132,
-     !          TemperatureFile*132, ManagementFile*132,
+     !          SoilFile*132,
+     !          ManagementFile*132,
      !          WaterFile*132, WaterBoundaryFile*132,
      !          PlantGraphics*132,InitialsFile*132,  VarietyFile*132,
      !          NodeGraphics*132,ElemGraphics*132,
@@ -34,10 +37,9 @@ c   will be transferred.
       Common /nodal_public/ NumSol,NumG,ListN(NumNPD),ListNE(NumNPD),
      !       MatNumN(NumNPD),hNew(NumNPD),ThNew(NumNPD), Vx(NumNPD),  
      !       Vz(NumNPD),Q(NumNPD), Conc(NumNPD,NumSD), 
-     !       g(NumNPD,NumGD), 
-     !       Tmpr(NumNPD), Con(NumNPD),TcsXX(NumNPD),RO(NumNPD),
-     !        hNew_org(NumNPD),QAct(NumNPD),ThetaAvail, ThetaFull,
-     !         ThAvail(NumNPD),ThFull(NMAtD),  lOrt
+     !       g(NumNPD,NumGD), Tmpr(NumNPD), Con(NumNPD),TcsXX(NumNPD),
+     !       RO(NumNPD), hNew_org(NumNPD),QAct(NumNPD),ThetaAvail, 
+     !       ThetaFull, ThAvail(NumNPD),ThFull(NMAtD),  lOrt
       Common /elem_public/  MatNumE(NumElD),Sink(NumElD), 
      !       cSink(NumElD,NumSD),gSink(NumElD,NumGD),tSink(NumElD),
      !       RTWT(NumElD),RUTDEN(NumElD) 
@@ -59,11 +61,14 @@ c   will be transferred.
      !        IADD(NumNPD),A1(MBandD,NumNPD),B1(NumNPD),
      !        VRV(NumNPD),RES(NumNPD),RQI(NumNPD,MNorth),
      !        QQ(NumNPD), RQ(NumNPD),QI(NumNPD,MNorth), RQIDOT(MNorth)
-	  Common /Initvar/ECNVRG, RCNVRG,ACNVRG, MaxItO
-	  Common /DataFilenames/ Starter, WeatherFile, TimeFile, BiologyFile,
-     !          ClimateFile, NitrogenFile, SoluteFile,
-     !          SoluteNitrogenFile,RootFile, SoilFile, 
-     !          TemperatureFile, ManagementFile,
+     
+	  Common /Initvar/ ECNVRG, RCNVRG, ACNVRG, MaxItO,EPSI_Heat,
+     !                 EPSI_Solute, hCritS, hCritA
+	 
+	  Common /DataFilenames/ Starter, WeatherFile, TimeFile, 
+     !          BiologyFile,ClimateFile, NitrogenFile, SoluteFile,
+     !          SoilFile, 
+     !          ManagementFile,
      !          WaterFile, WaterBoundaryFile, 
      !          PlantGraphics,InitialsFile,VarietyFile,
      !          NodeGraphics,ElemGraphics,NodeGeomFile,
@@ -71,4 +76,9 @@ c   will be transferred.
      !          FluxGraphics, MassBalanceFile,MassBalanceFileOut,
      !          LeafGraphics,RunFile
        Common /Nodal_pub_Aux/ ROForInfil(NumBPD)
+       
+       Common /Materials/BlkDn(NMatD),FracSind(NMatD), FracClay(NMatD),
+     !           FracOM(NMatD)
+     
+      
 	  
