@@ -111,7 +111,7 @@ void _stdcall crop_(struct
 			return;
 		}
 		//CString Junk;
-		char ttmp[10];
+		char ttmp[11];
 //DT for some reason need to read the buffer twice when reading text after a line of numbers
 // TODO - Plant density can be calculated from poprow and row spacing.
 // TODO need to add the initinfo components into SHOOTR and read from there. 
