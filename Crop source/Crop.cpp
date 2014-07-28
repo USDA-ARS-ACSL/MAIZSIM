@@ -66,7 +66,7 @@ void crop_(struct
 		std::cout << "Crop object reading initials file..." << endl;
 		SETSTR(iniFile, file_public->InitialsFile);
 
-		ifstream in(iniFile);
+		ifstream in(iniFile.c_str());
 		if (!in) 
 		{
 			cout << "error opening file" << endl ; 
