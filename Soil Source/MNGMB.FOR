@@ -13,8 +13,8 @@
 
       Subroutine Mngm()
       Include 'public.ins'
+      Integer Max_fert_times,Fert_times,Num_nodes,nAppl,applied
       Parameter (Max_fert_times=25)
-      Integer Fert_times,Num_nodes,nAppl,applied
       Dimension Bi(3),Ci(3)
       Character*10 Date(Max_fert_times)
 
