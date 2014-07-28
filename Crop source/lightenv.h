@@ -1,8 +1,12 @@
 #pragma once
 #ifndef _DELPHI_LIGHTENV_H_
 #define _DELPHI_LIGHTENV_H_
+#ifdef _WIN32
 #ifndef DLLIMPORT
 #define DLLIMPORT __declspec(dllimport)  __stdcall
+#endif
+#else
+#define DLLIMPORT
 #endif
 //import delphi dll for canopy light environment calculations
 //TODO: to be translated to C++

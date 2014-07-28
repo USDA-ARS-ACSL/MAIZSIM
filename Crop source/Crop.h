@@ -7,10 +7,14 @@
 
 // See creating a pocket PC dll using C++ article for information
 // on how to do this
+#ifdef _WIN32
 #ifdef MYPLANT_EXPORTS
 #define PLANT_API __declspec(dllexport)
 #else
 #define PLANT_API __declspec(dllexport)
+#endif
+#else
+#define PLANT_API
 #endif
 
 
