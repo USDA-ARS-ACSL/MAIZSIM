@@ -6,7 +6,8 @@
 #include "controller.h"
 
 #include "time.h"
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
