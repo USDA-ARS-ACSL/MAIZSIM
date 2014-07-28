@@ -27,7 +27,7 @@ using namespace std;
 #ifdef WIN32
 void _stdcall CROP(struct 
 #else
-void _stdcall crop_(struct 
+void crop_(struct 
 #endif
 				   ShootCommon        *SHOOTR, 
 				   WeathCommon        *Weather,
