@@ -193,7 +193,7 @@ extern "C" {
 #endif
 
 // Your exported function headers go here
-#ifdef WIN32
+#ifdef _WIN32
 PLANT_API void _stdcall CROP(struct ShootCommon    *, WeathCommon    *,
 #else
 PLANT_API void crop_(struct ShootCommon    *, WeathCommon    *,
