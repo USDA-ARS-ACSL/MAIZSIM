@@ -1,5 +1,4 @@
 //cpmdate.cpp
-#pragma once
 #include "stdafx.h"
 #include "cpmdate.h"
 #include <cmath>

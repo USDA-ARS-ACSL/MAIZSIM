@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "stdafx.h"
 
 #using <mscorlib.dll>
@@ -58,3 +59,4 @@ using namespace System::Runtime::CompilerServices;
 [assembly:AssemblyKeyFileAttribute("")];
 [assembly:AssemblyKeyNameAttribute("")];
 
+#endif

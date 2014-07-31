@@ -23,13 +23,13 @@ c         4  Michaelis-Menton uptake only
      !                     DLng(NMatD,NumSD),Dtrn(NMatD,NumSD)
       Common  / PotNitr /  PotNitrogen_t
       Character * 40  UptakeN(6)
-      data UptakeN / 
-     !'Passive Mass Uptake (Mihaelson-Menton kinetics'
-     !,'Passive Mass Uptake (Mihaelson-Menton kinetics)&convetcive flux'
-     !,'Active  Mass Uptake  Cr = Croot',
-     !' ',
-     !' ',
-     !' ' / 
+c      data UptakeN / 
+c     !'Passive Mass Uptake (Mihaelson-Menton kinetics'
+c     !,'Passive Mass Uptake (Mihaelson-Menton kinetics)&convetcive flux'
+c     !,'Active  Mass Uptake  Cr = Croot',
+c     !' ',
+c     !' ',
+c     !' ' / 
 c       real qc(NumElD),DispM(2,NumElD)
 C *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * 
 	If(lInput.eq.1) then
@@ -229,7 +229,7 @@ c calculate and alternative alphaK depending on demand
 	      If ((VUP(e,j).le.0).OR.(iSink.EQ.3)) Then
 	       GammaB=alphaK(e,j)*RootRadius/(Disp(e,j))
 	       PC=1-0.5*GammaB
-	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius*RootRadius)
+	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius**2)
 	       PC=1.0/(PC+PC2)
 	       PC=amax1(0.0,amin1(1.0,PC))
 	         Else

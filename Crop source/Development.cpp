@@ -4,6 +4,7 @@
 #include "radiation.h"
 #include <iostream>
 #include <string>
+#include <algorithm>
 //#using <mscorlib.dll>
 using namespace std;
 
@@ -61,8 +62,8 @@ void CDevelopment::setParms() // dt in days
 int CDevelopment::update(const TWeather& wthr)
 {
 	double Jday = wthr.jday;
-    T_cur = max(0,wthr.airT);
-	if (LvsAppeared < 9) T_cur = max(0,wthr.soilT); 
+    T_cur = max(0.,wthr.airT);
+	if (LvsAppeared < 9) T_cur = max(0.,wthr.soilT); 
     double addLeafPhotoPeriod, addLeafTemperature, addLeafTotal;
 //	double dt = initInfo.timeStep/(24*60); //converting minute to day decimal, 1= a day
 

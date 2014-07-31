@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include ".\thermaltime.h"
+#include "thermaltime.h"
 
 
 CThermalTime::CThermalTime(void)

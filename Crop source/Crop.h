@@ -7,10 +7,14 @@
 
 // See creating a pocket PC dll using C++ article for information
 // on how to do this
+#ifdef _WIN32
 #ifdef MYPLANT_EXPORTS
 #define PLANT_API __declspec(dllexport)
 #else
 #define PLANT_API __declspec(dllexport)
+#endif
+#else
+#define PLANT_API
 #endif
 
 
@@ -189,7 +193,11 @@ extern "C" {
 #endif
 
 // Your exported function headers go here
+#ifdef _WIN32
 PLANT_API void _stdcall CROP(struct ShootCommon    *, WeathCommon    *,
+#else
+PLANT_API void crop_(struct ShootCommon    *, WeathCommon    *,
+#endif
 							         GridCommon     *, NodeCommon     *,
 									 ElementCommon  *, BoundaryCommon *,
 									 TimeCommon     *, ModuleCommon   *,

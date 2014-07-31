@@ -12,8 +12,8 @@
 	character*132 RunDat
 	integer len, status
 	RunFile="Run.Dat"
-	Call GetArg(1, RunDat,status)
-	if (status.gt.0) then
+	Call get_command_argument(1, RunDat, len, status)
+	if (len.gt.0) then
 	  RunFile=RunDat
 	  endif
 	  

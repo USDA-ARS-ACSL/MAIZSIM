@@ -1,5 +1,4 @@
 //
-#pragma once
 #include "stdafx.h"
 #include "plant.h"
 #include "gas_exchange.h"
@@ -839,5 +838,6 @@ void CPlant::writeNote(const TWeather & w)
 	{
         oStr << s << " "<< w.jday;
 	}
-	note.swap(oStr.str());
+	//note.swap(oStr.str());
+	note = oStr.str();
 }

@@ -23,7 +23,6 @@ Unit to calculate solar geometry including solar elevation, declination,
 //using namespace System;
 
 
-#pragma once
 #define PAR2PFD 4.6  // conversion factor from W/m2 to PFD (umol m-2 s) for PAR waveband (median 550 nm of 400-700 nm) of solar radiation, see Campbell and Norman (1994) p 149
 	// 4.55 is a conversion factor from W to photons for solar radiation, Goudriaan and van Laar (1994)
 	// some use 4.6 i.e., Amthor 1994, McCree 1981, Challa 1995.

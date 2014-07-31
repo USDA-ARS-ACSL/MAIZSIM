@@ -5,7 +5,7 @@ double QuadSolnLower (double a, double b, double c );
 class CGas_exchange
 {
 public:
-	CGas_exchange(CString sType_in, double n_content);
+	CGas_exchange(std::string sType_in, double n_content);
 	~CGas_exchange(void);
 
 private:
@@ -21,7 +21,7 @@ private:
    double gsw(double pressure);
    double Es(double T);
    double Slope(double T);
-   CString sType;
+   std::string sType;
 public:
    void SetVal_psil(double PFD, double Tair, double CO2, double RH, double wind, double Press, double width, double leafp, double ET_supply);
    double get_gs(){return gs;}

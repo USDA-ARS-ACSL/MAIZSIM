@@ -1,4 +1,3 @@
-#pragma once
 #include "stdafx.h"
 #include "controller.h"
 #include "initinfo.h"
@@ -24,7 +23,7 @@ using namespace std;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CController::CController(char* filename, char* outfile, char* LFile, TInitInfo iniInfo)
+CController::CController(const char* filename, const char* outfile, const char* LFile, TInitInfo iniInfo)
 {
 	time			 = NULL;
 	weather 		 = NULL;
@@ -256,7 +255,7 @@ void CController::outputToCropFile()
 {
 	{
 			int mm,id,iyyy;
-			CString DateForOutput;
+			string DateForOutput;
 			double av_gs = plant->get_conductance();
 			if (!plant->get_develop()->Emerged())
 			{
@@ -268,8 +267,14 @@ void CController::outputToCropFile()
 				vpd=0;
 			}
 			time->caldat(weather[iCur].jday, mm, id,iyyy);
+#if 0
 			DateForOutput.Format("%.2d/%.2d/%4i",mm,id,iyyy);
-			CString s = "";
+#else
+			char DateForOutputBuff[16];
+			snprintf(DateForOutputBuff, 16, "%.2d/%.2d/%4i", mm, id, iyyy);
+			DateForOutput = DateForOutputBuff;
+#endif
+			string s = "";
 			if (plant->get_develop()->Matured()) {s="Matured";}
 			else if (plant->get_develop()->GrainFillBegan()) {s="grainFill";}
 			else if (plant->get_develop()->Silked()) {s="Silked";}
@@ -341,9 +346,15 @@ void CController::outputToLeafFile()
 	CNodalUnit*  nU;
 	CDevelopment* myDevelop=plant->get_develop();
 
-	CString DateForOutput;
+	string DateForOutput;
 	time->caldat(weather[iCur].jday, mm, id,iyyy);
+#if 0
 	DateForOutput.Format("%.2d/%.2d/%4i",mm,id,iyyy);
+#else
+	char DateForOutputBuff[16];
+	snprintf(DateForOutputBuff, 16, "%.2d/%.2d/%4i", mm, id, iyyy);
+	DateForOutput = DateForOutputBuff;
+#endif
 	ofstream ostr(LeafFile, ios::app);
 	ostr << setiosflags(ios::right) 
 		<< setiosflags(ios::fixed);

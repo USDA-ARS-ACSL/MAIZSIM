@@ -29,8 +29,8 @@ inline double Min(double a, double b, double c) {return (__min(__min(a,b),c));}
 
 
 
-CGas_exchange::CGas_exchange(CString sType_in, double n_content)
-{ 
+CGas_exchange::CGas_exchange(std::string sType_in, double n_content)
+{
 	sType=sType_in;
 	lfNContent = n_content; 
 }
@@ -131,7 +131,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
   Rd = Parms.Rd25*exp(Parms.Ear*(Tleaf-25)/(298*R*(Tleaf+273)));
 
   double CriticalNitrogen;
-  CriticalNitrogen=max(0.25,lfNContent);
+  CriticalNitrogen=__max(0.25,lfNContent);
   Parms.Vcm25 = Parms.Vcm25*(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
   Parms.Jm25 = Parms.Jm25*(2/  (1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
   Parms.Vpm25 = Parms.Vpm25*(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1); //in Sinclair and Horie, 1989 Crop sciences, it is 4 and 0.2; 
