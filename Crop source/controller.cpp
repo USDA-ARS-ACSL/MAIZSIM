@@ -271,7 +271,7 @@ void CController::outputToCropFile()
 			DateForOutput.Format("%.2d/%.2d/%4i",mm,id,iyyy);
 #else
 			char DateForOutputBuff[16];
-			snprintf(DateForOutputBuff, 16, "%.2d/%.2d/%4i", mm, id, iyyy);
+			sprintf(DateForOutputBuff, "%.2d/%.2d/%4i", mm, id, iyyy);
 			DateForOutput = DateForOutputBuff;
 #endif
 			string s = "";
