@@ -14,8 +14,11 @@
 #define __max(a, b) (((a)>(b))?(a):(b))
 
 #include <cstring>
+//KY workaround for Windows-only functions
+#ifndef _WIN32
 #define strcpy_s(t, s) strcpy(t, s)
 #define strcat_s(t, s) strcat(t, s)
 #define _itoa_s(i, a, n) snprintf(a, n, "%d", i)
+#endif
 
 // TODO: reference additional headers your program requires here
