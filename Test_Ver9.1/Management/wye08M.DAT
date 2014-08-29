@@ -1,0 +1,37 @@
+ ****Script for chemical application module  *******
+ Number of Fertilizer applications (max=25) mappl is in total mg N applied to grid  (1 kg/ha = 1 mg/m2/width of application) application divided by width of grid in cm is kg ha-1
+2
+ tAppl(i)  mAppl(i),  Num_nodes(i)  (repeat these 3 lines for the number of fertilizer applications)
+ "06/06/2008"   29.4   15
+ Nodes for the application 158
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+"07/06/2008"   29.4   15
+ Nodes for the application 158
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+
+
+
+
+was 60 35 35
+5/19 6/19 and 6/30
+
+152.5 0.00052   2
+
+
+
+ 162.0 0.00000   2
+ 166.5 0.00018   2
+ 167.5 0.00012   2
+ 169.5 0.00052   2
+ 180.5 0.00024   2
+ 181.0 0.00000   2
+ 183.0 0.00000   2
+ 188.0 0.00000   2
+ 194.0 0.00000   2
+ 195.5 0.00024   2
+ 200.0 0.00000   2
+ 207.0 0.00000   2
+ 212.0 0.00000   2
+ 218.0 0.00000   2
+ 229.0 0.00000   2
+ 245.0 0.00000   2

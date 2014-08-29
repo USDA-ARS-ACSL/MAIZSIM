@@ -1,0 +1,24 @@
+Corn growth simulation for  WYE data
+P37y14 
+GDD to      Juvenile   Daylength    Rmax_LTAR              Rmax_LTIR             Phyllochrons from
+maturity    leaves       Sensitive   Leaf tip appearance   Leaf tip initiation     Tassle Init
+2400          16            1          0.53                  0.978                  3
+[SoilRoot]
+*** WATER UPTAKE PARAMETER INFORMATION **************************
+ RRRM       RRRY    RVRL
+ 166.7 31.30 0.73
+ ALPM    ALPY     RTWL    RtMinWtPerUnitArea
+ 0.350  0.04     1.059e-004    2.00000e-004
+ Wl    Wa     Wr      Wb   ---Wr increased up to 4.0
+ 1.00 1.00 2.00 10.00
+[SoilNitrogen]
+*** NITROGEN ROOT UPTAKE PARAMETER INFORMATION **************************
+ISINK    Rroot                                                                                   
+  0	 0.017      					            
+ConstI   Constk     Cmin0       		                                    
+35.0     0.50        .01
+17.2    0.75        .030
+
+
+
+

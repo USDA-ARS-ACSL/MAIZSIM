@@ -1,0 +1,8 @@
+ *** SYNCHRONIZER INFORMATION *****************************
+ Initial time       dt       dtMin     DMul1    DMul2    tFin
+ '05/28/2008'             0.0001      1e-7    1.3      0.3      '10/15/2008'
+Output variables, 1 if true  Daily    Hourly
+                                 0         1
+Weather data,  1    if true
+                                 0           1 
+
