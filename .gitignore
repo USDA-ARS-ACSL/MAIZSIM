@@ -18,6 +18,8 @@ tmp/
 *.g03
 *.g04
 *.g05
+*.g06
+*.$$$
 *.out
 local.properties
 .classpath
