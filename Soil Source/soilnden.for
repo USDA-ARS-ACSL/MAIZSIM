@@ -27,6 +27,19 @@
      &      fe(m),fh(m),r0(m),rL(m),rm(m),fa(m),nq(m),cs(m)
         Enddo         
 
+C      initialize variables to zero here
+        Do i=1, NumNP
+          Ch_Old(i)=0
+          Nh_Old(i)=0
+          CL_Old(i)=0
+          NL_Old(i)=0
+          Cm_Old(i)=0
+          Nm_Old(i)=0
+          Denit_Old(i)=0
+          NNH4_Old(i)=0
+          NNO3_Old(i)=0
+        EndDo
+        
         Close(40)
         NumSol=1
         Call SetAbio(ew,et,ed,0,0.,0.)
@@ -45,7 +58,7 @@ C                 ug cm3 * cm3 H2O cm-3 soil  * N / nitrate = ug N cm-3 volume
 C                   multiply by 1000 to get mg N cm3 volume
         BNO3=Amax1(0.,Conc(i,1)*ThNew(i)*14./62.0/1000.0 )
         NNO3_OLD(i)=BNO3
-        BNH4=NNH4_Old(i)
+        BNNH4=NNH4_Old(i) !8/28/2014 DT was BNH4 original typo
         BDENIT=Denit_old(i)
         DO IT=1,3
 C  Rate constants
@@ -101,7 +114,7 @@ C
 C Preferential immobilization of ammonium
 C
 C Nitrification
-          Aux1=(NNH4_Old(i)+BNH4)/2.
+          Aux1=(NNH4_Old(i)+BNNH4)/2.  !8/28/2014 DT was BNH4 original typo
           Aux2=(BNO3+NNO3_Old(i))/2.
           Q6 =  kn * AMAX1(0.,Aux1 - Aux2/nq(m))
 C Ammonium available for immobilization
