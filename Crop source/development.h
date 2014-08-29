@@ -49,6 +49,7 @@ public:
 	double get_CalibTemperature() {return CalibTemperature;}
 	double get_T_Opt() {return T_opt;}
 	double get_T_Base() {return T_base;}
+	double get_T_ceil() {return T_ceil;}
 	double get_Tgrow()  {return T_grow;}
 
   

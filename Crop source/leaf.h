@@ -14,10 +14,11 @@ public:
 	~CLeaf();
 
 	bool isInitiated() {return initiated;}
+	bool isAppeared() {return appeared;}
 	bool isGrowing() {return growing;}
-	bool isProlific() {return prolific;}
+	bool isMature() {return mature;}
 	bool isAging() {return aging;}
-	bool isTerminated() {return terminated;}
+	bool isDead() {return dead;}
 	bool isDropped() {return dropped;}
 	double get_area(){return area;}
 	double get_greenArea() {return greenArea;}
@@ -30,6 +31,7 @@ public:
 	double get_RelativeAreaIncrease() {return RelativeAreaIncrease;}
 	double get_actualgreenArea() {return actualgreenArea;}
 	double get_droppedArea () {return droppedArea;}
+	double get_GDD2mature() {return GDD2mature;}
 	int    get_TotalGrowingLeaves() {return TotalGrowingLeaves;}
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
 	int    get_Rank() {return rank;}
@@ -44,18 +46,21 @@ public:
 	double GTI(double);
 	void set_RelativeAreaIncrease(double x) {RelativeAreaIncrease=x;}
 	void update(CDevelopment *, double pdlwp);
-	void Expand(CDevelopment *, double pdlwp);
+	void elongate(CDevelopment *, double pdlwp);
+	void expand(CDevelopment *, double pdlwp);
+	void senescence(CDevelopment *);
 	void senescence(CDevelopment *, double pdlwp);
 	void set_N_content(double x) {N_content=x;}
+	void set_GDD2mature(double x) {GDD2mature=x;}
 
+	void calc_dimensions(CDevelopment * dv);
 	void calcLongevity(double pdlwp);
-	 double LWPeffect(double predawn_psil);
+	double LWPeffect(double predawn_psil);
 
 private:
 	CLeaf(const CLeaf&);
-	bool initiated, growing, prolific, aging, terminated, dropped;
+	bool initiated, appeared, growing, mature, aging, dead, dropped;
 	int rank;
-	int totalLeaves; // potential total leaf number?
 	int TotalGrowingLeaves, TotalDroppedLeaves;
 	double PotentialArea; // potential leaf area
 	double FullyExpandedArea;
@@ -68,15 +73,15 @@ private:
 	double length;
 	double width;
 	double SLA;
-	double plastochrons; // Fournier and Andrieu (1998), used for delay between initiation and elongation
-	double phase1Delay, phase2Duration, elongAge, elongRate;
+	double plastochrons, GDD2mature; // Fournier and Andrieu (1998), used for delay between initiation and elongation
+	double phase1Delay, growthDuration, elongAge, elongRate, maxElongRate, seneAge, activeAge;
 	double ptnLength, ptnWidth;
 	double LeafCalibTemperature; //temperature at which experiments run where parameters for leaf expansion were determined
 	double actualArea;
 	double actualLength,actualwidth; //actual length and width of leaf under both drought stress and carbon limitation
 	bool   first;  //indicates if this is the first time we call the elongate method;
 	double N_content; 
-	
+	double WLRATIO, A_LW;
 	/*
 	SK 8/22/10: Leaf N content in mg/m2
 	*/
