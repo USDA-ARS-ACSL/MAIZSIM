@@ -16,7 +16,7 @@ tmp/
 *.g01
 *.g02
 *.g03
-*.go4
+*.g04
 *.g05
 *.out
 local.properties
