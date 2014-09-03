@@ -471,7 +471,8 @@ void crop_(struct
 
 			}
 
-			if (pSC->getPlant()->get_develop()->Matured()) 
+			if (pSC->getPlant()->get_develop()->Dead()) 
+//			if (pSC->getLastDayOfSim() <= pSC->getTime()->get_day_of_year()) 
 			{
 				cout << "Completing crop simulation..." <<endl;
 				module_public->NShoot=0; //tell 2dsoil that crops harvested

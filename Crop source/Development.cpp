@@ -30,7 +30,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	LvsAtTI = 1;
 	initInfo = info;
 	addedLvs = 0.0;
-	inductions = 0;
+	inductionPeriod = 0.0;
 	dt = initInfo.timeStep/MINUTESPERDAY; //converting minute to day decimal, 1= a day
 	T_grow_sum = T_grow = steps = 0.0;
 	PhyllochronsToSilk=info.PhyllochronsToSilk;
@@ -93,6 +93,7 @@ int CDevelopment::update(const TWeather& wthr)
 			{
 				emergence.done = true;
 				emergence.daytime = wthr.daytime;
+				GDDsum = 0.0; //reset GDDsum from emergernce, SK
 				cout << "* Emergence: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 				emerge_gdd = GDDsum; //gdd at emergence YY 4/2/09
 				//	corn->LvsAppeared = 1.0;
@@ -121,17 +122,18 @@ int CDevelopment::update(const TWeather& wthr)
 				// Added back the temperature effect on leaf number and revised the algorithm to accumulate addLeafNo to totLeafNo.
 				// Changed to respond to mean growing season temperature upto this point. 
 				// This has little mechanistic basis. Needs improvements. SK 1-19-12
-				addedLvs = (addedLvs*inductions + addLeafTotal)/(inductions+1);
-				inductions ++;
-				totLeafNo = juvLeafNo + addedLvs;
+				// addedLvs = (addedLvs*inductions + addLeafTotal)/(inductions+1);
+				inductionPeriod += dt;
+ 			    addedLvs += addLeafTotal*dt;
+			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod;
 				LvsAtTI = LvsAppeared;
 			//	LvsAtTI = LvsInitiated; //Should be LvsInitiated. Already confirmed with Soo. 7/27/2006
-			 //   cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs << endl;
+			    cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
 
 			}
-			if (LvsInitiated >= totLeafNo)
+			if (LvsInitiated - juvLeafNo >= addedLvs/inductionPeriod)
 			{
-				youngestLeaf = (int) LvsInitiated;
+				youngestLeaf = totLeafNo = (int) LvsInitiated;
 				curLeafNo = youngestLeaf;
 				tasselInitiation.done =true;
 			    tasselInitiation.daytime = wthr.daytime;
@@ -168,7 +170,8 @@ int CDevelopment::update(const TWeather& wthr)
 		if (silking.done)
 		{
 			GDDgrain += calcGDD(T_cur)*dt;
-			if (GDDgrain >= 170 && (!beginGrainFill.done))
+			if (GDDgrain >= 170 && (!beginGrainFill.done)) // where is this number '170' from? SK
+				//Todo: GTI was found more accurate for grain filling stage, See Thijs phenolog paper (2014)
 			{
 				beginGrainFill.done = true;
 			    beginGrainFill.daytime = wthr.daytime;

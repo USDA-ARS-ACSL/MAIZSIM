@@ -40,16 +40,17 @@ CGas_exchange::~CGas_exchange()
 
 void CGas_exchange::getParms()
 {
-	Parms.EaVp     =        36200;
-	Parms.EaVc     =        22125;
-	Parms.Eaj      =        28100;
-	Parms.Hj       =       269000;
-	Parms.Sj       =          860;
-	Parms.Vpm25    =          120;
-	Parms.Vcm25    =           60;
-	Parms.Jm25     =          400;
-	//In Cameron (2000), Vpm25=120, Vcm25=60,Jm25=400
-	//In Soo et al.(2006), under elevated CO2, Vpm25=91.9, Vcm25=71.6, Jm25=354.2 YY
+	Parms.EaVp     =        75100;
+	Parms.EaVc     =        55900; // Sage (2002) JXB
+	Parms.Eaj      =        32800;
+	Parms.Hj       =       220000;
+	Parms.Sj       =          702.6;
+	Parms.Vpm25    =          120.0;
+	Parms.Vcm25    =           72.0;
+	Parms.Jm25     =          355.0;
+	// Kim et al. (2007), Kim et al. (2006)
+	//In von Cammerer (2000), Vpm25=120, Vcm25=60,Jm25=400
+	//In Soo et al.(2006), under elevated C5O2, Vpm25=91.9, Vcm25=71.6, Jm25=354.2 YY
 	Parms.Rd25     =          2.0;
 	Parms.Ear      =        39800;
 	Parms.g0 = 0.04;
@@ -274,7 +275,11 @@ double CGas_exchange::gbw(void)
     d = width*0.72; // characteristic dimension of a leaf, leaf width in m
   //  return 1.42; // total BLC (both sides) for LI6400 leaf chamber
     return (1.4*0.147*sqrt(__max(0.1,wind)/d))*ratio; 
-	// multiply by 1.4 for outdoor condition, Campbell and Norman (1998), p109
+    // return (1.4*1.1*6.62*sqrt(wind/d)*(Press/(R*(273.15+Tair)))); // this is an alternative form including a multiplier for conversion from mm s-1 to mol m-2 s-1
+	// 1.1 is the factor to convert from heat conductance to water vapor conductance, an avarage between still air and laminar flow (see Table 3.2, HG Jones 2014)
+	// 6.62 is for laminar forced convection of air over flat plates on projected area basis
+	// when all conversion is done for each surface it becomes close to 0.147 as given in Norman and Campbell
+	// multiply by 1.4 for outdoor condition, Campbell and Norman (1998), p109, also see Jones 2014, pg 59 which suggest using 1.5 as this factor.
 	// multiply by ratio to get the effective blc (per projected area basis), licor 6400 manual p 1-9
 }
 

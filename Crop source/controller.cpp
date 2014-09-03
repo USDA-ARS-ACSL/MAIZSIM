@@ -79,7 +79,7 @@ void CController::initialize()
 			<< setw(9) << "Lvs_Apr"
 			<< setw(9) << "Leaf_#"
 			<< setw(7) << "area"
-			<< setw(13) << "mass"
+			<< setw(10) << "mass"
 			<< setw(10) << "Sen_Area"
 			<< setw(10) << "Pntl_Area"
 			<< setw(9) << "Longev"
@@ -104,7 +104,7 @@ void CController::initialize()
 			<< setw(8) << "LA/pl"
 			<< setw(8) << "LA_ac"
 			<< setw(8) << "LAI"
-			<< setw(8) << "LAI_ac"
+			<< setw(8) << "RH"
 			<< setw(8) << "psil_"
 			<< setw(8) << "PFD"
 			<< setw(8) << "SolRad"
@@ -281,6 +281,7 @@ void CController::outputToCropFile()
 			else if (plant->get_develop()->Flowered()) {s="Flowered";}
 			else if (plant->get_develop()->TasselInitiated()) {s="Tasselinit";}
 			else if (plant->get_develop()->Emerged()) {s="Emerged";}
+    		else if (plant->get_develop()->Dead()) {s="Inactive";}
 			else {s="none";}
 		//	if (FLOAT_EQ(plant->get_develop()->emergence.daytime,weather[iCur].daytime)){s = "Emergence";}
 		////	if (FLOAT_EQ(plant->get_develop()->tasselInitiation.daytime,weather[iCur].daytime)){s = "Tassel Initiation";}
@@ -300,7 +301,7 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()
 				<< setw(8) << setprecision(2) << plant->calcActualGreenLeafArea()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
-				<< setw(8) << setprecision(2) << plant->calcActualGreenLeafArea()*initInfo.plantDensity/(100*100)
+				<< setw(8) << setprecision(2) << weather[iCur].RH
 				//<< setw(8) << setprecision(2) << plant->getCarbonRatio()
 				<< setw(8) << setprecision(4) << weather[iCur].psil_   //print out leaf water potential Yang 8/22/06
 				<< setw(8) << setprecision(2) << weather[iCur].PFD
@@ -369,13 +370,13 @@ void CController::outputToLeafFile()
 			<< setw(9)   << setprecision(2) << plant->get_develop()->get_LvsAppeared()
 			<< setw(9)   << setprecision (0)<< nU->get_leaf()->get_Rank()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_greenArea()
-			<< scientific
-			<< setw(13)   << setprecision(3) << nU->get_leaf()->get_mass()
+//			<< scientific
+			<< setw(10)   << setprecision(4) << nU->get_leaf()->get_mass()
 			<< fixed
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_senescentArea()
             << setw(9)   << setprecision(3) << nU->get_leaf()->get_potentialArea()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_longevity()
-			<< setw(9)   << setprecision(3) << "1.0"   //placeholder for now 
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_N_content() 
 			<< setw(9)   << setprecision(1) << nU->get_leaf()->get_SLA()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->isDropped()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->isGrowing()

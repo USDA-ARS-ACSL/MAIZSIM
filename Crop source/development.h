@@ -48,7 +48,7 @@ public:
 	double get_Rmax_LTAR() {return Rmax_LTAR/dt;}
 	double get_CalibTemperature() {return CalibTemperature;}
 	double get_T_Opt() {return T_opt;}
-	double get_T_Base() {return T_base;}
+	double get_Tbase() {return T_base;}
 	double get_T_ceil() {return T_ceil;}
 	double get_Tgrow()  {return T_grow;}
 
@@ -60,6 +60,8 @@ public:
 	bool Silked() {return silking.done;}
 	bool GrainFillBegan() {return beginGrainFill.done;}
 	bool Matured() {return maturity.done;}
+	bool Dead() {return death.done;} // when all leaves are senescend and dead, the whole-plant is pronounced dead. SK
+
 	string getNote() {return note;}
 	TEvent germination;
 	TEvent emergence;
@@ -68,6 +70,7 @@ public:
 	TEvent silking;
 	TEvent beginGrainFill;
 	TEvent maturity;
+	TEvent death;
 
 private:
 	CDevelopment(const CDevelopment&); // supressing shallow copy constructor
@@ -86,7 +89,7 @@ private:
 	                          // is scaled to actual temperature using a beta function. Could be an input param at some point.
 	double totLeafNo, addedLvs, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation
 	double P2; //photoperiod sensitivity as used in CERES-Maize
-	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded, Anthesis;
+	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded, Anthesis, inductionPeriod;
 	int initLeafNo,  youngestLeaf, curLeafNo, inductions; 
 	double PhyllochronsToSilk; // number of phyllochrons past tassel initiation when silking takes place
 	string note;

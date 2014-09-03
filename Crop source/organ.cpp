@@ -1,14 +1,12 @@
 #include "stdafx.h"
 #include "organ.h"
-#define CO2_MW 44.0098
-#define C_MW 12.011
-#define CH2O_MW 30.03
 
 
 COrgan::COrgan()
 {
 	age = physAge = mass = 0;
 	CH2O=N=0;
+	C_conc = 0.40;
 	temperature = 25;
 	growthDuration=10;
 	longevity=50;
@@ -25,6 +23,7 @@ COrgan::COrgan(const TInitInfo& info)
 	initInfo = info;
 	temperature=25.0;
 	CH2O=N=0;
+	C_conc = 0.40;
 	age = physAge = mass = 0;
 	growthDuration=10;
 	longevity=50;
@@ -49,13 +48,13 @@ void COrgan::update()
 	GDD->add(temperature);
 	age = GDD->get_actualAge();
 	physAge=GDD->get_sum();
-	mass = CH2O; // C content as carbohydrate
+	mass = CH2O/CH2O_MW*C_MW/C_conc; // C content as carbohydrate
 }
 
 void COrgan::import_CH2O(double dCH2O)
 {
 	CH2O += dCH2O;
-	mass = CH2O; // C content as carbohydrate
+	mass = CH2O/CH2O_MW*C_MW/C_conc; // C content as carbohydrate
 }
 
 void COrgan::import_N(double dN)

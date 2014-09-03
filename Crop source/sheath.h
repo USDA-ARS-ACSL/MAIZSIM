@@ -25,7 +25,7 @@ private:
 	double area;
 	double ptnLength, PotentialArea;
 	double elongRate, elongAge;
-	double phase1Delay, phase2Duration;
+	double phase1Delay, growthDuration;
 	double plastochrons;
 
 };

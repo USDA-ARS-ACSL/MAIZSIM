@@ -54,7 +54,8 @@ public:
 	double get_rootMass() {return rootMass;}
 	double get_shootPart() {return shootPart;}
 	double get_rootPart() {return rootPart;}
-	double get_DroppedLeafMass() {return droppedLfmass;}
+	double get_DroppedLeafMass() {return droppedLeafmass;}
+	double get_activeLeafMass() {return activeLeafMass;}
 	double get_conductance() {return conductance;}
 	double get_VPD() {return VPD;}
 	double get_LeafArea() {return leafArea;}
@@ -90,6 +91,7 @@ public:
 
 	double calcLeafArea();
 	double calcTotalLeafMass();
+	double calcActiveLeafMass();
 	double calcDroppedLeafMass();
 	double calcGreenLeafArea();
 	double calcActualGreenLeafArea();
@@ -128,7 +130,7 @@ private:
 	double C_demand;
 	double C_supply;
 	double C_ReserveLeaf;  //holds extra C in leaf - allows SLA to change
-	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, droppedLfmass; // this is redundant, but for convenience of access
+	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass; // this is redundant, but for convenience of access
 	double maintRespiration;
 	double sowingDay;
 	double age;
