@@ -2,7 +2,7 @@ Corn growth simulation for  Delaware data
 PI33B53 
 GDD to      Juvenile   Daylength    Rmax_LTAR              Rmax_LTIR             Phyllochrons from
 maturity    leaves       Sensitive   Leaf tip appearance   Leaf tip initiation     Tassle Init
-1800          18            1          0.53                  0.978                  3
+1800          18            1          0.524                  0.978                  3
 [SoilRoot]
 *** WATER UPTAKE PARAMETER INFORMATION **************************
  RRRM       RRRY    RVRL
