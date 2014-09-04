@@ -337,7 +337,7 @@ void CController::outputToCropFile()
 				<< setw(9) << setprecision(2)  << weather[iCur].dayLength
             //    << setw(9) << setprecision(2) << plant->get_develop()->get_GDDsum()
 				<< endl; 
-		
+		ostr.close();
 	}
 }
 void CController::outputToLeafFile()
@@ -383,7 +383,7 @@ void CController::outputToLeafFile()
 			<< setw(9) << setprecision(2) << plant->get_develop()->get_GDDsum()
 			<< endl; 
 	}
-	
+	ostr.close();
 	nU=NULL;
 
 }
