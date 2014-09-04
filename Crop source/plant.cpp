@@ -22,7 +22,7 @@ CPlant::CPlant(const TInitInfo& info )
 	roots = NULL;
 	develop = NULL;
 	seedMass = mass =  CH2O = 0.275; // seed weight g/seed
-	C_content = 0.4; // 40% C
+	C_content = 0.40; // 40% C, See Kim et al. (2007) EEB
 	C_pool = 0.0;  //mass*C_content;
 	C_reserve = 0.0;
 	C_ReserveLeaf=0.0;
@@ -33,11 +33,11 @@ CPlant::CPlant(const TInitInfo& info )
 	// initialize plant part sizes //
 	shootPart = 0.70;
 	rootPart = 0.30;
-	earMass=droppedLfmass=rootMass=0.0;
+	earMass=droppedLeafmass=rootMass=0.0;
 	//rootMass = rootPart*seedMass; This will be implemented later when roots grow from germination
 	;
 	shootMass=seedMass*(1.0-rootPart);
-	leafMass=0.90*shootMass;
+	leafMass = activeLeafMass=0.90*shootMass;
 	stemMass=0.10*shootMass;
 	shootPart_old = shootPart; rootPart_old = rootPart;
     TotalNitrogen = 0.275*3.4/100.0; //assume nitrogen concentration at the beginning is 3.4% of the total weight of the seed
@@ -62,6 +62,7 @@ CPlant::CPlant(const TInitInfo& info )
 	for (int i=0; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile
 	{
 		nodalUnit[i].initialize(i, develop);
+		nodalUnit[i].get_leaf()->set_mass(leafMass/PRIMORDIA); //assing initial mass for each primordium
        	nodeNumber = i;
 	}
 	finalNodeNumber = info.genericLeafNo;
@@ -143,7 +144,7 @@ void CPlant::update(const TWeather & weather, double lwpd)
 		 temperature = develop->get_Tcur();
 	     C_reserve = seedMass*C_content;
 		//				C_pool += C_reserve*(1/20)*(1/24)*(initInfo.timeStep/60); // assume it takes 20 days to exhaust seed C reserve 
-		 C_pool+=C_reserve;
+		 C_pool = C_reserve;
  	for (int i = 1; i <= develop->get_LvsInitiated() ; i++)
 		{
 			
@@ -161,27 +162,41 @@ void CPlant::update(const TWeather & weather, double lwpd)
 					 TotalGrowingLeaves++;
 				}
 				if (nodalUnit[i].get_leaf()->isDropped()) 
-			{
-				TotalDroppedLeaves++;
-			}
+				{
+					TotalDroppedLeaves++;
+				}
 					
 			}
 		}	
 // calculate relative area increases for leaves now that they are updated
 
-        calcPerLeafRelativeAreaIncrease();
-				
-
 		//calcMaintRespiration(weather); // commented for now, have to test this for seedling
 		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves);
 		nodalUnit[0].get_leaf()->set_TotalDroppedLeaves(TotalDroppedLeaves);
 
-		C_allocation(weather);
-		seedMass = __max(0.0,seedMass-C_supply); // need setmass
-		setMass();
+		if(nodalUnit[1].get_leaf()->isInitiated() && !nodalUnit[1].get_leaf()->isAppeared())
+		{
+			calcMaintRespiration(weather);
+			C_allocation(weather);
+			seedMass = __max(0.0,seedMass-C_supply); // need setmass
+			setMass();
+		}
+		else if (nodalUnit[1].get_leaf()->isAppeared())
+		{
+	        calcPerLeafRelativeAreaIncrease();
+			calcLeafArea();
+			calcGasExchange(weather);
+			double c_pool1 = C_pool;
+			double c_pool2 = assimilate*CH2O_MW/CO2_MW; // convert from grams CO2 to grams carbohydrate (per hour per plant)
+            C_pool += c_pool2;
+			calcMaintRespiration(weather);
+			C_allocation(weather);
+			seedMass = __max(0.0,seedMass-C_supply*c_pool1/C_pool); // get seedmass reduction only for those C from the seed
+			setMass();
+		}
 		return;
 	}
-	else if(!develop->Matured())
+	else if(!develop->Dead())
 	{
 		emerge_gdd = develop->get_EmergeGdd(); //if the plant emergies, then pass the emerge_gdd value from the develop object into the plant object
 
@@ -214,6 +229,13 @@ void CPlant::update(const TWeather & weather, double lwpd)
 
 		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves);
 		nodalUnit[0].get_leaf()->set_TotalDroppedLeaves(TotalDroppedLeaves);
+
+		if (TotalDroppedLeaves >= develop->get_totalLeaves()) 
+		{
+			develop->death.done = true;
+			develop->death.daytime = weather.daytime;
+		}
+
 
 //SK: Below {} lumps N related codes
 	{
@@ -261,8 +283,8 @@ void CPlant::update(const TWeather & weather, double lwpd)
 		//	C_allocation(weather, potentialCarbonDemand); //Calculating carbon allocation with carbon demand known YY
 		if (weather.time == 0)
 		{
-//			C_reserve += __max(0, C_pool);
-//			C_pool = 0.0; //reset shorterm C_poot to zero at midnight, needs to be more mechanistic
+			C_reserve += __max(0, C_pool);
+			C_pool = 0.0; //reset shorterm C_poot to zero at midnight, needs to be more mechanistic
 		}
 		else
 		{
@@ -278,7 +300,8 @@ void CPlant::setMass()
 {
 	double m = 0;
 	
-	double agefn=1;
+/*
+double agefn=1;
 	if (potentialLeafArea>0)
 		{
 			agefn= (leafArea/potentialLeafArea); // as more leaves drop leaf biomass should go down 
@@ -302,39 +325,30 @@ void CPlant::setMass()
 		                          //actual leaf area and potential leaf area. In this sense, the droppedLfmass should be (1-agefn)*lf  YY
 	   
 	}
-
+*/
 	// dt the addition of C_reserve here only serves to maintain a total for the mass. It could have just as easily been added to total mass.
 	// It is not clear why it was done this way here. 
     stemMass = this->get_nodalUnit()->get_stem()->get_mass() + C_reserve; //C_reserve was moved from here because it doesn't actually represent the stem mass.
     earMass = this->get_ear()->get_mass();
    // need to iterate here to set leaf mass
 	leafMass=calcTotalLeafMass();
-	droppedLfmass=calcDroppedLeafMass();
+	leafMass = this->get_leafMass();
+	activeLeafMass = calcActiveLeafMass();
+	droppedLeafmass=calcDroppedLeafMass();
 	rootMass = this->get_roots()->get_mass();
-	shootMass = stemMass + leafMass + earMass+droppedLfmass;
+	shootMass = seedMass + stemMass + leafMass + earMass;
 	mass = shootMass + rootMass;
    
 	return;
 }
 
-double CPlant::calcGreenLeafArea2() // empirical fit of plant green leaf area from SPAR 02 field exp
-// estimate growth and decay of LAI as a product of logistic and exp decay fns as a f(cumulative GDD)
-{
-	double cGDD = develop->get_GDDsum();
-	const double maxLA = 6000.0, k = 0.0114, a = 874; //fitted parameters of logistic fn for LA as a f(cGDD:base 8)
-	const double b = 0.00244, ceilGDD = 2113.2; // fitted parameters of decay fn
-	double plantLA, f1, f2;
-       f1 = maxLA/(1+a*exp(-k*cGDD)); // logistic fn governing growth period
-       f2 = 1-exp(-b*(ceilGDD-cGDD)); // decay fn governing senescence period
-	plantLA = f1*f2; // in cm2
-	return plantLA;
-}
+
 
 double CPlant::calcLeafArea()
 {
 	double area = 0.0; 
 	double dL = 0.0;
-	for (int i = 1; i <= develop->get_LvsAppeared(); i++)
+	for (int i = 1; i <= develop->get_LvsInitiated(); i++)
 	{
  		dL = nodalUnit[i].get_leaf()->get_area();
 		area += dL ;
@@ -346,7 +360,7 @@ double CPlant::calcLeafArea()
 double CPlant::calcGreenLeafArea()
 {
 	double area = 0.0;
-	for (int i = 1; i <= develop->get_LvsAppeared(); i++)
+	for (int i = 1; i <= develop->get_LvsInitiated(); i++)
 	{
 		area += nodalUnit[i].get_leaf()->get_greenArea();
 	}
@@ -357,7 +371,7 @@ double CPlant::calcGreenLeafArea()
 double CPlant::calcActualGreenLeafArea()
 {
 	double area = 0.0;
-	for (int i= 1; i<=develop->get_LvsAppeared(); i++)
+	for (int i= 1; i<=develop->get_LvsInitiated(); i++)
 	{
 		area +=nodalUnit[i].get_leaf()->get_actualgreenArea();
 	}
@@ -368,7 +382,7 @@ double CPlant::calcActualGreenLeafArea()
 double CPlant::calcSenescentLeafArea()
 {
 	double area = 0.0;
-	for (int i = 1; i <= develop->get_LvsAppeared(); i++)
+	for (int i = 1; i <= develop->get_LvsInitiated(); i++)
 	{
 		area += nodalUnit[i].get_leaf()->get_senescentArea();
 	}
@@ -379,7 +393,7 @@ double CPlant::calcSenescentLeafArea()
 double CPlant::calcPotentialLeafArea()
 {
 	double area = 0.0;
-	for (int i = 1; i <= develop->get_LvsAppeared(); i++)
+	for (int i = 1; i <= develop->get_LvsInitiated(); i++)
 	{
 		area += nodalUnit[i].get_leaf()->get_potentialArea();
 	}
@@ -416,7 +430,8 @@ void  CPlant::calcPerLeafRelativeAreaIncrease()
     	}
 	}
 
-double CPlant::calcTotalLeafMass()
+double CPlant::calcActiveLeafMass() //this is the total mass of active leaves that are not entirely dead (e.g., dropped).
+//It would be slightly greather than the green leaf mass because some senesced leaf area is included until they are complely aged (dead), SK
 {
 	double Mass = 0.0;
 	for (int i=1; i<=develop->get_LvsInitiated(); i++)
@@ -426,10 +441,11 @@ double CPlant::calcTotalLeafMass()
 				Mass +=nodalUnit[i].get_leaf()->get_mass();
 			}
 	}
-	leafMass=Mass;
+	activeLeafMass=Mass;
 	return Mass;
 }
-double CPlant::calcDroppedLeafMass()
+double CPlant::calcDroppedLeafMass() //It has been pointed that corn leaves don't really drop and is still likely to be attached to the node. 
+// this is true so a better term would be "dead" leaves (entirely senesced) but I am fine with continuing to use dropped leaf as long as we are clear about the meaning, SK
 {
 	double Mass = 0.0;
 	for (int i=1; i<=develop->get_LvsInitiated(); i++)
@@ -439,9 +455,25 @@ double CPlant::calcDroppedLeafMass()
 				Mass+=nodalUnit[i].get_leaf()->get_mass();
 			}
 	}
-	droppedLfmass=Mass;
+	droppedLeafmass=Mass;
 	return Mass;
 }
+double CPlant::calcTotalLeafMass()
+{
+	double TotalMass = 0.0;
+	double Mass = 0.0;
+	double Area = 0.0;
+	for (int i=1; i<=develop->get_LvsInitiated(); i++)
+	{
+		Mass = nodalUnit[i].get_leaf()->get_mass();
+		Area = nodalUnit[i].get_leaf()->get_area();
+		nodalUnit[i].get_leaf()->set_SLA(Area/Mass); // Set SLA from current leaf area and mass, SK
+		TotalMass += Mass;
+	}
+	leafMass=TotalMass; //this should equal to activeLeafMass + droppedLeafMass;
+	return TotalMass;
+}
+
 double CPlant::calcPotentialCarbondemand()
 { //this will only be used for total leaf area adjustment. If the individual leaf thing works 
   // out this will be deleted. 
@@ -620,12 +652,12 @@ void CPlant::C_allocation(const TWeather & w)
 
 	double Fraction = __min(0.925, 0.67 + 0.33*scale); // eq 3 in Grant
 //	const double convFactor = 1/1.43; // equivalent Yg, Goudriaan and van Laar (1994)
-	//double Yg = 0.750; // synthesis efficiency, ranges between 0.7 to 0.76 for corn, see Loomis and Amthor (1999), Grant (1989), McCree (1988)
-	  double Yg = 0.74;
+	double Yg = 0.750; // synthesis efficiency, ranges between 0.7 to 0.76 for corn, see Loomis and Amthor (1999), Grant (1989), McCree (1988)
+//  double Yg = 0.74;
 	
 	// this is the same as (PhyllochronsSinceTI - lvsAtTI/(totalLeaves - lvsAtTI)
-	//shootPart = __max(0,Yg*(Fraction*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
-	//rootPart = __max(0,Yg*((1-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
+	shootPart = __max(0,Yg*(Fraction*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
+	rootPart = __max(0,Yg*((1-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
 
     if (!develop->Germinated())
    {
@@ -635,14 +667,16 @@ void CPlant::C_allocation(const TWeather & w)
    {
 	
    // shootPart was reduced to 0.37; rootPart was 0.43 in sourcesafe file yy
-	   shootPart = __max(0, 0.67*(C_supply-maintRespiration)); //these are the amount of carbons allocated with no drought stress
-       rootPart = __max(0, 0.33*(C_supply-maintRespiration));  //Yang, 6/22/2003
+// SK, commenting it out. Yg needs to be multiplied here because it represents growth respiration.
+//		   shootPart = __max(0, 0.67*(C_supply-maintRespiration)); //these are the amount of carbons allocated with no drought stress
+//         rootPart = __max(0, 0.33*(C_supply-maintRespiration));  //Yang, 6/22/2003
 
 
 	   if (w.pcrs>rootPart_old) // if in time step t-1, the value of pcrs is higher than that of pcrl
 	   { 
+// give a half of carbon from shoot needed to meet root demand? SK
 	      shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old)); //than take the difference between the two out of the carbon allocation to shoot at time step t
-		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);  //and put that amount of carbon into carbon allocation to root at time step t. 
+		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);  //and put that amount of carbon into carbon allocation to root at time step t.          
 	   }
 	   else 
 	   {
@@ -769,23 +803,36 @@ void CPlant::C_allocation(const TWeather & w)
 	 //Update SLA based on current shoot growth rate. Do this for every leaf
 	   // no sla adjustment until after emergence
 //	   double SLA_est;
-//	   if (shootPart_real > 0 && develop->Emerged()) 
+//	   if (shootPart_real > 0 && develop->Emered()) 
 //	   {
 //		   SLA_est=1/(25.0+150.0*shootPart_real)*10000; // see Grant, 1989, eq 9. 10000 converts from
 //		                                                // m2 to cm2
 //	       if (leaf->isGrowing()) leaf->set_SLA(min(400.0,SLA_est));
 //	   }
-	    
+	    double totLA;
 
-	    if (nodalUnit[i].isInitiated())
+	    if (nodalUnit[i].isInitiated()&& LeafPartSum >= 0.0)
 		{
 			
 			
-			if (leaf->isGrowing())
+
+			if (!leaf->isDead())
 			{
-			   PCarboDemandPerLeaf=leaf->get_RelativeAreaIncrease()*leafPart; // carbon allocated according to growth rate
-               leaf->import_CH2O(PCarboDemandPerLeaf);
-			   LeafPartSum-=PCarboDemandPerLeaf;
+			
+                totLA = calcPotentialLeafArea();
+				PCarboDemandPerLeaf=__max(0.0, leaf->get_potentialArea()/totLA*leafPart); //Adjusting C allocation based on leaf size if not aging. doing it based on current growth rate is more mechanistic but seems to have issue now. To revisit. SK
+//			   PCarboDemandPerLeaf=__max(0.0, leaf->get_RelativeAreaIncrease()*leafPart); // carbon allocated according to growth rate
+
+				if (LeafPartSum >= PCarboDemandPerLeaf)
+			   {
+					leaf->import_CH2O(PCarboDemandPerLeaf);
+					LeafPartSum-=PCarboDemandPerLeaf;
+			   }
+			   else
+			   {
+					leaf->import_CH2O(__min(LeafPartSum, PCarboDemandPerLeaf));
+					LeafPartSum=0.0;
+			   }
 
 			}
 		}
@@ -795,7 +842,7 @@ void CPlant::C_allocation(const TWeather & w)
 
    this->get_roots()->set_ActualCarboIncrement(rootPart_real);
    this->get_nodalUnit()->get_stem()->import_CH2O(stemPart);
-   this->get_nodalUnit()->get_leaf()->import_CH2O(leafPart);
+//   this->get_nodalUnit()->get_leaf()->import_CH2O(leafPart);
    this->C_reserve += reservePart; // everything is carbohydrate now
    // before emergence root weight has been initialized. Just dump this carbon for now.
    if (develop->Emerged()) this->get_roots()->import_CH2O(rootPart_real);
@@ -817,7 +864,8 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	double dt = initInfo.timeStep/(24*60);
 //	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
 	const double maintCoeff = 0.018;
-	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero
+	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
+	//no maint cost for dead materials but needs to be more mechanistic, SK
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature
 	maintRespiration = agefn*q10fn*maintCoeff*mass*dt;// gCH2O dt-1
 }

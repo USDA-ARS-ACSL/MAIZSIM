@@ -9,7 +9,7 @@ CNodalUnit::CNodalUnit()
 	stem = NULL;
 //	sheath = NULL;
 //	internode = NULL;
-	initiated = growing = aging = terminated = false;
+	initiated = appeared = growing = aging = terminated = false;
 }
 void CNodalUnit::initialize(int n, CDevelopment * dv)
 {
@@ -20,6 +20,7 @@ void CNodalUnit::initialize(int n, CDevelopment * dv)
 //	internode = new CInternode();
 	leaf->initialize(dv);
 	stem->initialize();
+	mass = leaf->get_mass() + stem->get_mass(); // has no mass here
 	initiated = true;
 }
 

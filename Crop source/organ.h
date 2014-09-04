@@ -5,6 +5,10 @@
 #include "ThermalTime.h"
 #include "initinfo.h"
 #include "development.h"
+#define CO2_MW 44.0098
+#define C_MW 12.011
+#define CH2O_MW 30.03
+
 
 struct TElement
 {
@@ -35,6 +39,7 @@ public:
 	double get_mass() {return mass;}
 	double get_CH2O() {return CH2O;}
 	double get_N() {return N;}
+	double get_Nconc() {return N/mass;}
 //	TElement * get_element() {return element;}
 	double get_temperature() {return temperature;}
 	double get_longevity() {return longevity;}
@@ -50,7 +55,7 @@ public:
 	virtual void set_ActualCarboIncrement(double x) {ActualCarboIncrement = x;}
 	virtual void set_age(double x) {age = x;}
 	virtual void set_physAge(double x) {physAge=x;}
-	virtual void setMass(double x) {mass=x;}
+	virtual void set_mass(double x) {mass=x;set_CH2O(x*(C_conc/C_MW*CH2O_MW));}
 	virtual void set_CH2O(double x) {CH2O=x;}
 	virtual void set_N(double x) {N=x;}
 //	virtual void set_element(TElement * x) {element=x;}
@@ -69,7 +74,7 @@ private:
 	double physAge; // physiological age accouting for temperature effect (in reference to endGrowth and lifeSpan, days)
 	double mass; // biomass, g
 	double CH2O; //glucose, MW = 180.18 / 6 = 30.03 g
-	double N; //nitrogen content, mg
+	double C_conc, N; //nitrogen content, mg
 	double temperature; // organ temperature, C
 	double longevity; // life expectancy of an organ in days at optimal temperature (fastest growing temp), days
 	double growthDuration; // physiological days to reach the end of growth (both cell division and expansion) at optimal temperature, days
