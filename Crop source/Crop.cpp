@@ -8,7 +8,6 @@
 #include "time.h"
 #include <cstdlib>
 #include <cstdio>
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <iomanip>
@@ -48,8 +47,6 @@ void crop_(struct
 	//First read input data if start of simulation
 	char* Buffer=(char*)calloc(256,sizeof(char));
 	
-	// DEL LATER ::NR dConvert;
-	ofstream ostr;
 	static CController* pSC; //SK, declare as static to ensure only one copy is instantiated during 2DSOIL execution
 	// varFile contains variety information, GraphicFile holds output,LeafFile holds individual leaves
 
@@ -83,7 +80,8 @@ void crop_(struct
 		in.getline(Buffer,100) ;
 		in.getline(Buffer,100) ;
 		in >> SHOOTR->PopRow >> SHOOTR->RowSp >>initInfo.plantDensity >> SHOOTR->RowAng ;
-		in >> SHOOTR->xBStem >> SHOOTR->yBStem >> SHOOTR->CEC >>SHOOTR->EOMult >>initInfo.CO2;
+// 9/9/2014 DT removed CO2 from initials file, now read in with weather. Allows daily input for face, etc.
+		in >> SHOOTR->xBStem >> SHOOTR->yBStem >> SHOOTR->CEC >>SHOOTR->EOMult;
 		in.getline(Buffer,10);
 	    in.getline(Buffer,100);
 		in >> initInfo.latitude >> initInfo.longitude >> initInfo.altitude;
@@ -219,7 +217,7 @@ void crop_(struct
 				wthr.DailyOutput=time_public->DailyOutput;
 				wthr.jday = Weather->JDAY;
 				wthr.time = time_public->Time-Weather->JDAY;
-				wthr.CO2 = initInfo.CO2;
+				wthr.CO2 = Weather->CO2;
 				wthr.airT = Weather->TAIR[SHOOTR->iTime-1];
 				wthr.PFD = Weather->par[SHOOTR->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
 				wthr.solRad = Weather->WATTSM[SHOOTR->iTime-1]; //conversion from Wm-2 to J m-2 in one hour
@@ -480,7 +478,6 @@ void crop_(struct
 				pSC = NULL; // if matured points to nothing
 				delete pSC;
 				time_public->RunFlag=0;
-				ostr.close();
 			}
 			else
 			{

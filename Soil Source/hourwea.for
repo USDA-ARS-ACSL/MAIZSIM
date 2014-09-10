@@ -1,7 +1,8 @@
 cdt this version had code added to calculate rain infiltration as 
 c constant head infiltration for a period. I have to finish it to allow final 
 c flux to just finish up the water.
-
+CDT  9/10/2014 Added CO2 as a weather variable and took it out of the 
+CDT   initials file. 
 
 C**  MSW1-  switch to indicate if daily wet bulb temperatures are     **
 C**         available (=1 if YES).                                    **
@@ -12,6 +13,7 @@ C** cdt don't think these two variables (above) are needed  for hourly data
 C**  MSW4-  Chemical concentrations in rain water                     **
 C**  MSW5-  1 for flood irrigation                                    **
 C**  MSW6-  1 if relative humidity is available                       **
+C**  MSW7-  1 if Daily CO2 Measurements are available                 **
 C**                                                                   **
 C**  BSOLAR-factor for changing solar radiation units. Equals         **
 C**         radiation in J m-2 divided by radiation in units used in  **
@@ -34,9 +36,11 @@ C**         data file.                                                **
 C**                                                                   **
 C**                                                                   **
 C**                                                                   **
-C**                                                                   **
 C**  WIND-  if windspeed is unavailable read in average value for     **
 C**         site. windspeed at 2 meters (km hr-1).                    **
+C**                                                                   **
+C** CO2   -  If daily values are not available read average           **
+C**                                                                   **
 C**                                                                   **
 C**  (File 1, Line 3 to EOF, free format)                             **
 C**      (WIND, TWET and TDRY are optional)                           **
@@ -134,7 +138,7 @@ C
       Read (5,*,ERR=10)
       im=im+1
       il=il+1
-      Read (5,*,ERR=10) MSW1,MSW2,MSW3,MSW4,MSW5,MSW6
+      Read (5,*,ERR=10) MSW1,MSW2,MSW3,MSW4,MSW5,MSW6,MSW7
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -143,10 +147,15 @@ C
       Read (5,*,ERR=10)
       im=im+1
       il=il+1
-      Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
+       ISOL=NumSol*Movers(2)
+       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
 cdt 10/25/2007 changed from 1-MSW4
       ISOL=NumSol*(MSW4)*Movers(2)
-      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
+cdt  9/10/2014 added CO2 as a weather variable. Made this line consistent
+Cdt   with the same line from the daily weather file 
+CDT    TODO this needs to be tested fully
+      NCD=4-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
+C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -170,11 +179,15 @@ Cdt 02/03/2009 changed from 0-MSW4
           GAIR(i)=CLIMAT(3-MSW2-MSW3+ISOL+i)
         Enddo
       Endif
+      IF(MSW7.eq.0) then
+         CO2=CLIMAT(NCD)
+       Endif
+
       close(5)
 C
 C Total number of weather data
 C
-      NCD=3+2*MSW1+MSW2+ISOL*MSW4+MSW6
+      NCD=3+2*MSW1+MSW2+ISOL*MSW4+MSW6+MSW7
 C
 C     Nodal numbers of furrow nodes
 C
@@ -286,6 +299,9 @@ C    since the julian day is referenced to a time longer in the past
             endif
          enddo
 
+       If(MSW7.gt.0) then
+          CO2=Climat(4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)
+       EndIf
 
 
 C
