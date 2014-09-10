@@ -48,8 +48,11 @@ void CLeaf::initialize (CDevelopment * dv)
 	initiated = true;
 //	growing=true; // DT
 	first=true;
-	std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
+	// uncomment for debugging
+#if _DEBUG
+	      std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
               <<  " potential area " << PotentialArea << std::endl;
+#endif
 
 }
 
