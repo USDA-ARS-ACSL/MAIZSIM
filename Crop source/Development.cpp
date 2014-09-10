@@ -128,7 +128,8 @@ int CDevelopment::update(const TWeather& wthr)
 			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod;
 				LvsAtTI = LvsAppeared;
 			//	LvsAtTI = LvsInitiated; //Should be LvsInitiated. Already confirmed with Soo. 7/27/2006
-			    cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
+				// uncomment the following for debugging
+			 //   cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
 
 			}
 			if (LvsInitiated - juvLeafNo >= addedLvs/inductionPeriod)

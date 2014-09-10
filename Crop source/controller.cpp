@@ -62,7 +62,7 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MaizeSim: A Simulation Model for Corn          *" << endl
-		<< " *                     VERSION  1.0.00 2011                *" << endl
+		<< " *                     VERSION  1.1.00 2014                *" << endl
 		<< " *   USDA-ARS, CROP SYSTEMS AND GLOBAL CHANGE LABORATORY   *" << endl
 		<< " ***********************************************************" << endl
 		<< endl << endl;
