@@ -10,11 +10,11 @@ Yang Yang, now at Dow Agrosciences
 Annette Dathe Norwegian University of Life Sciences
 Jong-Ahn Chun APEC Climate Center, Korea
 
-MAIZSIM is a mechanistic model of maize growth, development and yield. It is written in C++. 
+MAIZSIM is a mechanistic model of maize growth, development and yield. It is written in C++ (crop) and FORTRAN (soil). 
 
 The model is interfaced with 2DSOIL, a two dimensional simulator of soil water and heat movement, and solute transport. This model is written in FORTRAN and is the main model. 2DSOIL calls the crop model as a subroutine. 
 
-The code compiles in visual studio.net. We think it should compile under Linux but have not tried it yet. 
+The code compiles in visual studio.net. It has recently been revised to compile under Linux by Kyungdahm Yun of the Univ. of Washington 
 
 There are two subprojects, Crop Source and Soil Source. 
 
