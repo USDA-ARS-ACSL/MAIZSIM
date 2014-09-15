@@ -1,11 +1,11 @@
  ***STANDARD METEOROLOGICAL DATA  Header fle for the eastern shore, Maryland
  LATUDE
  39.0
- Daily Bulb Temp	^ Daily WInd ^RainIntensity ^ Daily Conc^ ,Furrow	^Rel_humid
-   0   0   0   0   0   1   0
+ Daily Bulb Temp	^ Daily WInd ^RainIntensity ^ Daily Conc^ ,Furrow	^Rel_humid ^CO2
+   0   0   0   0   0   1   0 0
  Parameters for changing of units: BSOLAR BTEMP ATEMP ERAIN BWIND BIR
  BSOLAR is 1e6/3600 to go from j m-2 h-1 to wm-2
  1E6   1  0  0.1   1   1
  Average values for the site
- WINDA	IRAV	Conc
- 8.0 3.0 0.0 
+ WINDA	IRAV	Conc CO2
+ 8.0 3.0 0.0 380

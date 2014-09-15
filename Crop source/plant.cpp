@@ -274,6 +274,16 @@ void CPlant::update(const TWeather & weather, double lwpd)
 
     //SK 8/22/10: N remobilization is implicitly done by adjusting greenleaf area after determining senesced leaf area. Currently it is assumed that all N is moved from the senesced to the active
 		previousDroppedlfArea = droppedLfArea;
+		//when less than 5% of total leaf area is green, physiological maturity is reached. SK
+		//see http://www.agry.purdue.edu/ext/corn/news/timeless/TopLeafDeath.html
+		if ((greenLeafArea <= 0.05*leafArea) && !develop->maturity.done) 
+		{
+			develop->maturity.done = true;
+			develop->maturity.daytime = weather.daytime;
+			cout << "* Physiological maturity " << develop->get_GDDsum() << " T growth: " << develop->get_Tgrow() 
+				<< " green leaf %: " << greenLeafArea/leafArea*100 << endl;
+		}
+
 	}
 
 
@@ -707,8 +717,9 @@ void CPlant::C_allocation(const TWeather & w)
 
 		if (w.pcrs>rootPart_old)
 	   { 
-	      shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old));
-		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);
+// give a half of carbon from shoot needed to meet root demand, SK
+		  shootPart_real = __max(0, shootPart-0.5*(w.pcrs-rootPart_old));
+		  rootPart_real = rootPart+ 0.5*(w.pcrs-rootPart_old);
 	   }
 	   else 
 	   {
@@ -748,7 +759,7 @@ void CPlant::C_allocation(const TWeather & w)
             cobPart = shootPart_real*0.625;
 		}
    }
-   else if (!develop->Matured())//no acutally kernel No. is calculated here ? Yang, 6/22/2003
+   else if (!develop->Dead())//no acutally kernel No. is calculated here ? Yang, 6/22/2003
    {
        // here only grain and root dry matter increases root should be zero but it is small now. 
 	   const int maxKernelNo = 800; // assumed maximum kerner number per ear
@@ -859,8 +870,8 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 // based on McCree's paradigm, See McCree(1988), Amthor (2000), Goudriaan and van Laar (1994)
 // units very important here, be explicit whether dealing with gC, gCH2O, or gCO2
   {
-	//const double Q10 = 2.0; // typical Q10 value for respiration, Loomis and Amthor (1999) Crop Sci 39:1584-1596
-	const double Q10 = 2.1;
+	const double Q10 = 2.0; // typical Q10 value for respiration, Loomis and Amthor (1999) Crop Sci 39:1584-1596
+	//const double Q10 = 2.1; // where does this value come from?
 	double dt = initInfo.timeStep/(24*60);
 //	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
 	const double maintCoeff = 0.018;

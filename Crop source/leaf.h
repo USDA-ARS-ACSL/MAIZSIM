@@ -48,7 +48,7 @@ public:
 	void update(CDevelopment *, double pdlwp);
 	void elongate(CDevelopment *, double pdlwp);
 	void expand(CDevelopment *, double pdlwp);
-	void senescence(CDevelopment *);
+//	void senescence(CDevelopment *);
 	void senescence(CDevelopment *, double pdlwp);
 	void set_N_content(double x) {N_content=x;}
 	void set_GDD2mature(double x) {GDD2mature=x;}

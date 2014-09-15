@@ -98,7 +98,7 @@ void CLeaf::update(CDevelopment * dv, double predawnlwp)
 	COrgan::update();
 	calc_dimensions(dv);
 	expand(dv, predawnlwp);
-	senescence(dv);
+	senescence(dv, predawnlwp);
     greenArea = max(0.0, area-senescentArea);
 }
 
@@ -112,6 +112,7 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 	double T = dv->get_Tcur();
 	double T_gro = dv->get_Tgrow();
 	double T_effect_size = max(0.0, (T_gro-Tb)/(T_peak-Tb)*exp(1.0-(T_gro-Tb)/(T_peak-Tb))); //final leaf size is adjusted by growth temperature determining cell size during elongation
+	// See Kim et al. (2012) Agro J. for more information on how this relationship has been derermined basned o multiple studies and is applicable across environments
 	double water_effect=LWPeffect(predawnlwp);
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY; // time step as day fraction
 
@@ -129,12 +130,13 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 		// elongAge indicates where it is now along the elongation stage or duration. duration is determined by totallengh/maxElongRate which gives the shortest duration to reach full elongation in the unit of days.
 		elongAge = __min(t_e, elongAge);
 
-		area = __max(0.0, water_effect*T_effect_size*PotentialArea*(1.0 + (t_e-elongAge)/(t_e-t_m))*pow(elongAge/t_e, (t_e/(t_e-t_m))));
-		double maxExpansionRate = PotentialArea*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
+//		area = __max(0.0, water_effect*T_effect_size*PotentialArea*(1.0 + (t_e-elongAge)/(t_e-t_m))*pow(elongAge/t_e, (t_e/(t_e-t_m))));
+		double maxExpansionRate = T_effect_size*PotentialArea*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
 		PotentialAreaIncrease =__max(0.0,maxExpansionRate*__max(0.0, (t_e-elongAge)/(t_e-t_m)*pow(elongAge/t_m,t_m/(t_e-t_m)))*dD);
-	                                           //potential leaf area increase without carbon limitation YY
-//		double dA = water_effect*T_effect_size*PotentialAreaIncrease;
-//		area += dA;
+	                                           //potential leaf area increase without any limitations
+        double C_effect = 1.0; // place holder
+		double dA = __min(water_effect,C_effect)*PotentialAreaIncrease; // growth temperature effect is included in determining potential area
+		area += dA;
 		if (area >= PotentialArea || elongAge >= t_e) 
 		{
 			mature = true;
@@ -148,21 +150,23 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 }
 
 
-void CLeaf::senescence(CDevelopment * dv)
+void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
 {
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY;
 	double T = dv->get_Tcur();
 	double T_opt = dv->get_T_Opt();
 	double T_grow = dv->get_Tgrow();
-    double N_index = (2/(1+exp(-2.9*(N_content-0.25)))-1); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
-	                                                       // This assumes 0.25mg/m2 minimum N required
-	double N_stress = 0.1*(1.0-N_index); //SK 8/20/10: scaled between 0 and 0.1 to adjust the slope (Kx) bewteen 0.1 and 0.2
-//	stayGreen = N_stress*stayGreen;
+	double scale = 0.5; // scale for aging rate acceration, if 1.0, upto 100% accelration of aging at maximum stress
+    double N_index = (1+scale)-__max(0.0, scale*(2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
+	// This assumes 0.25mg/m2 minimum N required, and below this the value is 0.0. 
+	// The N_index and water_effect ranges from 1 to 1+scale that increases as N content decreases (i.e., N stressed) to accelerate senescence upto 50%
+	double water_effect= (1+scale) - scale*LWPeffect(predawnlwp);
 
 	double t_e = growthDuration; // end of growth period, time to maturity
 	const double stayGreen = 4.0; // staygreen trait of the hybrid
                                   // stay green for this value times growth period after peaking before senescence begins
-
+                                  // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
+	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
 	double stayGreenPeriod = stayGreen*growthDuration;
 	double t_m = t_e/2; // max. growth rate assumed to be half of t_e
 
@@ -175,7 +179,7 @@ void CLeaf::senescence(CDevelopment * dv)
 
 	if (mature && !aging && !dead)
 	{
-		activeAge +=q10fn*dD;
+		activeAge +=__min(stayGreenPeriod-activeAge, __max(water_effect,N_index)*q10fn*dD);
 		if (activeAge >= stayGreenPeriod)
 		{
 			activeAge = stayGreenPeriod;
@@ -186,8 +190,12 @@ void CLeaf::senescence(CDevelopment * dv)
 	{
   		seneAge += q10fn*dD; 
 		seneAge = __min(t_e, seneAge);
-
-		senescentArea = __max(0.0, this->area*(1.0 + (t_e-seneAge)/(t_e-t_m))*pow(seneAge/t_e, (t_e/(t_e-t_m))));
+		double maxRate = area*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
+		double nonstressAgingRate = __max(0.0,maxRate*__max(0.0, (t_e-seneAge)/(t_e-t_m)*pow(seneAge/t_m,t_m/(t_e-t_m)))*dD);
+ 		double dA = __min(greenArea,__max(water_effect,N_index)*nonstressAgingRate);
+//Leaf senescence accelerates with drought and heat. see http://www.agry.purdue.edu/ext/corn/news/timeless/TopLeafDeath.html
+		senescentArea += dA;
+//		senescentArea = __max(0.0, this->area*(1.0 + (t_e-seneAge)/(t_e-t_m))*pow(seneAge/t_e, (t_e/(t_e-t_m))));
 		if (senescentArea >= area || seneAge >= t_e) 
 		{
 			senescentArea = area; dead = true;
@@ -210,10 +218,13 @@ void CLeaf::senescence(CDevelopment * dv)
 double CLeaf::LWPeffect(double predawn_psil)
 {
     //DT Oct 10, 2012 changed this so it was not as sensitive to stress near -0.5 lwp
-	double rf_psil=-1.0;
-	double rf_sensitivity=0.5;
+	//SK Sept 14, 2014 putting back the original parameter estimates from Yang's paper
+	//sensitivity = 1.92, psil_half = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
+
+	double rf_psil=-1.86; // -1.0;
+	double rf_sensitivity=1.92; // 0.5;
 	double effect;
-	effect=(1+exp(rf_psil*rf_sensitivity))/(1+exp(rf_sensitivity*(rf_psil-(predawn_psil+0.5))));
+	effect=(1+exp(rf_psil*rf_sensitivity))/(1+exp(rf_sensitivity*(rf_psil-(predawn_psil))));
 	if (effect >1 ) effect=1;
 	return effect;
 }

@@ -70,7 +70,7 @@ void CController::initialize()
 // This is the leaf file for output (see function "output to leaffile"
 	{
 		ofstream LeafOut(LeafFile, ios::out);
-		LeafOut << setiosflags(ios::right)
+		LeafOut << setiosflags(ios::left)
 			<< setiosflags(ios::fixed)
             << setw(10) << "date"
 			<< setw(6) << "jday"
@@ -94,7 +94,7 @@ void CController::initialize()
 //This is the plant file for output (see function "output to crop file"
 	{
 		ofstream cropOut(cropFile, ios::out); 
-		cropOut << setiosflags(ios::right) 
+		cropOut << setiosflags(ios::left) 
 			<< setiosflags(ios::fixed)
  			<< setw(9) << "date" 
  			<< setw(6) << "jday" 
@@ -102,7 +102,7 @@ void CController::initialize()
 			<< setw(8) << "Leaves"
 			<< setw(8) << "Dropped"
 			<< setw(8) << "LA/pl"
-			<< setw(8) << "LA_ac"
+			<< setw(8) << "LA_dead"
 			<< setw(8) << "LAI"
 			<< setw(8) << "RH"
 			<< setw(8) << "psil_"
@@ -127,11 +127,11 @@ void CController::initialize()
 			<< setw(8) << "shootDM"
 			<< setw(8) << "earDM"
 			<< setw(8) << "leafDM"
-			<< setw(8) << "DroppedLfDM"
+			<< setw(8) << "DrpLfDM"
 			<< setw(8) << "stemDM"
 			<< setw(8) << "rootDM"
-			<< setw(8) << "SoilRoot"
-			<< setw(8) << "MaxRDepth"
+			<< setw(8) << "SoilRt"
+			<< setw(8) << "MxRtDep"
             << setw(8) << "AvailW"
 			<< setw(9) << "solubleC"
 			<< setw(9) << "Note"
@@ -299,7 +299,7 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(2) << plant->get_develop()->get_LvsAppeared()
 				<< setw(8)  << setprecision(2) << plant->get_nodalUnit()->get_leaf()->get_TotalDroppedLeaves()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()
-				<< setw(8) << setprecision(2) << plant->calcActualGreenLeafArea()
+				<< setw(8) << setprecision(2) << plant->calcSenescentLeafArea()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
 				<< setw(8) << setprecision(2) << weather[iCur].RH
 				//<< setw(8) << setprecision(2) << plant->getCarbonRatio()
