@@ -76,7 +76,7 @@ int CDevelopment::update(const TWeather& wthr)
 		{
             germination.done = true;
 			germination.daytime = wthr.daytime;
-			cout << "* Germinated: GDDsum " << GDDsum << " Growing season T " << dt << endl;
+			cout << "* Germinated: GDDsum " << GDDsum << " time step (min): " << dt*(24*60) << endl;
 		}
 	}
 	else // if (germination.done)
@@ -109,10 +109,10 @@ int CDevelopment::update(const TWeather& wthr)
                   //Equation 4 in Grant 1989 Ag. J. (81)
 			     //dt 12/11/2012 broke the equation in two to separate temperature and daylenght effects
 			   addLeafTemperature = __max(0,(13.6-1.89*T_cur+0.081*T_cur*T_cur - 0.001*T_cur*T_cur*T_cur)); 
-			   addLeafPhotoPeriod=0;
+			   addLeafPhotoPeriod=0.0;
 			   if (DayLengthSensitive)
 				   {
-				      addLeafPhotoPeriod = __max(0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5)); 
+				      addLeafPhotoPeriod = __max(0.0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5)); 
 				   }
 			   addLeafTotal=addLeafTemperature + addLeafPhotoPeriod;
 			
@@ -125,21 +125,21 @@ int CDevelopment::update(const TWeather& wthr)
 				// addedLvs = (addedLvs*inductions + addLeafTotal)/(inductions+1);
 				inductionPeriod += dt;
  			    addedLvs += addLeafTotal*dt;
-			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod;
-				LvsAtTI = LvsAppeared;
+			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod; //get a mean value over this period
 			//	LvsAtTI = LvsInitiated; //Should be LvsInitiated. Already confirmed with Soo. 7/27/2006
 				// uncomment the following for debugging
 			 //   cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
-
-			}
-			if (LvsInitiated - juvLeafNo >= addedLvs/inductionPeriod)
-			{
-				youngestLeaf = totLeafNo = (int) LvsInitiated;
-				curLeafNo = youngestLeaf;
-				tasselInitiation.done =true;
-			    tasselInitiation.daytime = wthr.daytime;
-				LvsInitiated = youngestLeaf;
-				cout << "* Tassel initiation: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+			
+				if (LvsInitiated - juvLeafNo >= addedLvs/inductionPeriod)
+				{
+					youngestLeaf = totLeafNo = (int) LvsInitiated;
+					curLeafNo = youngestLeaf;
+					tasselInitiation.done =true;
+					tasselInitiation.daytime = wthr.daytime;
+					LvsInitiated = youngestLeaf;
+					LvsAtTI = LvsAppeared;
+					cout << "* Tassel initiation: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				}
 			}
 		}
 		else
@@ -156,9 +156,9 @@ int CDevelopment::update(const TWeather& wthr)
 			}
 		}
 
-//		 if ((LvsAppeared >= (int) LvsInitiated) && (!silking.done))
-		 if (((tasselInitiation.done) && (!silking.done) && !DayLengthSensitive)
-			 ||  ((LvsAppeared >= (int) LvsInitiated) && (!silking.done) && DayLengthSensitive))
+		 if (tasselInitiation.done && (LvsAppeared >= (int) LvsInitiated) && !silking.done)
+//		 if (((tasselInitiation.done) && (!silking.done) && !DayLengthSensitive)
+//			 ||  ((LvsAppeared >= (int) LvsInitiated) && (!silking.done) && DayLengthSensitive))
 		{
 		    Anthesis += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume 75% Silking occurs at total tip appeared + 3 phyllochrons
 			if (Anthesis >= PhyllochronsToSilk) //was 3
