@@ -85,7 +85,7 @@ public:
 
 	
 
-	void update(const TWeather &, double lwpd);
+	void update(const TWeather &, double PredawnLWP);
 	void calcGasExchange(const TWeather & weather);
 	void calcMaintRespiration(const TWeather&);
 
