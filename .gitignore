@@ -229,3 +229,7 @@ pip-log.txt
 # Mac / Linux #
 ###############
 *.o
+Crop source/copydll.bat
+Soil Source/CopyToTestVer.bat
+Test_Ver9.1/Crop.dll
+Test_Ver9.1/2dsoil.exe
