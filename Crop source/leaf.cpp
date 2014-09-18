@@ -21,7 +21,8 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	actualArea = actualgreenArea=greenArea = senescentArea = droppedArea = 0;
 	actualLength=actualwidth=0;
 	initiated = appeared = growing = mature = aging = dead = dropped = false;
-	phase1Delay = growthDuration=ptnLength=ptnWidth = 0;
+	phase1Delay = growthDuration=stayGreenDuration = seneDuration = 0.0;
+	ptnLength=ptnWidth = 0.0;
 	elongRate = 0.564;  //0.564 cm dd-1 Fournier and Andrieu 1998 Pg239. This is the "potential" elongation rate with no water stress Yang
 	maxElongRate = 12.0; //max elongation rate (cm per day) at optipmal temperature (Topt: 31C with Tbase = 9.8C using 0.564 cm/dd rate from Fournier 1998 paper above
 	elongAge = 0.0; //physiological age during expansion phase
@@ -32,7 +33,10 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	LeafCalibTemperature=dv->get_CalibTemperature();   
 	WLRATIO = 0.106; // leaf lamina width to length ratio
 	A_LW = 0.75; // leaf area coeff with respect to L*W
-		
+	stayGreen = 4.0; // staygreen trait of the hybrid
+                                  // stay green for this value times growth period after peaking before senescence begins
+                                  // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
+	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
 }
 
 CLeaf::~CLeaf() {}
@@ -48,7 +52,9 @@ void CLeaf::initialize (CDevelopment * dv)
 	initiated = true;
 //	growing=true; // DT
 	first=true;
-	// uncomment for debugging
+	stayGreenDuration = stayGreen*growthDuration;
+	seneDuration = growthDuration; 
+// uncomment for debugging
 #if _DEBUG
 	      std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
               <<  " potential area " << PotentialArea << std::endl;
@@ -92,17 +98,17 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
 
 }
 
-void CLeaf::update(CDevelopment * dv, double predawnlwp)
+void CLeaf::update(CDevelopment * dv, double PredawnLWP)
 { 
 	COrgan::set_temperature(dv->get_Tcur());
 	COrgan::update();
 	calc_dimensions(dv);
-	expand(dv, predawnlwp);
-	senescence(dv, predawnlwp);
+	expand(dv, PredawnLWP);
+	senescence(dv, PredawnLWP);
     greenArea = max(0.0, area-senescentArea);
 }
 
-void CLeaf::expand(CDevelopment * dv, double predawnlwp)
+void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 //leaf expansiopn rate based on a determinate sigmoid function by Yin et al. (2003)
 {
 	const double T_peak = 18.7, Tb = 8.0, phyllochron = (dv->get_T_Opt()- Tb)/(dv->get_Rmax_LTAR()); 
@@ -113,7 +119,8 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 	double T_gro = dv->get_Tgrow();
 	double T_effect_size = max(0.0, (T_gro-Tb)/(T_peak-Tb)*exp(1.0-(T_gro-Tb)/(T_peak-Tb))); //final leaf size is adjusted by growth temperature determining cell size during elongation
 	// See Kim et al. (2012) Agro J. for more information on how this relationship has been derermined basned o multiple studies and is applicable across environments
-	double water_effect=LWPeffect(predawnlwp);
+    const double psi_threshold_bars = -0.8657; 
+	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY; // time step as day fraction
 
 	if (dv->get_LvsAppeared() >= rank && !appeared) 
@@ -150,25 +157,19 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 }
 
 
-void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
+void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 {
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY;
 	double T = dv->get_Tcur();
 	double T_opt = dv->get_T_Opt();
 	double T_grow = dv->get_Tgrow();
-	double scale = 0.5; // scale for aging rate acceration, if 1.0, upto 100% accelration of aging at maximum stress
-    double N_index = (1+scale)-__max(0.0, scale*(2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
-	// This assumes 0.25mg/m2 minimum N required, and below this the value is 0.0. 
-	// The N_index and water_effect ranges from 1 to 1+scale that increases as N content decreases (i.e., N stressed) to accelerate senescence upto 50%
-	double water_effect= (1+scale) - scale*LWPeffect(predawnlwp);
+    double N_index = __max(0.0, (2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
+	// This assumes 0.25mg/m2 minimum N required, and below this the value is 0.0.
+	const double psi_threshold_bars = -4.0; //threshold predawn leaf water potential (in bars) below which water stress triggers senescence, needs to be substantiated with lit or exp evidence, SK
+	// This is the water potential at which considerable reduction in leaf growth takes place in corn, sunflower, and soybean in Boyear (1970)
+	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
 
-	double t_e = growthDuration; // end of growth period, time to maturity
-	const double stayGreen = 4.0; // staygreen trait of the hybrid
-                                  // stay green for this value times growth period after peaking before senescence begins
-                                  // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
-	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
-	double stayGreenPeriod = stayGreen*growthDuration;
-	double t_m = t_e/2; // max. growth rate assumed to be half of t_e
+	double t_e, t_m; // max. growth rate assumed to be half of t_e
 
 	double Q10 = 2.0;
 	double q10fn = pow(Q10,(T - T_opt)/10);
@@ -176,26 +177,40 @@ void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
 		// a peaked fn like beta fn not used here because aging should accelerate with increasing T not slowing down at very high T like growth,
 		// instead a q10 fn normalized to be 1 at T_opt is used, this means above Top aging accelerates. 
 
+	double scale = 1.0; // scale for reduction in leaf lifespan and aging rate
 
-	if (mature && !aging && !dead)
+	if (!mature && !aging && !dead)
 	{
-		activeAge +=__min(stayGreenPeriod-activeAge, __max(water_effect,N_index)*q10fn*dD);
-		if (activeAge >= stayGreenPeriod)
+		stayGreenDuration = stayGreen*growthDuration;
+		seneDuration = growthDuration; // end of growth period, time to maturity
+	}
+	else if (mature && !aging && !dead)
+	{
+		activeAge += q10fn*dD;
+		scale = 1.0/stayGreenDuration;
+		stayGreenDuration = __max(0.0, stayGreenDuration - scale*stayGreenDuration*(1.0 - water_effect)*dD);
+		//One day of cumulative severe water stress (i.e., water_effect = 0.0 around -4MPa) would result in a reduction of leaf lifespan in relation staygreeness and growthDuration, SK
+        //if scale is 1.0, it will take one day of severe water stress to trigger aging and another day of severe stress to the death of the leaf (coded below)
+		if (activeAge >= stayGreenDuration)
 		{
-			activeAge = stayGreenPeriod;
+			activeAge = stayGreenDuration;
 			aging = true;
 		}
 	}	
 	else if (aging && !dead)
 	{
   		seneAge += q10fn*dD; 
+		scale = 1.0/growthDuration;
+        seneDuration = __max(0.0, seneDuration - scale*seneDuration*(1.0 - water_effect)*dD);
+		t_e = seneDuration;
+		t_m = t_e/2;
 		seneAge = __min(t_e, seneAge);
-		double maxRate = area*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
-		double nonstressAgingRate = __max(0.0,maxRate*__max(0.0, (t_e-seneAge)/(t_e-t_m)*pow(seneAge/t_m,t_m/(t_e-t_m)))*dD);
- 		double dA = __min(greenArea,__max(water_effect,N_index)*nonstressAgingRate);
+//		double maxRate = area*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
+//		double nonstressAgingRate = __max(0.0,maxRate*__max(0.0, (t_e-seneAge)/(t_e-t_m)*pow(seneAge/t_m,t_m/(t_e-t_m))));
+// 		double dA = nonstressAgingRate*dD;
 //Leaf senescence accelerates with drought and heat. see http://www.agry.purdue.edu/ext/corn/news/timeless/TopLeafDeath.html
-		senescentArea += dA;
-//		senescentArea = __max(0.0, this->area*(1.0 + (t_e-seneAge)/(t_e-t_m))*pow(seneAge/t_e, (t_e/(t_e-t_m))));
+//		senescentArea += dA;
+		senescentArea = __max(0.0, this->area*(1.0 + (t_e-seneAge)/(t_e-t_m))*pow(seneAge/t_e, (t_e/(t_e-t_m))));
 		if (senescentArea >= area || seneAge >= t_e) 
 		{
 			senescentArea = area; dead = true;
@@ -215,16 +230,17 @@ void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
 //create a function which simulates the reducing in leaf expansion rate
 //when predawn leaf water potential decreases. Parameterization of rf_psil
 //and rf_sensitivity are done with the data from Boyer (1970) and Tanguilig et al (1987) YY
-double CLeaf::LWPeffect(double predawn_psil)
+double CLeaf::LWPeffect(double predawn_psi_bars, double threshold)
 {
     //DT Oct 10, 2012 changed this so it was not as sensitive to stress near -0.5 lwp
-	//SK Sept 14, 2014 putting back the original parameter estimates from Yang's paper
-	//sensitivity = 1.92, psil_half = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
+	//SK Sept 16, 2014 recalibrated/rescaled parameter estimates in Yang's paper. The scale of Boyer data wasn't set correctly
+	//sensitivity = 1.92, LeafWPhalf = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
 
-	double rf_psil=-1.86; // -1.0;
-	double rf_sensitivity=1.92; // 0.5;
+	double psi_f=-1.4251; // -1.0;
+	double s_f=0.4258; // 0.5;
+	double psi_th = threshold; // threshold wp below which stress effect shows up
 	double effect;
-	effect=(1+exp(rf_psil*rf_sensitivity))/(1+exp(rf_sensitivity*(rf_psil-(predawn_psil))));
+	effect=__min(1.0, (1+exp(psi_f*s_f))/(1+exp(s_f*(psi_f-(predawn_psi_bars-psi_th)))));
 	if (effect >1 ) effect=1;
 	return effect;
 }

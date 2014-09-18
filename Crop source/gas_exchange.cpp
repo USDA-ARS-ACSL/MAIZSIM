@@ -45,12 +45,13 @@ void CGas_exchange::getParms()
 	Parms.Eaj      =        32800;
 	Parms.Hj       =       220000;
 	Parms.Sj       =          702.6;
-	Parms.Vpm25    =          120.0;
-	Parms.Vcm25    =           72.0;
-	Parms.Jm25     =          355.0;
+	Parms.Vpm25    =          70.0;
+	Parms.Vcm25    =          50.0;
+	Parms.Jm25     =         300.0;
 	// Kim et al. (2007), Kim et al. (2006)
 	//In von Cammerer (2000), Vpm25=120, Vcm25=60,Jm25=400
 	//In Soo et al.(2006), under elevated C5O2, Vpm25=91.9, Vcm25=71.6, Jm25=354.2 YY
+	// Values in Kim (2006) are for 31C, and the values here are normalized for 25C. SK
 	Parms.Rd25     =          2.0;
 	Parms.Ear      =        39800;
 	Parms.g0 = 0.04;

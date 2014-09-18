@@ -87,7 +87,7 @@ CPlant::~CPlant()
 
 
 
-void CPlant::update(const TWeather & weather, double lwpd)
+void CPlant::update(const TWeather & weather, double PredawnLWP)
 {
 	int TotalGrowingLeaves = 0;
 	int TotalDroppedLeaves = 0;
@@ -155,7 +155,7 @@ void CPlant::update(const TWeather & weather, double lwpd)
 			}
 			else
 			{
-				nodalUnit[i].update(develop,lwpd);
+				nodalUnit[i].update(develop,PredawnLWP);
 				// from germination to emergence, C supply is from the seed
 				if (nodalUnit[i].get_leaf()->isGrowing()) 
 				 {
@@ -210,7 +210,7 @@ void CPlant::update(const TWeather & weather, double lwpd)
 			else
 			{
          		nodalUnit[i].get_leaf()->set_N_content(leaf_N_content); //SK 8/22/10: set leaf N content before each nodal unit is updated
-                nodalUnit[i].update(develop, lwpd); //Pass the predawn leaf water potential into a nodel
+                nodalUnit[i].update(develop, PredawnLWP); //Pass the predawn leaf water potential into a nodel
 				//to enable the model to simulate leaf expansion with the
 				//effect of predawn leaf water potential YY
 			}
@@ -521,15 +521,15 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	 	
 	  //Calculating transpiration and photosynthesis without stomatal control Y
 	   // sunlit->SetVal_NC(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
-	       //           weather.wind, atmPressure, leafwidth, weather.psil_, weather.ET_supply); 
+	       //           weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply); 
 	    // shaded->SetVal_NC(shadedPFD(), weather.airT, weather.CO2, weather.RH, 
-	          //     weather.wind, atmPressure, leafwidth, weather.psil_, weather.ET_supply);
+	          //     weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply);
 
-	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential psil_ Y
+	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential LeafWP Y
 	    sunlit->SetVal_psil(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
-	                weather.wind, atmPressure, leafwidth, weather.psil_, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
+	                weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
 	    shaded->SetVal_psil(shadedPFD(), weather.airT, weather.CO2, weather.RH, 
-	          weather.wind, atmPressure, leafwidth, weather.psil_, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
+	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
 
 	
 	photosynthesis_gross = (sunlit->A_gross*sunlitLAI() + shaded->A_gross*shadedLAI());//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
@@ -718,8 +718,8 @@ void CPlant::C_allocation(const TWeather & w)
 		if (w.pcrs>rootPart_old)
 	   { 
 // give a half of carbon from shoot needed to meet root demand, SK
-		  shootPart_real = __max(0, shootPart-0.5*(w.pcrs-rootPart_old));
-		  rootPart_real = rootPart+ 0.5*(w.pcrs-rootPart_old);
+		  shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old));
+		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);
 	   }
 	   else 
 	   {
