@@ -131,8 +131,8 @@ void crop_(struct
 		SHOOTR->Height=0.0;
 		//dt change for debugging purposes
 		SHOOTR->Convr=1.0; // was 0.1 or 0.38 should be 1.0 as dry matter is used in all cases
-		SHOOTR->AWUPS = 0.0;  //initialize AWUPS, AWUPS_old and psil_ in 2DSOIL Yang 8/15/06
-		SHOOTR->psil_ = -0.5; 
+		SHOOTR->AWUPS = 0.0;  //initialize AWUPS, AWUPS_old and LeafWP in 2DSOIL Yang 8/15/06
+		SHOOTR->LeafWP = -0.5; 
 		SHOOTR->PCRS = 0.0;
 		SHOOTR->ET_demand = 0.0;
 		SHOOTR->HourlyCarboUsed=0;  //it is also zero'd upon initialization in 2dsoil
@@ -226,16 +226,16 @@ void crop_(struct
 				wthr.rain = Weather->RINT[SHOOTR->iTime-1];
 				wthr.wind = Weather->WIND*(1000.0/3600.0); // conversion from km hr-1 to m s-1
 				wthr.dayLength = Weather->daylng;
-				wthr.psil_ = SHOOTR->psil_/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06
-				//since psil_ in 2dsoil is in bar but in maizesim is in MPa, so, have to
+				wthr.LeafWP = SHOOTR->LeafWP/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06
+				//since LeafWP in 2dsoil is in bar but in maizesim is in MPa, so, have to
 				//divide it by 10 to convert it into MPa before passing the value to Maizesim 1 bar=10kPa
 
 				if (abs(wthr.time-0.2083)<0.0001) //If time is 5 am, then pass the leaf water potential (the predawn leaf water potential)
 					//from SHOOTR to the wthr object. YY
 
 				{
-					lwpd=SHOOTR->psil_; //Here psil_ is in bar. Since the LWPeffect in leaf.cpp uses leaf water potential
-					//in bar, so here lwpd is in bar, instead of being scaled to MPa. YY
+					PredawnLWP=SHOOTR->LeafWP; //Here LeafWP is in bar. Since the LWPeffect in leaf.cpp uses leaf water potential
+					//in bar, so here PredawnLWP is in bar, instead of being scaled to MPa. YY
 				}
 
 // pass actual carbohydrate amount used in 2dsoil back to the plant
@@ -327,10 +327,10 @@ void crop_(struct
 			int ier = pSC->getErrStatus();
 			if ( ier == 0 ) 
 			{
-				ier = pSC->run(wthr, lwpd); //Pass both weather and leaf water potential into the "run" function
+				ier = pSC->run(wthr, PredawnLWP); //Pass both weather and leaf water potential into the "run" function
 				//of the controller pSC YY
 				// need to get rid of other run module (with only wthr) done?
-				// need to add lwpd to wthr structure
+				// need to add PredawnLWP to wthr structure
 			}
 
 

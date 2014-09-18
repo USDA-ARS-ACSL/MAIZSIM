@@ -28,7 +28,7 @@
 		  Trel,            // relative time since emergence
 		  Period,          // one hour of time
 		  Emergence;       // Day of year plant emerged
-   double lwpd=0.05;
+   double PredawnLWP=-0.05;
    
 	TInitInfo			initInfo; //Initial input data stored here
   double old_shoot_weightPerM2 = 0; //Declare and initilize a variable to save 
@@ -83,7 +83,7 @@
       LAREAT,PopRow,RowSp,RowAng,CEC,
       EORSCS,AWUPSS,SolRad,Total_Eor,
       Total_Pcrs,SIncrSink,Psild,
-      OsmFac, EOMult,psil_, NDemandError, CumulativeNDemandError, 
+      OsmFac, EOMult,LeafWP, NDemandError, CumulativeNDemandError, 
 	  TotalRootWeight, ConstI[2],constK[2], Cmin0[2];
     int iTime,iDawn,iDusk;
 	

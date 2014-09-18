@@ -14,7 +14,7 @@ public:
 	int jday;
 	double time, daytime;
 	//dt added pcrl and pcrq to check balances
-	double CO2, airT, PFD, solRad, RH, wind, rain, dayLength, soilT,ET_supply,psil_,pcrs,pcrl,
+	double CO2, airT, PFD, solRad, RH, wind, rain, dayLength, soilT,ET_supply,LeafWP,pcrs,pcrl,
 		pcrq, TotalRootWeight;
 	float MaxRootDepth,ThetaAvail;
 	//double CO2, airT, PFD, solRad, RH, wind, rain, dayLength, soilT;

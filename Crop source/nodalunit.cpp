@@ -33,9 +33,9 @@ CNodalUnit::~CNodalUnit()
 }
 
 
-void CNodalUnit::update(CDevelopment * dv, double predawnlwp)
+void CNodalUnit::update(CDevelopment * dv, double PredawnLWP)
 {
-	leaf->update(dv, predawnlwp);
+	leaf->update(dv, PredawnLWP);
 	stem->update(dv);
 //	stem->grow(weather); // mass is not updated yet for leaf area increase should be able to add actual carbon increment here
 	mass = leaf->get_mass() + stem->get_mass(); // has no mass here

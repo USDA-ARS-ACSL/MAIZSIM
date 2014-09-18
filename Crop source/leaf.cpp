@@ -92,17 +92,17 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
 
 }
 
-void CLeaf::update(CDevelopment * dv, double predawnlwp)
+void CLeaf::update(CDevelopment * dv, double PredawnLWP)
 { 
 	COrgan::set_temperature(dv->get_Tcur());
 	COrgan::update();
 	calc_dimensions(dv);
-	expand(dv, predawnlwp);
-	senescence(dv, predawnlwp);
+	expand(dv, PredawnLWP);
+	senescence(dv, PredawnLWP);
     greenArea = max(0.0, area-senescentArea);
 }
 
-void CLeaf::expand(CDevelopment * dv, double predawnlwp)
+void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 //leaf expansiopn rate based on a determinate sigmoid function by Yin et al. (2003)
 {
 	const double T_peak = 18.7, Tb = 8.0, phyllochron = (dv->get_T_Opt()- Tb)/(dv->get_Rmax_LTAR()); 
@@ -113,7 +113,7 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 	double T_gro = dv->get_Tgrow();
 	double T_effect_size = max(0.0, (T_gro-Tb)/(T_peak-Tb)*exp(1.0-(T_gro-Tb)/(T_peak-Tb))); //final leaf size is adjusted by growth temperature determining cell size during elongation
 	// See Kim et al. (2012) Agro J. for more information on how this relationship has been derermined basned o multiple studies and is applicable across environments
-	double water_effect=LWPeffect(predawnlwp);
+	double water_effect=LWPeffect(PredawnLWP);
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY; // time step as day fraction
 
 	if (dv->get_LvsAppeared() >= rank && !appeared) 
@@ -150,7 +150,7 @@ void CLeaf::expand(CDevelopment * dv, double predawnlwp)
 }
 
 
-void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
+void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 {
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY;
 	double T = dv->get_Tcur();
@@ -160,7 +160,7 @@ void CLeaf::senescence(CDevelopment * dv, double predawnlwp)
     double N_index = (1+scale)-__max(0.0, scale*(2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
 	// This assumes 0.25mg/m2 minimum N required, and below this the value is 0.0. 
 	// The N_index and water_effect ranges from 1 to 1+scale that increases as N content decreases (i.e., N stressed) to accelerate senescence upto 50%
-	double water_effect= (1+scale) - scale*LWPeffect(predawnlwp);
+	double water_effect= (1+scale) - scale*LWPeffect(PredawnLWP);
 
 	double t_e = growthDuration; // end of growth period, time to maturity
 	const double stayGreen = 4.0; // staygreen trait of the hybrid
@@ -219,7 +219,7 @@ double CLeaf::LWPeffect(double predawn_psil)
 {
     //DT Oct 10, 2012 changed this so it was not as sensitive to stress near -0.5 lwp
 	//SK Sept 14, 2014 putting back the original parameter estimates from Yang's paper
-	//sensitivity = 1.92, psil_half = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
+	//sensitivity = 1.92, LeafWPhalf = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
 
 	double rf_psil=-1.86; // -1.0;
 	double rf_sensitivity=1.92; // 0.5;

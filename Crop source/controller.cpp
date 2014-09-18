@@ -105,7 +105,7 @@ void CController::initialize()
 			<< setw(8) << "LA_dead"
 			<< setw(8) << "LAI"
 			<< setw(8) << "RH"
-			<< setw(8) << "psil_"
+			<< setw(8) << "LeafWP"
 			<< setw(8) << "PFD"
 			<< setw(8) << "SolRad"
 			<< setw(8) << "SoilT"
@@ -126,7 +126,7 @@ void CController::initialize()
 		    << setw(8) << "totalDM"
 			<< setw(8) << "shootDM"
 			<< setw(8) << "earDM"
-			<< setw(8) << "leafDM"
+			<< setw(8) << "GrleafDM"
 			<< setw(8) << "DrpLfDM"
 			<< setw(8) << "stemDM"
 			<< setw(8) << "rootDM"
@@ -221,12 +221,12 @@ void CController::readWeatherFrom2DSOIL(const TWeather & wthr)
 
 
 
-int CController::run(const TWeather & wthr, double lwpd)
+int CController::run(const TWeather & wthr, double PredawnLWP)
 {
 	readWeatherFrom2DSOIL(wthr);
     if (weather[iCur].jday >= initInfo.sowingDay && weather[iCur].jday <= lastDayOfSim)
 	{
-		plant->update(weather[iCur], lwpd);
+		plant->update(weather[iCur], PredawnLWP);
 		RootWeightFrom2DSOIL=wthr.TotalRootWeight;
 		MaxRootDepth=        wthr.MaxRootDepth;
 		AvailableWater=      wthr.ThetaAvail;
@@ -303,7 +303,7 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
 				<< setw(8) << setprecision(2) << weather[iCur].RH
 				//<< setw(8) << setprecision(2) << plant->getCarbonRatio()
-				<< setw(8) << setprecision(4) << weather[iCur].psil_   //print out leaf water potential Yang 8/22/06
+				<< setw(8) << setprecision(4) << weather[iCur].LeafWP   //print out leaf water potential Yang 8/22/06
 				<< setw(8) << setprecision(2) << weather[iCur].PFD
 				<< setw(8) << setprecision(2) << weather[iCur].solRad
 				<< setw(8) << setprecision(2) << weather[iCur].soilT
