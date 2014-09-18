@@ -28,7 +28,7 @@
 		  Trel,            // relative time since emergence
 		  Period,          // one hour of time
 		  Emergence;       // Day of year plant emerged
-   double PredawnLWP=0.05;
+   double PredawnLWP=-0.05;
    
 	TInitInfo			initInfo; //Initial input data stored here
   double old_shoot_weightPerM2 = 0; //Declare and initilize a variable to save 

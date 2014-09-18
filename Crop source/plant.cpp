@@ -719,7 +719,7 @@ void CPlant::C_allocation(const TWeather & w)
 	   { 
 // give a half of carbon from shoot needed to meet root demand, SK
 		  shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old));
-		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);
+		  rootPart_real = rootPart+(w.pcrs-rootPart_old);
 	   }
 	   else 
 	   {

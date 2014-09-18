@@ -1,4 +1,4 @@
-Maize, corn simulation model developed by the USDA-ARS Crop Systems and Global Change Laboratory and Univ. of Washington School of Environmental and Forest Sciences. 
+MAIZSIM is a corn simulation model developed by the USDA-ARS Crop Systems and Global Change Laboratory and Univ. of Washington School of Environmental and Forest Sciences. 
 
 The developers are 
 

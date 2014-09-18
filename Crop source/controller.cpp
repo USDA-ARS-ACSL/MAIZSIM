@@ -126,7 +126,7 @@ void CController::initialize()
 		    << setw(8) << "totalDM"
 			<< setw(8) << "shootDM"
 			<< setw(8) << "earDM"
-			<< setw(8) << "leafDM"
+			<< setw(8) << "GrleafDM"
 			<< setw(8) << "DrpLfDM"
 			<< setw(8) << "stemDM"
 			<< setw(8) << "rootDM"
