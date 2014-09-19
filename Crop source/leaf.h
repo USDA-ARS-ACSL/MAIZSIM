@@ -55,7 +55,7 @@ public:
 
 	void calc_dimensions(CDevelopment * dv);
 	void calcLongevity(double pdlwp);
-	double LWPeffect(double predawn_psil);
+	double LWPeffect(double predawn_psil, double threshold);
 
 private:
 	CLeaf(const CLeaf&);
@@ -74,7 +74,8 @@ private:
 	double width;
 	double SLA;
 	double plastochrons, GDD2mature; // Fournier and Andrieu (1998), used for delay between initiation and elongation
-	double phase1Delay, growthDuration, elongAge, elongRate, maxElongRate, seneAge, activeAge;
+	double phase1Delay, growthDuration, elongAge, elongRate, maxElongRate, seneAge, activeAge, seneDuration;
+	double stayGreen, stayGreenDuration;
 	double ptnLength, ptnWidth;
 	double LeafCalibTemperature; //temperature at which experiments run where parameters for leaf expansion were determined
 	double actualArea;
