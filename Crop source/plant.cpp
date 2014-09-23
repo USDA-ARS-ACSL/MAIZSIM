@@ -660,7 +660,7 @@ void CPlant::C_allocation(const TWeather & w)
 		C_supply = __min(C_reserve, maintRespiration);
 	}
 
-	double Fraction = __min(0.925, 0.59 + 0.41*scale); // eq 3 in Grant
+	double Fraction = __min(0.925, 0.67 + 0.33*scale); // eq 3 in Grant
 //	const double convFactor = 1/1.43; // equivalent Yg, Goudriaan and van Laar (1994)
 	double Yg = 0.750; // synthesis efficiency, ranges between 0.7 to 0.76 for corn, see Loomis and Amthor (1999), Grant (1989), McCree (1988)
 //  double Yg = 0.74;
