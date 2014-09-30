@@ -368,7 +368,9 @@ void crop_(struct
 					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
 					
 				}
-                SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ pSC->getPlant()->get_shootPart())*24*PopSlab;
+                SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (0.5*pSC->getPlant()->get_shootPart()))*24*PopSlab;
+                //DT 09/19/14 under strong water stress mid season too much carbon is allocated to the roots, we
+				// try to limit it here.
 				//SHOOTR->PCRQ=SHOOTR->PCRL; //for debugging now remove later
 			//dt 03/2011 added these two for debugging now - need to calculate mass balcance of carbo sent to root
 				//can drop them later

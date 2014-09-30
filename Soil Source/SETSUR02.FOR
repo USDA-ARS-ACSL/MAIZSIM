@@ -823,7 +823,7 @@ C
         Do 90 i=1,ic
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
 
-          PSh=max(0.1,FSh(i,xBSTEM,SHADE,xS,ic))
+          PSh=max(0.0,FSh(i,xBSTEM,SHADE,xS,ic))
 c
 c  IF THE NODE IS EXPOSED THEN
 c
