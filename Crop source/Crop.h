@@ -23,7 +23,6 @@
 // Other global definitions go here
 
     double p_VMAX,
-		  Popare,
 		  PopSlab,
 		  Trel,            // relative time since emergence
 		  Period,          // one hour of time
@@ -80,16 +79,11 @@
     double PCRL,PCRQ,PCRS,HourlyCarboUsed,ET_demand,LCAI,Cover,Convr;
 	float MaxRootDepth,Shade,Height,LAI,AWUPS,nitroDemand;
 	float xBStem,yBStem,SGT,PSIM,
-      LAREAT,PopRow,RowSp,RowAng,CEC,
+      LAREAT,PopRow,RowSp,RowAng,PopArea,CEC,
       EORSCS,AWUPSS,SolRad,Total_Eor,
       Total_Pcrs,SIncrSink,Psild,
       OsmFac, EOMult,LeafWP, NDemandError, CumulativeNDemandError, 
 	  TotalRootWeight, ConstI[2],constK[2], Cmin0[2];
-    int iTime,iDawn,iDusk;
-	
-//	PILD,VMAX,vegsrc, AWUPS,
-//	AWUPS_old,WUPMS, EORSCF,WUPDS, WUP2S, WUP0S,
-//	DPSI02,SCF, PSIST,PROPAR;
   };
 // DT Made IR float (from int) 
  
@@ -104,7 +98,8 @@
 	 int   NumF[40],NumFP;
 	 float hFur[40],QF;
 	 int   IFUR;
-	 float GAIR[NumGD],PG,LATUDE,RI,par[24],parint[24],daylng;
+	 float GAIR[NumGD],PG,LATUDE,Longitude, Altitude,
+		         RI,par[24],parint[24],daylng;
 	 float AutoIrrigAmt;
 	 int   AutoIrrigate;
 
@@ -154,6 +149,9 @@
 			 float  Tinit;
 			 int    lInput,Iter;
 			 int   DailyOutput, HourlyOutput,RunFlag, DailyWeather, HourlyWeather;
+			 int   beginDay, sowingDay, endDay, OutputSoilNo, OutPutSoilYes, Year;
+		     int iTime,iDawn,iDusk;
+			 double TimeStep;
  };
 
 
