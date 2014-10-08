@@ -73,7 +73,7 @@ C**                                                                   **
       Include 'Puweath.ins'
       Parameter (PERIOD =1./24.)
       
-      integer jday, ThisYear,DayofYear,CurYear, ModNum
+      integer jday, DayofYear,CurYear, ModNum,ThisYear
       Common /weather/ il,im,isol,ModNum
       
       double precision St,t

@@ -51,8 +51,9 @@ C SetSurfaceH --  reading hourly weather
       Call SoilNitrogen()
       Call MacroChem()
 c      Call MassBl() 
-      
-      Call Output()
+      if (outputSoilYes.gt.0) then 
+         Call Output()
+        endif
 
       
       Goto 1

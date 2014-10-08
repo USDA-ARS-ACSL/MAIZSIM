@@ -3,19 +3,18 @@
 	  Real(8) HourlyCarboUsed 
       REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
 	  REAL LAREAT, MaxRootDepth
-	  Integer ITIME, IDAWN, IDUSK
 ! includes variables shared with crop model	 
       Common /ShootR/   PCRL,PCRQ,PCRS,HourlyCarboUsed, ET_demand,
      !                  LCAI,COVER,CONVR,
      !                  MaxRootDepth,SHADE,HEIGHT,LAI,AWUPS,
      !                  NitroDemand,xBSTEM,yBSTEM,SGT,PSIM,
-     !                  LAREAT,POPROW,ROWSP,ROWANG,
+     !                  LAREAT,POPROW,ROWSP,ROWANG,PopArea,
      !                  CEC,EORSCS,AWUPSS,SOLRAD,
      !                  Total_Eor,Total_Pcrs,sincrsink,PSILD,
      !                  OSMFAC,EOMULT,PSIL_,NDemandError, 
      !                  CumulativeNDemandError,TotalRootWeight,
-     !                  ConstI(2),constK(2), Cmin0(2),
-     !                  ITIME,IDAWN,IDUSK
+     !                  ConstI(2),constK(2), Cmin0(2)
+        
    
 ! includes variables only used inside 2dsoil	                 
       Common /shtR_public/ RVR(NumEld), AWUP(NumEld),PSISM,PSILT,EOR,

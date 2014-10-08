@@ -1,6 +1,12 @@
       Subroutine Initialize()
       Include 'public.ins'
-	
+      Include 'puweath.ins'
+      Include 'puplant.ins'
+	Character*10 Date1, Date2, Date3, Date4
+	Character*255 RootName,T1,T2
+	Integer CurYear, JulDay
+c    find root of file name in runfile
+      root
 c     for writing frequency to output
       Daily=0
       Hourly=0
@@ -53,9 +59,32 @@ c  These 4 variables are for the iterative solver Orthomin
 	RCNVRG=1.0d-6
 	MaxItO=200
 	AutoIrrigateF=0
-	
-	
-
+c    Open and read initials file	
+      Open(41, file=InitialsFile, status='old',err=9)
+	  read(41,*)
+	  read(41,*)
+	  read(41,*) PopRow,RowSP, PopArea, rowAng, 
+     &           xBStem, yBStem, CEC, EOMult
+        read(41,*)
+        read(41,*) LATUDE, Longitude, Altitude
+        read(41,*)  
+        read(41,*) AutoIrrigate
+        read(41,*) 
+        read(41,*) Date1, Date2, Date3, TimeStep
+        read(41,*)
+        read(41,*)
+        read(41,*) OutputSoilNo, OutPutSoilYes
+       Close(40)
+        if (OutPutSoilNo+OutPutSoilYes.gt.1) then
+           Write(*,*) 'error in soil output flag'
+           Goto 11
+         endif
+         beginDay=JulDay(Date1)
+         sowingDay=JulDay(Date2)
+         endDay=JulDay(Date3)
+         Year=CurYear(date1)
+         
+         
       Do i=1,NumNPD
         hNew(i)=0.
 c dt
@@ -122,5 +151,8 @@ C AD NimG is not used in the entire solution
       tatm=1.E+31
       
       Return
+ 9    Write(*,*) 'error in initials file'
+      goto 11     
 10    Write(*,*)'Run.dat file not found'
+11    continue
       End
