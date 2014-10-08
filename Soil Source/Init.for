@@ -5,8 +5,7 @@
 	Character*10 Date1, Date2, Date3, Date4
 	Character*255 RootName,T1,T2
 	Integer CurYear, JulDay
-c    find root of file name in runfile
-      root
+c    find root of file name in runfile TODO
 c     for writing frequency to output
       Daily=0
       Hourly=0
