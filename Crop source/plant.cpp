@@ -145,7 +145,7 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 	     C_reserve = seedMass*C_content;
 		//				C_pool += C_reserve*(1/20)*(1/24)*(initInfo.timeStep/60); // assume it takes 20 days to exhaust seed C reserve 
 		 C_pool = C_reserve;
- 	for (int i = 1; i <= develop->get_LvsInitiated() ; i++)
+ 	for (int i = 1; i <= develop->get_LvsInitiated()  ; i++)
 		{
 			
  			if(!nodalUnit[i].isInitiated())

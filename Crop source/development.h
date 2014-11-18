@@ -84,10 +84,10 @@ private:
 	double GTIsum; // cumulative GTI, Stewart et al (1998), equivalent to GDD of Tbase = 10 and Topt 30
 	double Rmax_LIR, Rmax_LTAR, Rmax_Germination, Rmax_Emergence;
 	bool DayLengthSensitive; //True if Day Length Sensitive
-	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum; // T_grow: mean temperature of the growing season from day 1 up to now, SK
+	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum, T_ind; // T_grow: mean temperature of the growing season from day 1 up to now, SK
 	double CalibTemperature;  //Temperature at which measured data on leaf growth rates were collected. This temperature
 	                          // is scaled to actual temperature using a beta function. Could be an input param at some point.
-	double totLeafNo, addedLvs, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation
+	double totLeafNo, LvsToInduce, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation
 	double P2; //photoperiod sensitivity as used in CERES-Maize
 	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded, Anthesis, inductionPeriod;
 	int initLeafNo,  youngestLeaf, curLeafNo, inductions; 

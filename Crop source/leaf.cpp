@@ -46,20 +46,18 @@ void CLeaf::initialize (CDevelopment * dv)
 // set potential leaf area of the current rank based on generic leaf no, see Fournier and Andrieu (1998), Birch et al., (1998)
 // Routine below to calculate potentialArea will repeat in CLeaf::update to get actual leaf area after the inductive phase to any additional leaves developed before tassel initiation, SK 1-20-12
 {
-
-	COrgan::initialize();
-    calc_dimensions(dv);
-	initiated = true;
-//	growing=true; // DT
-	first=true;
-	stayGreenDuration = stayGreen*growthDuration;
-	seneDuration = growthDuration; 
-// uncomment for debugging
-#if _DEBUG
-	      std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
-              <<  " potential area " << PotentialArea << std::endl;
-#endif
-
+		COrgan::initialize();
+		calc_dimensions(dv);
+		initiated = true;
+	//	growing=true; // DT
+		first=true;
+		stayGreenDuration = stayGreen*growthDuration;
+		seneDuration = growthDuration; 
+	// uncomment for debugging
+	#if _DEBUG
+			  std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
+				  <<  " potential area " << PotentialArea << std::endl;
+	#endif
 }
 
 void CLeaf::calc_dimensions(CDevelopment *dv)
@@ -102,7 +100,7 @@ void CLeaf::update(CDevelopment * dv, double PredawnLWP)
 { 
 	COrgan::set_temperature(dv->get_Tcur());
 	COrgan::update();
-	calc_dimensions(dv);
+//	calc_dimensions(dv);
 	expand(dv, PredawnLWP);
 	senescence(dv, PredawnLWP);
     greenArea = max(0.0, area-senescentArea);
@@ -187,10 +185,10 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	else if (mature && !aging && !dead)
 	{
 		activeAge += q10fn*dD;
-		scale = 1.0/stayGreenDuration;
-		stayGreenDuration = __max(0.0, stayGreenDuration - scale*stayGreenDuration*(1.0 - water_effect)*dD);
+		scale = 0.5;
+		stayGreenDuration = __max(0.0, stayGreenDuration - scale*(1.0 - water_effect)*dD);
 		//One day of cumulative severe water stress (i.e., water_effect = 0.0 around -4MPa) would result in a reduction of leaf lifespan in relation staygreeness and growthDuration, SK
-        //if scale is 1.0, it will take one day of severe water stress to trigger aging and another day of severe stress to the death of the leaf (coded below)
+        //if scale is 1.0, one day of severe water stress shortens one day of stayGreenDuration
 		if (activeAge >= stayGreenDuration)
 		{
 			activeAge = stayGreenDuration;
@@ -200,8 +198,9 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	else if (aging && !dead)
 	{
   		seneAge += q10fn*dD; 
-		scale = 1.0/growthDuration;
-        seneDuration = __max(0.0, seneDuration - scale*seneDuration*(1.0 - water_effect)*dD);
+		scale = 0.5;
+        //if scale is 0.5, one day of severe water stress at predawn shortens one half day of agingDuration
+		seneDuration = __max(0.0, seneDuration - scale*(1.0 - water_effect)*dD);
 		t_e = seneDuration;
 		t_m = t_e/2;
 		seneAge = __min(t_e, seneAge);
