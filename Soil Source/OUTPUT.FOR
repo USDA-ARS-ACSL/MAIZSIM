@@ -61,7 +61,7 @@ C*** FROM HourlyOut.for BEGIN
         Open(84,file=FluxGraphics)
          
       Write(81,5) "Date_time", "Date", "X", "Y", "hNew","thNew", "VZ", 
-     &   "VX","ConcN", "Temp","GasConc"  
+     &   "VX","Q", "ConcN", "Temp","GasConc"  
      
       Write(82,6) "Date_time", "Date", "X", "Y", "Elem", "RTWT",
      &         "TotalRT", "WaterSink", "NitSink", "GasSink", "Area"
@@ -229,7 +229,8 @@ C*** FROM HourlyOut.for END
            
       Return
 C10    Call errmes(im,il)
-  5   Format (1x,12A13)   ! format for nodal data header
+  5   Format (1x,A16, T20,A4,T36,A1,T46,A1, T52,A4,T63,A5,T75,A2,T87,A2,
+     &     T97,A1, T108, A5, T119, A4, T129 A7)   ! format for nodal data header
   6   Format (1x,13A13)
  10   Format (1x,F17.6,A15,18F16.3)  !format for flux data
  20   Format (1x,19A16)              !format for flux header

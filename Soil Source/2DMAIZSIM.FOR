@@ -16,8 +16,7 @@
 	if (len.gt.0) then
 	  RunFile=RunDat
 	  endif
-	  
-	
+	  	
 	
       Call Initialize()
       Call Get_Grid_and_Boundary()

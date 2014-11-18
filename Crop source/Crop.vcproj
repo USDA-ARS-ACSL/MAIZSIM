@@ -5,6 +5,10 @@
 	Name="Crop"
 	ProjectGUID="{E8E56F99-943A-4226-A0C8-24FF6419EAED}"
 	RootNamespace="Crop"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
