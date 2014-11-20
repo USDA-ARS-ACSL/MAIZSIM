@@ -9,7 +9,7 @@ CNodalUnit::CNodalUnit()
 	stem = NULL;
 //	sheath = NULL;
 //	internode = NULL;
-	initiated = appeared = growing = aging = terminated = false;
+	initiated = appeared = growing = aging =  prolific =terminated = false;
 }
 void CNodalUnit::initialize(int n, CDevelopment * dv)
 {
