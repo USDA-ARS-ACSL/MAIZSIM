@@ -29,10 +29,12 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	curLeafNo =1; 
 	LvsAtTI = 1;
 	initInfo = info;
-	addedLvs = 0.0;
+	LvsToInduce = 0.0;
 	inductionPeriod = 0.0;
+	inductions = 0;
 	dt = initInfo.timeStep/MINUTESPERDAY; //converting minute to day decimal, 1= a day
-	T_grow_sum = T_grow = steps = 0.0;
+	T_grow_sum = steps = 0.0;
+    T_grow =  T_ind = -99;
 	PhyllochronsToSilk=info.PhyllochronsToSilk;
 	setParms();
 }
@@ -103,18 +105,19 @@ int CDevelopment::update(const TWeather& wthr)
 		{
 			LvsInitiated += beta_fn(T_cur, Rmax_LIR, T_opt, T_ceil);
 			curLeafNo = (int) LvsInitiated;
-			if (LvsInitiated > juvLeafNo)
+			if (LvsInitiated >= juvLeafNo)
 			// inductive phase begins after juvenile stage and ends with tassel initiation
 			{
                   //Equation 4 in Grant 1989 Ag. J. (81)
 			     //dt 12/11/2012 broke the equation in two to separate temperature and daylenght effects
-			   addLeafTemperature = __max(0,(13.6-1.89*T_cur+0.081*T_cur*T_cur - 0.001*T_cur*T_cur*T_cur)); 
-			   addLeafPhotoPeriod=0.0;
-			   if (DayLengthSensitive)
-				   {
-				      addLeafPhotoPeriod = __max(0.0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5)); 
-				   }
-			   addLeafTotal=addLeafTemperature + addLeafPhotoPeriod;
+				if (T_ind == -99) {T_ind = T_grow;} //mean temperature during induction period
+				addLeafTemperature = __max(0.0,(13.6-1.89*T_ind+0.081*T_ind*T_ind - 0.001*T_ind*T_ind*T_ind)); 
+				addLeafPhotoPeriod=0.0;
+				if (DayLengthSensitive)
+				{
+				  addLeafPhotoPeriod = __max(0.0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5)); 
+				}
+				addLeafTotal=addLeafTemperature + addLeafPhotoPeriod;
 			
 				//addLeaf = __max(0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5) + (13.9-1.89*T_cur+0.0795*T_cur*T_cur - 0.001*T_cur*T_cur*T_cur)); //Equation 4 in Grant 1989 Ag. J. (81)
                
@@ -122,15 +125,16 @@ int CDevelopment::update(const TWeather& wthr)
 				// Added back the temperature effect on leaf number and revised the algorithm to accumulate addLeafNo to totLeafNo.
 				// Changed to respond to mean growing season temperature upto this point. 
 				// This has little mechanistic basis. Needs improvements. SK 1-19-12
-				// addedLvs = (addedLvs*inductions + addLeafTotal)/(inductions+1);
+				LvsToInduce = (LvsToInduce*inductions + addLeafTotal)/(inductions+1);
+				T_ind = (T_ind*inductions + T_cur)/(inductions +1);
+ 				inductions ++;
 				inductionPeriod += dt;
- 			    addedLvs += addLeafTotal*dt;
-			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod; //get a mean value over this period
+ 			//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod; //get a mean value over this period
 			//	LvsAtTI = LvsInitiated; //Should be LvsInitiated. Already confirmed with Soo. 7/27/2006
 				// uncomment the following for debugging
 			 //   cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
-			
-				if (LvsInitiated - juvLeafNo >= addedLvs/inductionPeriod)
+			    double actualAddedLvs = LvsInitiated - juvLeafNo;    
+				if ( actualAddedLvs >= LvsToInduce)
 				{
 					youngestLeaf = totLeafNo = (int) LvsInitiated;
 					curLeafNo = youngestLeaf;

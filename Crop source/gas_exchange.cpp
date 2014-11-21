@@ -310,6 +310,7 @@ void CGas_exchange::SetVal_psil(double PFD, double Tair, double CO2, double RH, 
     this->R_abs = (1-scatt)*PAR + 0.15*NIR + 2*(epsilon*sbc*pow(Tair+273,4)); // times 2 for projected area basis
 	// shortwave radiation (PAR (=0.85) + NIR (=0.15) solar radiation absorptivity of leaves: =~ 0.5
     this->CO2 = CO2;
+<<<<<<< HEAD
     this->RH = __min(100.0, __max(RH, 10.0))/100;
     this->Tair = Tair;  //C
     this->width = width/100;  //meters

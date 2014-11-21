@@ -146,7 +146,7 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 	     C_reserve = seedMass*C_content;
 		//				C_pool += C_reserve*(1/20)*(1/24)*(initInfo.timeStep/60); // assume it takes 20 days to exhaust seed C reserve 
 		 C_pool = C_reserve;
- 	for (int i = 1; i <= develop->get_LvsInitiated() ; i++)
+ 	for (int i = 1; i <= develop->get_LvsInitiated()  ; i++)
 		{
 			
  			if(!nodalUnit[i].isInitiated())
@@ -338,8 +338,8 @@ double agefn=1;
 	}
 */
 	// dt the addition of C_reserve here only serves to maintain a total for the mass. It could have just as easily been added to total mass.
-	// It is not clear why it was done this way here. 
-    stemMass = this->get_nodalUnit()->get_stem()->get_mass() + C_reserve; //C_reserve was moved from here because it doesn't actually represent the stem mass.
+	// C_reserve is added to stem here to represent soluble TNC, SK
+    stemMass = this->get_nodalUnit()->get_stem()->get_mass() + C_reserve;
     earMass = this->get_ear()->get_mass();
    // need to iterate here to set leaf mass
 	leafMass=calcTotalLeafMass();
@@ -901,7 +901,7 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	//no maint cost for dead materials but needs to be more mechanistic, SK
 	agefn=1.0;
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature
-	maintRespiration = agefn*q10fn*maintCoeff*mass*dt;// gCH2O dt-1
+	maintRespiration = q10fn*maintCoeff*mass*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 
 void CPlant::writeNote(const TWeather & w)
