@@ -33,7 +33,7 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	LeafCalibTemperature=dv->get_CalibTemperature();   
 	WLRATIO = 0.106; // leaf lamina width to length ratio
 	A_LW = 0.75; // leaf area coeff with respect to L*W
-	stayGreen = 4.0; // staygreen trait of the hybrid
+	stayGreen = 3.5; // staygreen trait of the hybrid
                                   // stay green for this value times growth period after peaking before senescence begins
                                   // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
 	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
