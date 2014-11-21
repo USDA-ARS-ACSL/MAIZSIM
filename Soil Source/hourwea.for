@@ -74,7 +74,7 @@ c inputs hourly data
       Include 'Puplant.ins'
       Include 'Puweath.ins'
       Parameter (PERIOD =1./24.)
-      integer jday,m,ThisYear,DayOfYear,CurYear
+      integer jday,m,DayOfYear,CurYear,Modnum, ThisYear
       double precision St,t
       real Interval
       character*10 date

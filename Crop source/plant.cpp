@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #define PRIMORDIA 5   //primordia initiated in the embryo, conservative species-wide, (Poethig, 1994)
 #define CO2_MW 44.0098
 #define C_MW 12.011
@@ -87,7 +88,7 @@ CPlant::~CPlant()
 
 
 
-void CPlant::update(const TWeather & weather, double PredawnLWP)
+void CPlant::update(const TWeather & weather, double PredawnLWP) 
 {
 	int TotalGrowingLeaves = 0;
 	int TotalDroppedLeaves = 0;
@@ -227,7 +228,7 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		}
  //SK 8/22/10: Why is this infor being stored in node0? this is confusing because it is supposed to be the coleoptile
 
-		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves);
+		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves); //TODO make this a class variable and an CPlant:update method
 		nodalUnit[0].get_leaf()->set_TotalDroppedLeaves(TotalDroppedLeaves);
 
 		if (TotalDroppedLeaves >= develop->get_totalLeaves()) 
@@ -291,10 +292,10 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		calcMaintRespiration(weather);
 		C_allocation(weather);
 		//	C_allocation(weather, potentialCarbonDemand); //Calculating carbon allocation with carbon demand known YY
-		if (weather.time == 0)
+		if (abs(weather.time)<0.0001)
 		{
 			C_reserve += __max(0, C_pool);
-			C_pool = 0.0; //reset shorterm C_poot to zero at midnight, needs to be more mechanistic
+			C_pool = 0.0; //reset shorterm C_pool to zero at midnight, needs to be more mechanistic
 		}
 		else
 		{
@@ -573,9 +574,9 @@ void CPlant::calcGasExchange(const TWeather & weather)
 }
 
 void CPlant::C_allocation(const TWeather & w)
-// thit needs to be f of temperature, source/sink relations, nitrogen, and probably water
+// this needs to be f of temperature, source/sink relations, nitrogen, and probably water
 // a valve function is necessary because assimilates from CPool cannot be dumped instantanesly to parts
-// thit may be used for implementing feedback inhibition due to high sugar content in the leaves
+// this may be used for implementing feedback inhibition due to high sugar content in the leaves
 // The following is based on Grant (1989) AJ 81:563-571
 {
    double b1=2.325152587; // Normalized (0 to 1) temperature response fn parameters, Pasian and Lieth (1990)
@@ -620,7 +621,16 @@ void CPlant::C_allocation(const TWeather & w)
         C_pool -= C_supply; // C_Pool is what is left over from the carbon available for growth
 	}
 	else
-	if ((C_reserve) > (C_demand))
+    if (abs(C_pool)<0.0001)       //C_pool is zero 
+	{
+		if (C_reserve >0)
+		{
+			C_supply = __max(C_reserve*tmprEffect*grofac, 0); //All the reserve is not available
+			C_reserve-=C_supply; //reduce reserve pool for used carbon
+		}
+	}
+	else
+	if ((C_reserve > C_demand) && (C_demand>0))
 	{
 		// conversion and translocation from long term reserve should be less efficient, apply nother glucose conversion factor
 		// translocation from the soluble sugar reserve
@@ -629,7 +639,7 @@ void CPlant::C_allocation(const TWeather & w)
 			C_reserve += C_pool; // C_pool negative here, add instead of subtract
 			C_pool = 0;
 		}
-		// deplete C_pool first
+		// deplete C_pool first* tmprEffect
 		C_supply = __max(C_demand* tmprEffect*grofac, 0);
 		C_reserve -= C_supply; //reserve C is used to increase grain mass
 		C_reserve += C_pool; // send remaining C (not enough to meet the demand) in shorterm pool to reserve
@@ -659,8 +669,13 @@ void CPlant::C_allocation(const TWeather & w)
 		C_pool = 0.0;
 		C_supply = __min(C_reserve, maintRespiration);
 	}
-
-	double Fraction = __min(0.925, 0.67 + 0.33*scale); // eq 3 in Grant
+//	std::cout  << setw(15)<< setprecision(8) <<w.daytime  
+//		<< " " 
+//		<< setw(10)<< std::setprecision(5)<< C_pool << " " 
+//		<< setw(10)<< std::setprecision(5)<< C_demand <<" " 
+//		<< setw(10)<< std::setprecision(5)<< C_supply << " " 
+//		<< setw(10)<< std::setprecision(5)<<C_reserve <<endl ;
+	double Fraction = __min(0.925, 0.50 + 0.50*scale); // eq 3 in Grant
 //	const double convFactor = 1/1.43; // equivalent Yg, Goudriaan and van Laar (1994)
 	double Yg = 0.750; // synthesis efficiency, ranges between 0.7 to 0.76 for corn, see Loomis and Amthor (1999), Grant (1989), McCree (1988)
 //  double Yg = 0.74;
@@ -717,7 +732,6 @@ void CPlant::C_allocation(const TWeather & w)
 
 		if (w.pcrs>rootPart_old)
 	   { 
-// give a half of carbon from shoot needed to meet root demand, SK
 		  shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old));
 		  rootPart_real = rootPart+(w.pcrs-rootPart_old);
 	   }
@@ -758,6 +772,12 @@ void CPlant::C_allocation(const TWeather & w)
 		{
             cobPart = shootPart_real*0.625;
 		}
+		//give reserve part what is left over, right now it is too high
+		if (reservePart>0)
+		{
+			double sum=cobPart+huskPart+leafPart+stalkPart+sheathPart;
+			reservePart=__max(0,shootPart-sum);
+		}
    }
    else if (!develop->Dead())//no acutally kernel No. is calculated here ? Yang, 6/22/2003
    {
@@ -795,7 +815,9 @@ void CPlant::C_allocation(const TWeather & w)
 
    }
    double stemPart = sheathPart + stalkPart; //TODO: sheath and stalk haven't been separated in this model
+                                             //reservePart needs to be added later
    double earPart = grainPart + cobPart + huskPart;
+   double sum= stemPart+earPart + leafPart;
 // here we can allocate leaf part among leaves
    CLeaf* leaf;
  
@@ -877,6 +899,7 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	const double maintCoeff = 0.018;
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
+	agefn=1.0;
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature
 	maintRespiration = q10fn*maintCoeff*mass*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }

@@ -17,7 +17,7 @@ c previous N step and N+1 step; thus in fact it is the potential transpiration r
       Common /Outcom/NumPoint(2000),NodNum(2000,60),
      &        NumCell(1000),NumElPrint(1000,60),ModNum,
      &        Period, ETO, ActualTrans1,ActualSoilEvap,
-     &        Poparea, pot_ET,pot_ET_EO,flux, ActualInfil,timer,
+     &        pot_ET,pot_ET_EO,flux, ActualInfil,timer,
      &        FluxAct,Runoff,PotentialSoilEvaporation,
      &        CumRain,
      &        SeasonRainfall, SeasonPotenTranspiration,
@@ -51,7 +51,6 @@ C*** FROM HourlyOut.for BEGIN
         SeasonActualTranspiration=0.0
         SeasonPotenSoilEvap=0.0
         SeasonActualSoilEvap=0.0
-	  Poparea=PopRow*100.0/RowSp
 	  ActualTrans1=0.0
 	  pot_ET=0.0
 	  pot_ET_EO=0.0

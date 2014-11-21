@@ -11,14 +11,15 @@ c   will be transferred.
      !             dtOpt,dtMin,dMul1,dMul2,dtMx,tTDB,tFin,tatm
       Double precision  A1,B1,VRV,RES,RQI,RQ,QI,QQ,RQIDOT  
 	  Double precision  ECNVRG, RCNVRG,ACNVRG
-	  Double precision Starter
+	  Double precision Starter, TimeStep
       
       Real BlkDn, FracSind, FracClay, FracOM, hCritS,hCritA
       Integer CodeW,CodeS,CodeT,CodeG,errPlant
-	  Integer MaxItO   
+	  Integer MaxItO, OutPutSoilNo, OutPutSoilYes   
       Logical*1 lOrt
       Integer DailyOutput, HourlyOutput,RunFlag,  
-     !  DailyWeather,HourlyWeather
+     !  DailyWeather,HourlyWeather,ITIME, IDAWN, IDUSK,
+     !  beginDay, sowingDay, endDay,year
      
         character WeatherFile*132, TimeFile*132, BiologyFile*132,
      !          ClimateFile*132, NitrogenFile*132, SoluteFile*132,
@@ -54,7 +55,10 @@ c   will be transferred.
       Common /time_public/tNext(NumModD),dtMx(4),Time,Step,dtOpt, 
      !        dtMin, dMul1, dMul2,  tTDB(4), Tfin,tAtm, Tinit,
      !        lInput,Iter,DailyOutput,HourlyOutput,RunFlag,
-     !          DailyWeather,HourlyWeather
+     !          DailyWeather,HourlyWeather, 
+     !          beginDay, sowingDay, endDay,
+     !          OutputSoilNo, OutPutSoilYes, Year,
+     !           iTime, iDawn, iDusk, TimeStep
       Common /module_public/  NumMod,Movers(4), NShoot     
 	  Common /error_public/errPlant   
       Common /Solver_public/IAD(MBandD,NumNPD), IADN(NumNPD),
