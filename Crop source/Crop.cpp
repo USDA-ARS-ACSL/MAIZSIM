@@ -143,13 +143,15 @@ void crop_(struct
 				wthr.CO2 = Weather->CO2;
 				wthr.airT = Weather->TAIR[time_public-> iTime-1];
 				wthr.PFD = Weather->par[time_public->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
-				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //conversion from Wm-2 to J m-2 in one hour
+				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //conversion from Wm-2 to J m-2 in one hour Total Radiation incident at soil surface
 				Es = (0.611*exp(17.502*wthr.airT/(240.97+wthr.airT))); // saturated vapor pressure at airT
 				wthr.RH = (1-(Weather->VPD[time_public->iTime-1]/Es))*100.0; // relative humidity in percent
 				wthr.rain = Weather->RINT[time_public->iTime-1];
 				wthr.wind = Weather->WIND*(1000.0/3600.0); // conversion from km hr-1 to m s-1
 				wthr.dayLength = Weather->daylng;
 				wthr.LeafWP = SHOOTR->LeafWP/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06
+				wthr.pcrl=SHOOTR->PCRL/PopSlab/24.;
+				wthr.pcrq=SHOOTR->PCRQ/PopSlab/24.;
 				//since LeafWP in 2dsoil is in bar but in maizesim is in MPa, so, have to
 				//divide it by 10 to convert it into MPa before passing the value to Maizesim 1 bar=10kPa
 
@@ -291,7 +293,15 @@ void crop_(struct
 					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
 					
 				}
-                SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (0.5*pSC->getPlant()->get_shootPart()))*24*PopSlab;
+				bool gf=pSC->getPlant()->get_develop()->GrainFillBegan();
+				
+                
+				SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (pSC->getPlant()->get_shootPart()))*24*PopSlab;
+                  if (gf) 
+				  {
+                      SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart())*24*PopSlab +
+						  (0.75*pSC->getPlant()->get_shootPart())*24*PopSlab;
+				  }
                 //DT 09/19/14 under strong water stress mid season too much carbon is allocated to the roots, we
 				// try to limit it here.
 				//SHOOTR->PCRQ=SHOOTR->PCRL; //for debugging now remove later
