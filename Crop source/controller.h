@@ -28,7 +28,7 @@ private:
 	// cdt 12/06/2010 - I had to increase the size of these from 132 to 133. We couldn't use
 	// strcpy in vs 2008 so I changed to strcpy_s but apparently it requires enough space for the null
 	// terminatino character in the destination string
-	char varietyFile[133], outputFile[11], cropFile[133], logFile[132],LeafFile[133];
+	char varietyFile[133], outputFile[133], cropFile[133], logFile[133],LeafFile[133];
 	char DebugFile[133];
 	int iCur, // current record number
 		errorFlag;
