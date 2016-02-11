@@ -2,7 +2,8 @@
 	  REAL(8) PCRL, PCRQ,PCRS,ET_demand,LCAI,COVER,CONVR
 	  Real(8) HourlyCarboUsed 
       REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
-	  REAL LAREAT, MaxRootDepth
+	  REAL LAREAT, MaxRootDepth, InitialRootCarbo
+	  integer isGerminated, isEmerged
 ! includes variables shared with crop model	 
       Common /ShootR/   PCRL,PCRQ,PCRS,HourlyCarboUsed, ET_demand,
      !                  LCAI,COVER,CONVR,
@@ -13,7 +14,9 @@
      !                  Total_Eor,Total_Pcrs,sincrsink,PSILD,
      !                  OSMFAC,EOMULT,PSIL_,NDemandError, 
      !                  CumulativeNDemandError,TotalRootWeight,
-     !                  ConstI(2),constK(2), Cmin0(2)
+     !                  InitialRootCarbo,
+     !                  ConstI(2),constK(2), Cmin0(2),
+     !                  isGerminated, isEmerged
         
    
 ! includes variables only used inside 2dsoil	                 

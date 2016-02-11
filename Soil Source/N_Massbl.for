@@ -74,11 +74,11 @@ C Cflux is loss of N in mg
                Mean1=Mean1+AE*(Conc(i,1)*ThNew(i)+Conc(j,1)*ThNew(j)
      &                 +Conc(l,1)*ThNew(l))/3.*14./62.
                Sum1=Sum1+AE*(ThNew(i)+ThNew(j)+ThNew(l))/3.
-               Mean2=Mean2+AE*(Nh(i)+Nh(j)+Nh(l))/3./1000.  ! organic N is mg cm3 area
-               Mean3=Mean3+AE*(NL(i)+NL(j)+NL(l))/3./1000.
-               Mean4=Mean4+AE*(Nm(i)+Nm(j)+Nm(l))/3./1000.
-               Mean5=Mean5+AE*(NNH4(i)+NNH4(j)+NNH4(l))/3./1000.
-               Sum2 =Sum2 +AE*(Denit(i)+denit(j)+denit(l))/3./1000.
+               Mean2=Mean2+AE*(Nh(i)+Nh(j)+Nh(l))/3.  ! organic N is mg cm3 area
+               Mean3=Mean3+AE*(NL(i)+NL(j)+NL(l))/3.
+               Mean4=Mean4+AE*(Nm(i)+Nm(j)+Nm(l))/3.
+               Mean5=Mean5+AE*(NNH4(i)+NNH4(j)+NNH4(l))/3.
+               Sum2 =Sum2 +AE*(Denit(i)+denit(j)+denit(l))/3.
              Enddo
              Min_N=Min_N+Mean1
              Org_N=Org_N+mean2

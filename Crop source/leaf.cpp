@@ -18,7 +18,7 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	RelativeAreaIncrease=0;
 	FullyExpandedArea=0;
 	TotalDroppedLeaves=0;
-	actualArea = actualgreenArea=greenArea = senescentArea = droppedArea = 0;
+	actualArea = actualgreenArea=greenArea = senescentArea = droppedArea = unstressedArea=0;
 	actualLength=actualwidth=0;
 	initiated = appeared = growing = mature = aging = dead = dropped = false;
 	phase1Delay = growthDuration=stayGreenDuration = seneDuration = 0.0;
@@ -29,11 +29,10 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	seneAge = 0.0; //age during senscence phase
 	activeAge = 0.0; // age during active phase after fully expansion before senescence
 	old_leaf = 0; //record leaf area in the last time step
-    N_content = 3.0; //no N stress
-	LeafCalibTemperature=dv->get_CalibTemperature();   
+    N_content = 3.0; //no N stress 
 	WLRATIO = 0.106; // leaf lamina width to length ratio
 	A_LW = 0.75; // leaf area coeff with respect to L*W
-	stayGreen = 3.5; // staygreen trait of the hybrid
+	stayGreen = 4.5; // staygreen trait of the hybrid
                                   // stay green for this value times growth period after peaking before senescence begins
                                   // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
 	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
@@ -75,12 +74,13 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
                                          // If this routine runs before TI, totalLeaves = genericLeafNo, and needs to be run with each update until TI and total leaves are finalized, SK
 	double n_m, a, b;
 
-	n_m = 5.93 + 0.33*totalLeaves; // the rank of the largest leaf. YY
+	n_m = 5.93 + 0.33*totalLeaves; // the rank of the largest leaf. YY (need to adjust here for the maximum leaf size as a function of plant pop -DT 8/12/2015)
 	a = -10.61 + 0.25*totalLeaves;
 	b = -5.99 + 0.27*totalLeaves;
     //equation 7 in Fournier and Andrieu (1998). YY
 
-	ptnLength = L_max*exp(a/2*pow(rank/n_m-1,2)+b/2*pow(rank/n_m-1,3)); //equa 8(b)(Actually eqn 6? - eqn 8 deals with leaf age - DT)
+	ptnLength = L_max*exp(a/2*pow(rank/n_m-1,2)+b/2*pow(rank/n_m-1,3)); //*dv->get_shadeEffect()
+	                                                                    //equa 8(b)(Actually eqn 6? - eqn 8 deals with leaf age - DT)
 	                                                                   //in Fournier and Andrieu(1998). YY
 	growthDuration = ptnLength/maxElongRate; // shortest possible linear phase duration in physiological time (days instead of GDD) modeified form of equa 8(a)Fournier and Andrieu(1998)
     phase1Delay = __max(0.0, -5.16+1.94*rank); //not used in MAIZSIM because LTAR is used to initiate leaf growth. Fournier's value : -5.16+1.94*rank;equa 11 Fournier and Andrieu(1998) YY, This is in plastochron unit
@@ -109,13 +109,18 @@ void CLeaf::update(CDevelopment * dv, double PredawnLWP)
 void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 //leaf expansiopn rate based on a determinate sigmoid function by Yin et al. (2003)
 {
+    double CriticalNitrogen;
+	CriticalNitrogen= __max(0.25,this->N_content);
+	double N_effect=(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
 	const double T_peak = 18.7, Tb = 8.0, phyllochron = (dv->get_T_Opt()- Tb)/(dv->get_Rmax_LTAR()); 
     // T_peak is the optimal growth temperature at which the potential leaf size determined in calc_mophology achieved. Similar concept to fig 3 of Fournier and Andreiu (1998) 
 	// phyllochron corresponds to PHY in Lizaso (2003); phyllochron needed for next leaf appearance in degree days (GDD8) - 08/16/11, SK. 
 
 	double T = dv->get_Tcur();
 	double T_gro = dv->get_Tgrow();
-	double T_effect_size = max(0.0, (T_gro-Tb)/(T_peak-Tb)*exp(1.0-(T_gro-Tb)/(T_peak-Tb))); //final leaf size is adjusted by growth temperature determining cell size during elongation
+	double T_effect_size = max(0.0, (T_gro-Tb)/(T_peak-Tb)*exp(1.0-(T_gro-Tb)/(T_peak-Tb))); 
+	//final leaf size is adjusted by growth temperature determining cell size during elongation
+    //final leaf 
 	// See Kim et al. (2012) Agro J. for more information on how this relationship has been derermined basned o multiple studies and is applicable across environments
     const double psi_threshold_bars = -0.8657; 
 	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
@@ -128,10 +133,10 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 
 	double t_e = growthDuration; // end of growth period, time to maturity
 	double t_m = t_e/2; // max. growth rate assumed to be half of t_e
-
+  //+(1-C2_effect) proposed C2_effect for elongAge, add to 1.0
 	if (appeared && !mature)
 	{
-		elongAge += dv->beta_fn(T, 1.0, dv->get_T_Opt(), dv->get_T_ceil())*dD; // Todo: implement Parent and Tardieu (2011, 2012) approach for leaf elongation in response to T and VPD, and normalized at 20C, SK, Nov 2012
+		elongAge += dv->beta_fn(T, 1.0,dv->get_T_Opt(), dv->get_T_ceil())*dD; // Todo: implement Parent and Tardieu (2011, 2012) approach for leaf elongation in response to T and VPD, and normalized at 20C, SK, Nov 2012
 		// elongAge indicates where it is now along the elongation stage or duration. duration is determined by totallengh/maxElongRate which gives the shortest duration to reach full elongation in the unit of days.
 		elongAge = __min(t_e, elongAge);
 
@@ -139,10 +144,13 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 		double maxExpansionRate = T_effect_size*PotentialArea*(2*t_e-t_m)/(t_e*(t_e-t_m))*pow(t_m/t_e,t_m/(t_e-t_m));
 		PotentialAreaIncrease =__max(0.0,maxExpansionRate*__max(0.0, (t_e-elongAge)/(t_e-t_m)*pow(elongAge/t_m,t_m/(t_e-t_m)))*dD);
 	                                           //potential leaf area increase without any limitations
-        double C_effect = 1.0; // place holder
-		double dA = __min(water_effect,C_effect)*PotentialAreaIncrease; // growth temperature effect is included in determining potential area
-		area += dA;
-		if (area >= PotentialArea || elongAge >= t_e) 
+      //C2_effect = 1.0; // place holder
+		double dA = PotentialAreaIncrease; // growth temperature effect is included in determining potential area
+		water_effect=1.0;
+		N_effect=1.0;
+		area += dA*__min(water_effect,N_effect)*dv->get_shadeEffect();
+		unstressedArea+=dA;
+		if (unstressedArea >= PotentialArea || elongAge >= t_e) 
 		{
 			mature = true;
 			set_GDD2mature (get_physAge());

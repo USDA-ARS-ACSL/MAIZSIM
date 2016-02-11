@@ -53,6 +53,7 @@ public:
 	double get_shootMass() {return shootMass;}
 	double get_rootMass() {return rootMass;}
 	double get_shootPart() {return shootPart;}
+	double get_leafPart()  {return leafPart;}
 	double get_rootPart() {return rootPart;}
 	double get_DroppedLeafMass() {return droppedLeafmass;}
 	double get_activeLeafMass() {return activeLeafMass;}
@@ -67,7 +68,10 @@ public:
 	double get_CumulativeNitrogenSoilUptake() {return CumulativeNitrogenSoilUptake;}
 	double get_droppedLfArea() { return currentDroppedLfArea;}
 	double get_ptnLfIncrease() { return potentialLeafAreaIncrease;}
-	double getCarbonRatio() { return carbonRatio;}
+	double getSunlitLAI() {return SunlitLAI;}
+	double getShadedLAI() {return ShadedLAI;}
+	double getC2_effect() {return C2_effect;}
+	double getSunlitRatio() {return SunlitRatio;}
 	string getNote() {return note;}
 
 	TStage get_stage() {return stage;}
@@ -104,6 +108,7 @@ public:
     double calcPotentialCarbondemand(); //calculate potential carbon demand for potential leaf growth YY
 	void grow();
 	void C_allocation(const TWeather&);
+	void calcRed_FRedRatio(const TWeather&);
 	void writeNote(const TWeather &);
     
 
@@ -159,6 +164,7 @@ private:
 	double rootPart;  // g per plant Carbohydrate partitioned to root
 	double shootPart_old; //g per plant carbohydrate partitioned to root in the previous time step
     double rootPart_old;
+	double leafPart;   //g per plant carbohydrate partitioned to leaf
 
 	double TotalNitrogen;  //This is the total nitrogen content of the plant in g plant-1
 	double HourlyNitrogenDemand;  // Nitrogen demand in g N plant-1
@@ -166,16 +172,17 @@ private:
 	double CumulativeNitrogenSoilUptake; // Nitrogen uptake from the soil g N plant-1
 	double HourlyNitrogenSoilUptake;
 	double leaf_NFraction; //records the fraction of nitrogen in leaves YY
-	double leaf_N; //total nitrogen in the leaves of a plant YY
-	double leaf_N_content; //leaf nitrogen content (per unit square) of a plant YY
+	double leaf_N; //total nitrogen in the leaves of a plant YY (grams N per plant)
+	double leaf_N_content; //leaf nitrogen content (per unit square meter) of a plant YY
 	double OptimalLeafN;       //g N holds leaf N content that is optimal 
 	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio
 
 
 	
 	double emerge_gdd;//records thermal time needed for plant to emergy YY
-	double carbonRatio; //Calcualte the ratio between carbon supply and carbon demand for leaf expasion YY
-
+	double SunlitLAI, ShadedLAI; // sunlit and shaded LAI values
+	double SunlitRatio;  // daily ratio of sunlit leaf area to use for scaling leaf expansion due to carbon stress
+    double C2_effect;
 	TStage stage;
 
 

@@ -2,6 +2,7 @@
       Include 'Public.ins'
       Include 'NITVAR.ins'
       common /nitrog/ModNum
+      Real*8 BCh,BNh, BCl,BNl,BCm,BNm,BNNH4,BNO3,BDENIT
       
       Logical enough
        t=time
@@ -27,24 +28,12 @@
      &      fe(m),fh(m),r0(m),rL(m),rm(m),fa(m),nq(m),cs(m)
         Enddo         
 
-C      initialize variables to zero here
-        Do i=1, NumNP
-          Ch_Old(i)=0
-          Nh_Old(i)=0
-          CL_Old(i)=0
-          NL_Old(i)=0
-          Cm_Old(i)=0
-          Nm_Old(i)=0
-          Denit_Old(i)=0
-          NNH4_Old(i)=0
-          NNO3_Old(i)=0
-        EndDo
-        
+      
         Close(40)
         NumSol=1
         Call SetAbio(ew,et,ed,0,0.,0.)
         dtmx(4)=1./24
-       Else
+       Else  ! not the first time step
 
         Do i=1,NumNP
         m=MatNumN(i)
@@ -54,9 +43,12 @@ C      initialize variables to zero here
         BNL=NL_Old(i)
         BCm=Cm_Old(i)
         BNm=Nm_Old(i)
-C                 ug cm3 * cm3 H2O cm-3 soil  * N / nitrate = ug N cm-3 volume
-C                   multiply by 1000 to get mg N cm3 volume
-        BNO3=Amax1(0.,Conc(i,1)*ThNew(i)*14./62.0/1000.0 )
+C
+C                soil water concentration is ug NO3 cm-3 of water  (multiply by water to get ug N per cm3 of soil) 
+C               The units of N in this routine are mg N liter-1 of soil. 
+C               The two are equivalent (both numerator and denominator differ by a factor of 1000)
+C                   
+        BNO3=Amax1(0.,Conc(i,1)*ThNew(i)*14./62.0)
         NNO3_OLD(i)=BNO3
         BNNH4=NNH4_Old(i) !8/28/2014 DT was BNH4 original typo
         BDENIT=Denit_old(i)
@@ -78,26 +70,28 @@ C calculate mean of current concentration and concentration from past time step
           kd=kd0(m)*ed*et*Aux/(Aux+cs(m))
 C  Carbon and nitrogen fluxes
           P1 =    kh * (Ch_old(i)+BCh)/2. ! rate is given as mg C per cm3 of area (or mg per liter?)
-          Q1 =    kh * (Nh_old(i)+BNh)/2.
+          Q1 =    kh * (Nh_old(i)+BNh)/2.  !N from humus pool to Nitrate pool (NH4)
           P2 =    kL * ((CL_old(i)+BCL)/2.) * fe(m) * fh(m)
-          Q2 =    P2 / r0(m)
+          Q2 =    P2 / r0(m)               !N from litter to humus pool
           P12 =   km * ((Cm_old(i)+BCm)/2.) * fe(m) * fh(m)
-          Q12 =   P12 / r0(m)
+          Q12 =   P12 / r0(m)              !N From organic fert to humus pool
           P3 =    kL * (CL_old(i)+BCL)/2.
-          Q3 =    kL * (NL_old(i)+BNL)/2.
+          Q3 =    kL * (NL_old(i)+BNL)/2.   ! N from litter pool 
           P13 =   km * (Cm_old(i)+BCm)/2.
-          Q13 =   km * (Nm_old(i)+BNm)/2.
+          Q13 =   km * (Nm_old(i)+BNm)/2.    ! N from Organic Fert pool to NH4
 C Added mineral nitrogen
-          Added = (Q1+Q3+Q13)*Step
+          Added = (Q1+Q3+Q13)*Step          ! N going to mineral N via NH4
 C Potentially immobilized and lost mineral nitrogen
           Q45pot =   kL * ((Cl_old(i)+BCL)/2.) * fe(m) / r0(m)
           Q1415pot =   km * ((Cm_old(i)+BCm)/2.) * fe(m) / r0(m)
-          Q7 =  kd
-          PotLost = (Q45pot + Q1415pot + Q7)*Step
+          Q7 =  kd                           ! N lost through denitrification
+          PotLost = (Q45pot + Q1415pot + Q7)*Step  !N lost from min N pool via immobilization and denitrification
 C Present mineral nitrogen
 CDT this uses N from previous time step
           Present  = NNO3_old(i)+NNH4_old(i)
 C 'Enough' is true when it is enough mineral nitrogen for immobilization
+C Q45 is immobilization via NH4 and NO3 via the litter pool
+C Q1415 is immobilization vie the organic fertilizer pool
           If(PotLost.Lt.Added+Present) then
              Enough=.true.
           else
@@ -116,9 +110,9 @@ C
 C Nitrification
           Aux1=(NNH4_Old(i)+BNNH4)/2.  !8/28/2014 DT was BNH4 original typo
           Aux2=(BNO3+NNO3_Old(i))/2.
-          Q6 =  kn * AMAX1(0.,Aux1 - Aux2/nq(m))
+          Q6 =  kn * AMAX1(0.,Aux1 - Aux2/nq(m)) ! nitrification
 C Ammonium available for immobilization
-          Avail = NNH4_old(i) + (Q1+Q3+Q13-Q6)*Step
+          Avail = NNH4_old(i) + (Q1+Q3+Q13-Q6)*Step  !all NH$ sources and sinks
 C Enough is .true. if available ammonium cover all needs for immobilization
 C dt 7-9-2007 Added code below to account for case when enough is false because there is almost no N in ths soil
 C  then Q45act and Q1415act are zero. Have to avoid a divide by zero error.
@@ -174,7 +168,7 @@ C End of iterations
           Denit(i)=BDENIT
           NNH4(i) = BNNH4
           NNO3_sol = BNO3
-          Conc(i,1)=NNO3_sol*62./ThNew(i)/14.0*1000.0 
+          Conc(i,1)=NNO3_sol*62./ThNew(i)/14.0
           TotNitO=Nh_old(i)+Nl_old(i)+Nm_Old(i)+NNO3_Old(i)+NNH4_old(i)
           TotNit=Nh(i)+Nl(i)+Nm(i)+NNO3_sol+NNH4(i)  
           DTot=TotNit-TotNitO
@@ -186,7 +180,7 @@ C End of iterations
           Cm_old(i)=Cm(i)
           Denit_old(i)=Denit(i)
           NNH4_old(i)=NNH4(i)
-          NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i)*14./62./1000.)
+          NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i)*14./62.)
 CDT the following is OK if we sum BNO3 above          
 cdt          NNO3_old(i)=NNO3_sol
           ThOld(i)=ThNew(i)
@@ -202,10 +196,11 @@ cdt          NNO3_old(i)=NNO3_sol
 10    Call Errmes(im,il)
       End
 C
+C 12/2015 removed theta sat (ThSat) and theta wilting (ThW)point from the input file
+C this information now comes from SetMat01 and is in public.ins
       Subroutine SetAbio(ew,et,ed,m,theta,T)
       Include 'public.ins'
-      Common /Abio/ ThSat(NMatD),ThW(NMatD),
-     &              dThH,dThL,es,Th_m,tb,QT,dThD,Th_D
+      Common /Abio/ dThH,dThL,es,Th_m,tb,QT,dThD,Th_D
       If(lInput.eq.1) then
         im=420
         il=0
@@ -213,21 +208,6 @@ C
         im=im+1
         il=il+1
         Read(40,*,ERR=10)
-        im=im+1
-        il=il+1
-        Read(40,*,ERR=10)
-        im=im+1
-        il=il+1
-C
-        Read(40,*,err=10)NM
-        im=im+1
-        il=il+1
-        Read(40,*,ERR=10)
-        im=im+1
-        Do i=1,NMat
-           il=il+1
-           Read(40,*,ERR=10) l,ThSat(l),ThW(l)
-        Enddo
         im=im+1
         il=il+1
         Read(40,*,ERR=10)
@@ -258,23 +238,24 @@ C
         Close(40)
         Return
       else
-        ThH=ThSat(m)-dThH
-        ThL=ThW(m)  +dThL
+        ThH=TUpperLimit(m)-dThH
+        ThL=TLowerLimit(m)  +dThL
         if(theta.gt.ThH) then
-          ew=es+(1.-es)*((ThSat(m)-Theta)/(ThSat(m)-ThH))**Th_m
+          ew=es+(1.-es)*((TUpperLimit(m)-Theta)/
+     &            (TUpperLimit(m)-ThH))**Th_m
         elseif(theta.lt.ThL) then
-          if(Theta.le.ThW(m)) then
+          if(Theta.le.TLowerLimit(m)) then
             ew=0.
           else
-            ew=((Theta-ThW(m))/(ThL-ThW(m)))**Th_m
+            ew=((Theta-TLowerLimit(m))/(ThL-TLowerLimit(m)))**Th_m
           endif
         else
           ew=1.
         endif
         eT=QT**((T-tb)/10.)
-        ThD=ThSat(m)-dThD
+        ThD=TUpperLimit(m)-dThD
         if(Theta.GT.ThD) then
-          ed=((Theta-ThD)/(ThSat(m)-ThD))**Th_d
+          ed=((Theta-ThD)/(TUpperLimit(m)-ThD))**Th_d
         else
           ed=0.
         endif

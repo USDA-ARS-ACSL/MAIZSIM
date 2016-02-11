@@ -83,7 +83,9 @@
       EORSCS,AWUPSS,SolRad,Total_Eor,
       Total_Pcrs,SIncrSink,Psild,
       OsmFac, EOMult,LeafWP, NDemandError, CumulativeNDemandError, 
-	  TotalRootWeight, ConstI[2],constK[2], Cmin0[2];
+	  TotalRootWeight, InitialRootCarbo,
+	  ConstI[2],constK[2], Cmin0[2];
+	int isGerminated, isEmerged;
   };
 // DT Made IR float (from int) 
  
@@ -101,7 +103,7 @@
 	 float GAIR[NumGD],PG,LATUDE,Longitude, Altitude,
 		         RI,par[24],parint[24],daylng;
 	 float AutoIrrigAmt;
-	 int   AutoIrrigate;
+	 int   AutoIrrigateF;
 
  };
  //grid
@@ -190,7 +192,7 @@
 extern "C" {
 #endif
 
-// Your exported function headers go here
+// Your exported function headers go here 
 #ifdef _WIN32
 PLANT_API void _stdcall CROP(struct ShootCommon    *, WeathCommon    *,
 #else

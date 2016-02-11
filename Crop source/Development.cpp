@@ -23,7 +23,6 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	DayLengthSensitive=info.DayLengthSensitive;
 	Rmax_Germination = Rmax_Emergence =0;
 	T_base = 8.0;  T_opt = 30.0; T_ceil = 40.0; 
-    CalibTemperature=20.0;
 	totLeafNo = juvLeafNo = info.genericLeafNo; 
 	initLeafNo =  youngestLeaf = 5;
 	curLeafNo =1; 
@@ -36,6 +35,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	T_grow_sum = steps = 0.0;
     T_grow =  T_ind = -99;
 	PhyllochronsToSilk=info.PhyllochronsToSilk;
+	shadeEffect=1.0;
 	setParms();
 }
 
@@ -117,7 +117,7 @@ int CDevelopment::update(const TWeather& wthr)
 				{
 				  addLeafPhotoPeriod = __max(0.0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5)); 
 				}
-				addLeafTotal=addLeafTemperature + addLeafPhotoPeriod;
+				addLeafTotal=(addLeafTemperature + addLeafPhotoPeriod);
 			
 				//addLeaf = __max(0, 0.1*(juvLeafNo-10.0)*(wthr.dayLength-12.5) + (13.9-1.89*T_cur+0.0795*T_cur*T_cur - 0.001*T_cur*T_cur*T_cur)); //Equation 4 in Grant 1989 Ag. J. (81)
                

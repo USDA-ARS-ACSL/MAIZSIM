@@ -60,19 +60,20 @@ c  These 4 variables are for the iterative solver Orthomin
 	AutoIrrigateF=0
 c    Open and read initials file	
       Open(41, file=InitialsFile, status='old',err=9)
-	  read(41,*)
-	  read(41,*)
-	  read(41,*) PopRow,RowSP, PopArea, rowAng, 
+	  read(41,*,err=8)
+	  read(41,*,err=8)
+	  read(41,*,err=8) PopRow,RowSP, PopArea, rowAng, 
      &           xBStem, yBStem, CEC, EOMult
-        read(41,*)
-        read(41,*) LATUDE, Longitude, Altitude
-        read(41,*)  
-        read(41,*) AutoIrrigate
-        read(41,*) 
-        read(41,*) Date1, Date2, Date3, TimeStep
-        read(41,*)
-        read(41,*)
-        read(41,*) OutputSoilNo, OutPutSoilYes
+        read(41,*,err=8)
+        read(41,*,err=8) LATUDE, Longitude, Altitude
+        read(41,*,err=8)  
+cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'        
+        read(41,*,err=8) AutoIrrigateF
+        read(41,*,err=8) 
+        read(41,*,err=8) Date1, Date2, Date3, TimeStep
+        read(41,*,err=8)
+        read(41,*,err=8)
+        read(41,*,err=8) OutputSoilNo, OutPutSoilYes
        Close(40)
         if (OutPutSoilNo+OutPutSoilYes.gt.1) then
            Write(*,*) 'error in soil output flag'
@@ -150,7 +151,9 @@ C AD NimG is not used in the entire solution
       tatm=1.E+31
       
       Return
- 9    Write(*,*) 'error in initials file'
+ 8    Write(*,*) 'Error in initials file'
+      goto 11     
+ 9    Write(*,*) 'initials file not found'
       goto 11     
 10    Write(*,*)'Run.dat file not found'
 11    continue
