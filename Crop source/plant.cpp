@@ -30,14 +30,17 @@ CPlant::CPlant(const TInitInfo& info )
 	C_demand = C_supply = 0.0;
 	C_pool_root=0.0;
 	maintRespiration = 0.0;
+	C2_effect=1.0;
+	SunlitRatio=0.0;
 
 	// initialize plant part sizes //
-	shootPart = 0.70;
-	rootPart = 0.30;
+	shootPart = 0.60;
+	rootPart = 0.40;
 	earMass=droppedLeafmass=rootMass=0.0;
 	//rootMass = rootPart*seedMass; This will be implemented later when roots grow from germination
 	;
 	shootMass=seedMass*(1.0-rootPart);
+	rootMass=seedMass-shootMass;  // need to distribute this in a few seed elements. at about 1.059e-4 wt/L =780 cm
 	leafMass = activeLeafMass=0.90*shootMass;
 	stemMass=0.10*shootMass;
 	shootPart_old = shootPart; rootPart_old = rootPart;
@@ -52,7 +55,8 @@ CPlant::CPlant(const TInitInfo& info )
 
 
 
-
+    SunlitLAI=0.0;
+	ShadedLAI=0.0;
 	sowingDay = 1.0;
 	age = 0.0;
 	initInfo = info;
@@ -76,6 +80,7 @@ CPlant::CPlant(const TInitInfo& info )
 		VPD=0;
     conductance=0;
 	emerge_gdd = 0;
+	SunlitRatio=0.0;
 }
 
 CPlant::~CPlant() 
@@ -94,7 +99,14 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 	int TotalDroppedLeaves = 0;
 	double PlantNitrogenContent;
 	double percentN;
+	if (develop->Emerged())
+	{
+		calcRed_FRedRatio(weather);
+	}
+
 	develop->update(weather);
+	
+	
 	finalNodeNumber = develop->get_youngestLeaf();
 	//SK: get N fraction allocated to leaves, this code is just moved from the end of the procedure, this may be taken out to become a separate fn
 	{
@@ -130,16 +142,18 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		temperature = develop->get_Tcur();
 		return;
 	}
-	else if(!develop->Emerged())
+	else if(!develop->Emerged()) //after germination but emergence
 	{
 // here we calculate the mass of roots that were initialized in the soil model (read in with the element data)
 // This is so there is no discontinuity in root mass (relative to the carbon supplied by the plant later)
+// Jan 9, 2015, added root growth before emergence 
 				// these are roots taht grew from the seed
 		if (!this->get_roots()->GetInitialized())
 			{
+				// now gets root mass from seed partitioning
 				this->get_roots()->SetInitialized();
-                this->get_roots()->import_CH2O(weather.TotalRootWeight);
-			    rootMass=weather.TotalRootWeight;
+                this->get_roots()->import_CH2O(rootMass);
+			    //rootMass=weather.TotalRootWeight;
 			}
 
 		 temperature = develop->get_Tcur();
@@ -535,8 +549,8 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	
 	photosynthesis_gross = (sunlit->A_gross*sunlitLAI() + shaded->A_gross*shadedLAI());//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
 	photosynthesis_net = (sunlit->A_net*sunlitLAI() + shaded->A_net*shadedLAI());//
-	double sunlai = sunlitLAI();
-	double shadelai = shadedLAI();
+	SunlitLAI = sunlitLAI();
+	ShadedLAI = shadedLAI();
 	transpirationOld=transpiration;  // when outputting the previous step transpiration is compared to the current step's water uptake
 	transpiration=0;
 	if (sunlitLAI()>0) transpiration=sunlit->ET*sunlitLAI();
@@ -589,7 +603,7 @@ void CPlant::C_allocation(const TWeather & w)
   // double rootPart = 0.0;
    double shootPart_real = 0.0;
    double rootPart_real = 0.0;
-   double leafPart = 0.0;
+   //double leafPart = 0.0; made class variable for now to transfer, may have to do this for all
    double sheathPart = 0.0;
    double stalkPart = 0.0;
    double reservePart = 0.0;
@@ -903,6 +917,41 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature
 	maintRespiration = q10fn*maintCoeff*mass*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
+void CPlant::calcRed_FRedRatio(const TWeather &weather)
+// this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 
+// ration is used to estimate the effects of plant density on leaf expansion and LAI. 
+// A daily mean ratio is calculated. We use a 3 parameter sigmoid function to model the effect
+{
+	//double Xo=0.43, B=0.05, A=1.2;
+	double Xo=0.6, B=0.13, A=2.0;
+	double dt=initInfo.timeStep/(24.0*60);
+	double C2_effectTemp;
+      //First set counter to 0 if it is the beginning of the day. 
+	if (abs(weather.time)<0.0001)
+		{// have to rename C2_effect to Light_effect
+			//Journal of Experimental Botany, Vol. 65, No. 2, pp. 641–653, 2014
+			C2_effectTemp=exp(-(SunlitRatio-Xo)/B);
+			C2_effect=__min(1.0,A/(1.0+C2_effectTemp));
+			develop->set_shadeEffect(C2_effect);
+			SunlitRatio=0.0;
+			
+		}
+	else
+	{
+		if (SunlitLAI/(SunlitLAI+ShadedLAI)>0.05) // calculate from emergence
+		{
+
+			SunlitRatio+=SunlitLAI/(SunlitLAI+ShadedLAI)*dt;
+	
+		}
+	
+		else SunlitRatio+=1.0*dt;
+
+	}
+     
+	
+}
+
 
 void CPlant::writeNote(const TWeather & w)
 {

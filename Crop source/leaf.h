@@ -46,7 +46,7 @@ public:
 	double GTI(double);
 	void set_RelativeAreaIncrease(double x) {RelativeAreaIncrease=x;}
 	void update(CDevelopment *, double pdlwp);
-	void elongate(CDevelopment *, double pdlwp);
+	//void elongate(CDevelopment *, double pdlwp);
 	void expand(CDevelopment *, double pdlwp);
 //	void senescence(CDevelopment *);
 	void senescence(CDevelopment *, double pdlwp);
@@ -66,7 +66,7 @@ private:
 	double FullyExpandedArea;
 	double PotentialAreaIncrease, old_leaf;//potential leaf area increase without temperature or water limitation YY
 	double RelativeAreaIncrease; //Area increase of this leaf relative to all other leaves. Used to partition carbon
-	double area; // actual leaf area
+	double area, unstressedArea; // actual leaf area and accumulated potential area
 	double greenArea, actualgreenArea;//actualgreenArea is the green area of leaf growing under carbon limitation
 	//SK 8/22/10: There appears to be no distinction between these two variables in the code.
 	double senescentArea, droppedArea;
@@ -77,12 +77,12 @@ private:
 	double phase1Delay, growthDuration, elongAge, elongRate, maxElongRate, seneAge, activeAge, seneDuration;
 	double stayGreen, stayGreenDuration;
 	double ptnLength, ptnWidth;
-	double LeafCalibTemperature; //temperature at which experiments run where parameters for leaf expansion were determined
 	double actualArea;
 	double actualLength,actualwidth; //actual length and width of leaf under both drought stress and carbon limitation
 	bool   first;  //indicates if this is the first time we call the elongate method;
 	double N_content; 
 	double WLRATIO, A_LW;
+
 	/*
 	SK 8/22/10: Leaf N content in mg/m2
 	*/

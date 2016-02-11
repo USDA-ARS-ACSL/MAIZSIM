@@ -29,6 +29,7 @@ private:
 	// strcpy in vs 2008 so I changed to strcpy_s but apparently it requires enough space for the null
 	// terminatino character in the destination string
 	char varietyFile[133], outputFile[11], cropFile[133], logFile[132],LeafFile[133];
+	char DebugFile[133];
 	int iCur, // current record number
 		errorFlag;
 
@@ -54,6 +55,7 @@ public:
     void readWeatherFrom2DSOIL(const TWeather &);
 	void outputToCropFile();
 	void outputToLeafFile();
+	void outputToDebug();
 
 	Timer* getTime() {return time;}
 

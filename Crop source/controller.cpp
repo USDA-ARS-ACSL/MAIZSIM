@@ -29,9 +29,20 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	weather 		 = NULL;
 	plant			 = NULL;
 	
+	int loc;
 	strcpy_s(varietyFile, filename);
     strcpy_s(cropFile, outfile);
+	char *pch=(char*)calloc(133,sizeof(char));
+	char *next=(char*)calloc(133,sizeof(char));
+	char *ext=".dbg";
+	char* temp=(char*)calloc(133,sizeof(char)); 
+	strcpy_s(temp,133,cropFile);
+	pch=strtok_s(temp,".",&next);
+	temp=strcat(pch,ext);
+	strcpy_s(DebugFile,temp);
 	strcpy_s(LeafFile, LFile);
+	//DebugFile=outfile
+	//strcpy_s(DebugFile,"Debug.out");
 	initInfo = iniInfo;
 	iCur = 0;
 	weatherFormat = ICASA;
@@ -39,6 +50,7 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	lastDayOfSim = 365;
     initialize();
 	errorFlag = 0;
+	
 }
 
 CController::~CController()
@@ -55,15 +67,35 @@ CController::~CController()
 //**********************************************************************
 void CController::initialize()
 {
+	ofstream DebugOut(DebugFile, ios::out);
+	DebugOut
+    		 << setw(10) << "date"
+			<< setw(6) << "jday"
+			<< setw(7) << "time"
+			<< setw(3) << "sunlit"
+            << setw(4) << "shaded"
+			<< setw(5) << "Pn"
+			<<setw(7)  << "Pg"
+			<<setw(7)  << "Lvs Init"
+			<<setw(9)  << "Lvs apprd"
+			<<setw(9)  << "Lvs grwg"
+			<<setw(9)  << "C to Lvs"
+			<<setw(9)  <<"C2_effect"
+			<<setw(9)  <<"sunlitRatio"
+			<<endl
+        ;
+	DebugOut.close();
+
 	Timer dConvert; //object to convert dates 
 	int mm, dd,yy;  // for calendar dates
 	char* Buffer=(char*)calloc(256,sizeof(char)); //to hold duumy strings from variety file
 	cout << "Initializing Controller object...." << endl <<endl <<endl ; 
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
-		<< " *          MaizeSim: A Simulation Model for Corn          *" << endl
+		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
 		<< " *                     VERSION  1.1.00 2014                *" << endl
 		<< " *   USDA-ARS, CROP SYSTEMS AND GLOBAL CHANGE LABORATORY   *" << endl
+		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
 		<< endl << endl;
 // output headings of files
@@ -154,18 +186,7 @@ void CController::initialize()
 		cfs.getline(Buffer, 255,'\n');
         cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
-// Read root parameters
-/* 
-These are not read by 2dsoil delete this block when we are sure of the structure
-		cfs.getline(Buffer, 255,'\n');
-        cfs.getline(Buffer, 255,'\n');
-		cfs >>initInfo.RRRM >> initInfo.RRRY >> initInfo.RVRL
-			>> initInfo.ALPM >> initInfo.ALPY;
-		cfs.getline(Buffer, 255,'\n');
-		cfs >> initInfo.RTWL >> initInfo.RtMinWtPerUnitArea 
-			>> initInfo.Wl >>initInfo.Wa>> initInfo.Wr >>initInfo.Wb;
 
- */
 // end reading variety file
 
 
@@ -238,6 +259,9 @@ int CController::run(const TWeather & wthr, double PredawnLWP)
 			outputToCropFile();
 //			if (plant->get_develop()->Germinated())
 				outputToLeafFile();
+#ifndef _DEBUG_FILE
+				if (plant->get_develop()->Germinated()) outputToDebug();
+#endif
 //			}
 //		if (weather[iCur].HourlyOutput==1)
 //			{
@@ -281,6 +305,7 @@ void CController::outputToCropFile()
 			else if (plant->get_develop()->Flowered()) {s="Flowered";}
 			else if (plant->get_develop()->TasselInitiated()) {s="Tasselinit";}
 			else if (plant->get_develop()->Emerged()) {s="Emerged";}
+			else if (plant->get_develop()->Germinated()) {s="Germinated";}
     		else if (plant->get_develop()->Dead()) {s="Inactive";}
 			else {s="none";}
 		//	if (FLOAT_EQ(plant->get_develop()->emergence.daytime,weather[iCur].daytime)){s = "Emergence";}
@@ -302,7 +327,6 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(2) << plant->calcSenescentLeafArea()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
 				<< setw(8) << setprecision(2) << weather[iCur].RH
-				//<< setw(8) << setprecision(2) << plant->getCarbonRatio()
 				<< setw(8) << setprecision(4) << weather[iCur].LeafWP   //print out leaf water potential Yang 8/22/06
 				<< setw(8) << setprecision(2) << weather[iCur].PFD
 				<< setw(8) << setprecision(2) << weather[iCur].solRad
@@ -386,4 +410,46 @@ void CController::outputToLeafFile()
 	ostr.close();
 	nU=NULL;
 
+}
+
+void CController::outputToDebug()
+{
+	// needed for saving information on carbon allocation and assimilation
+	// Can be modified for other variables. 
+	// only called if _DEBUG_FILE is defined.
+	CNodalUnit*  nU;
+	CDevelopment* myDevelop=plant->get_develop();
+	int mm,id,iyyy,i;
+	string DateForOutput;
+	time->caldat(weather[iCur].jday, mm, id,iyyy);
+#if 0
+	DateForOutput.Format("%.2d/%.2d/%4i",mm,id,iyyy);
+#else
+	char DateForOutputBuff[16];
+	sprintf(DateForOutputBuff, "%.2d/%.2d/%4i", mm, id, iyyy);
+	DateForOutput = DateForOutputBuff;
+#endif
+	
+
+
+	ofstream DebugOut(DebugFile, ios::app);
+	 DebugOut << setiosflags(ios::right) 
+		<< setiosflags(ios::fixed);
+     DebugOut << setw(11) << DateForOutput
+			<< setw(7)   << weather[iCur].jday 
+			<< setw(3)   << setprecision(0) << weather[iCur].time*24.0
+			<< setw(7)   << setprecision(2) << plant->getSunlitLAI()
+	        << setw(7)   << setprecision(2) << plant->getShadedLAI()
+			<< setw(8)   << setprecision(2) << plant->get_Pn()*1000.0   //g Carbo per plant per hour
+		    << setw(8)   << setprecision(2) << plant->get_Pg()*1000.0 
+			<< setw(8)   << setprecision(0) << myDevelop->get_LvsInitiated()
+		    << setw(8)   << setprecision(0) << myDevelop->get_LvsAppeared()
+			<< setw(8)   << setprecision(0) << plant->get_nodalUnit()->get_leaf()->get_TotalGrowingLeaves()
+			<< setw(8)   << setprecision(2) << plant->get_leafPart()*1000.0 
+			<< setw(6)   << setprecision(2) << plant->getC2_effect()
+			<< setw(6)   << setprecision(2) <<plant->getSunlitRatio()
+			<< endl;
+	 myDevelop=NULL;
+	DebugOut.close();
+    
 }

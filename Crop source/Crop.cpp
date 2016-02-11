@@ -84,6 +84,7 @@ void crop_(struct
 		SHOOTR->HourlyCarboUsed=0;  //it is also zero'd upon initialization in 2dsoil
 		Period=time_public->TimeStep/60/24; // period should be in days, input in minutes
 		PopSlab=SHOOTR->PopRow/100.0*SHOOTR->EOMult;
+		SHOOTR->isEmerged=SHOOTR->isEmerged=0;
 		/*These two lines show the relationships among some of the space variables.
               --PopSlab=SHOOTR->PopRow/100*SHOOTR->RowSp*SHOOTR->EOMult;
 		      --PlantDensity=SHOOTR->PopRow*100.0/SHOOTR->RowSp;
@@ -91,7 +92,7 @@ void crop_(struct
 
 // A new plant model object is created and initialized (calls initialize function) here
 //  ***************************************************************************
- 		pSC = new CController(varFile.c_str(), GraphicFile.c_str(), LeafFile.c_str(), initInfo);
+ 		pSC = new CController(varFile.c_str(), GraphicFile.c_str(), LeafFile.c_str(), initInfo); //Consider putting file names in initInfo
 //  ***************************************************************************
 
 		NitrogenUptake=pSC->getPlant()->get_N()*PopSlab; //initialize nitrogen uptake with what is already in the plant
@@ -140,7 +141,11 @@ void crop_(struct
 				wthr.DailyOutput=time_public->DailyOutput;
 				wthr.jday = Weather->JDAY;
 				wthr.time = time_public->Time-Weather->JDAY;
-				wthr.CO2 = Weather->CO2;
+				wthr.CO2 = Weather->CO2; 
+				if (initInfo.CO2>0) 
+				{
+					wthr.CO2=initInfo.CO2;         //Can set CO2 in initials for specific simulations where CO2 is constant
+				}
 				wthr.airT = Weather->TAIR[time_public-> iTime-1];
 				wthr.PFD = Weather->par[time_public->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
 				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //conversion from Wm-2 to J m-2 in one hour Total Radiation incident at soil surface
@@ -266,14 +271,40 @@ void crop_(struct
 				{
 					if (!pSC->getPlant()->get_develop()->Germinated())
 					{
-						cout << wthr.jday <<endl;
+						cout << "Germinated on:" <<wthr.jday <<endl;
 					} 
 				}
 			}
+// The remaining groups of code handle carbon and nitrogen exchange between 2dsoil and maizsim
+            if ((pSC->getPlant()->get_develop()->Germinated()) && (!pSC->getPlant()->get_develop()->Emerged()))
+				// begin root growth at germination
+			{
+				if (!SHOOTR->isGerminated)
+				{
+					SHOOTR->isGerminated=1;
+					SHOOTR->InitialRootCarbo=pSC->getPlant()->get_rootMass()*PopSlab; // get initial root mass to distribute over initial nodes
+				}
 
+				//double pool=pSC->getPlant()->get_C_pool_root(); //This holds any carbon not used for root growth in the previous time step
+				//if ((pSC->getPlant()->get_C_pool_root()>0) && (pSC->getPlant()->get_rootPart()<0.00001))
+				// TODO: need to put in a method since we repeat it in several places
+				//{ 
+					
+				//	SHOOTR->PCRL=(pSC->getPlant()->get_rootPart()+pool)*24*PopSlab;
+		    	//	pSC->getPlant()->set_C_pool_root(0.0);
+				//}
+
+				//else
+				//{
+				//	SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
+					
+				//}
+
+			}
 			if (pSC->getPlant()->get_develop()->Emerged())
 				// pass appropriate data to 2DSOIL file structures 
 			{
+				if (!SHOOTR->isEmerged) SHOOTR->isEmerged=1;
 				//ActualCarboIncrement is calculated from "assimilate", which in turn is calculated from photosynthsis_net in
 				//plant; the unit of assimilate then is in g/plant/hour, thus, at this point, pcrl has unit g/plant/hour
 				// Multiply by 24 to get g plant-1 day-1; multiply by popslab to get g Carbo slab-1 day-1
@@ -326,7 +357,7 @@ void crop_(struct
                 
 				shoot_weightPerM2 = pSC->getPlant()->get_shootMass()*pSC->getInitInfo().plantDensity; //Calculate total shoot mass per meter aquared YY
                 massIncrease = (shoot_weightPerM2 - old_shoot_weightPerM2); //Calculated increase in above-ground biomass per m2 YY
-				
+				massIncrease = max(0.0,massIncrease); // was going zero 2/6/2016 DT
 				//The biomass  returned by getPlant()->get_shootMass() is the weight of each single plant (g/plant), 
 				//to convert it into (g/m-2), it has to be 
 				//multiplied by pSC->getIniInfo().plantDensity
