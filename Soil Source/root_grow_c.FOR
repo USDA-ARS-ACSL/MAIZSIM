@@ -32,7 +32,7 @@ C  ARE MOST FAVORABLE FOR GROWTH
 
 
 C  No Plant = No Root Activity
-      If(NShoot.eq.0) Return
+      If(NShoot.eq.0.or.isGerminated.eq.0) Return
 C
 
 C calculate potential growth in root length (DT- May not need this loop - look into this)
@@ -170,18 +170,22 @@ C this (AWTot) is for testing how much root mass is transferred
 		  AWTot=AWTot+D20
 		  RTWT(iCell) =	RTWT(iCell)	+ D20
 		  ADRL(iCell) =	ADRL(iCell)	+ D20/RTWL
+		  
 		  D21 =	AWR(iCell)*	WeightLeft /D19
 		  AWTot=AWTot+D21
 		  RTWT(iLeft) =	RTWT(iLeft)	+ D21
 		  ADRL(iLeft) =	ADRL(iLeft)	+ D21/RTWL
+		  
 		  D22 =	AWR(iCell)*	WeightRight	/D19
 		  RTWT(iRight) = RTWT(iRight) +	D22
 		  AWTot=AWTot+D22
 		  ADRL(iRight) = ADRL(iRight) +	D22/RTWL
+		  
 		  D23 =	AWR(iCell)*	WeightUpper	/D19
 		  AWTot=AWTot+D23
 		  RTWT(iUpper) = RTWT(iUpper) +	D23
 		  ADRL(iUpper) = ADRL(iUpper) +	D23/RTWL
+		  
 		  D24 =	AWR(iCell)*	WeightLower	/D19
 		  AWTot=AWTot+D24
 		  RTWT(iLower) = RTWT(iLower) +	D24
@@ -189,7 +193,7 @@ C this (AWTot) is for testing how much root mass is transferred
 		  LL=1
 		  
 		  GO TO	80
-		ENDIF   ! RTWT is not larger enough to cross over cell
+		ENDIF   ! RTWT is not large enough to cross over cell
  1212		RTWT(iCell)	= RTWT(iCell) +	AWR(iCell)
 		ADRL(iCell)	= ADRL(iCell) +	AWR(iCell)/RTWL
 	END IF  !AWR >0

@@ -10,10 +10,13 @@ C added two new variables TUpperLimit, TLowerLimit and an array, TAVAIL,
 C   and ThFUll = which is total available water
 C dt 7/2014 added Bulk Density and soil texture to soil file. They are 
 C  read here
+C 12/ 2015 made TUpperLimit and TLowerLimit arguments so they could be used in the main program
+C 
       subroutine SetMat(lInput,NumNP,hNew,hOld,NMat,MatNum,Con,Cap,
      &                  BlkDn,hTemp,Explic,Theta,hTab1,hTabN,
      &                  hSat,ThSat,ThR, ThAvail,ThFull,
-     &                  FracOM, FracSind, FracClay,SoilFile)
+     &                  FracOM, FracSind, FracClay,
+     &                  TupperLimit, TLowerLimit,SoilFile)
       Logical Explic
       character SoilFile*132
       Real BldDn
@@ -21,14 +24,14 @@ C  read here
       Common /HydPar/ Par(NPar,NMatD),
      !                hTab(NTabD),ConTab(NTabD,NMatD),
      !                CapTab(NTabD,NMatD),ConSat(NMatD),
-     !                TheTab(NTabD,NMatD),alh1,dlh,
-     !                TUpperLimit(NMatD),TLowerLimit(NMatD)
+     !                TheTab(NTabD,NMatD),alh1,dlh
    
       Dimension hNew(NumNP),hOld(NumNP),MatNum(NumNP),
      !          Con(NumNP),Cap(NumNP),hTemp(NumNP),Theta(NumNP),
      !          thR(NMatD),hSat(NMatD),thSat(NMatD),ThAvail(NumNP),
      !           ThFull(NMatD),BlkDn(NMatD),
-     !          FracOM(NMatD), FracSind(NMatD), FracClay(NMatD)
+     !          FracOM(NMatD), FracSind(NMatD), FracClay(NMatD),
+     !          TUpperLimit(NMatD),TLowerLimit(NMatD)
       If(lInput.eq.1) then
         im=60
         il=0

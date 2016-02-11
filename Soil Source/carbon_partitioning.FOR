@@ -4,8 +4,12 @@
       Include 'puplant.ins'
       Dimension iLoc(4)
       Character InString*132
-      Integer e,e1,SW10,SW20,SW30,SW40
+      Integer e,e1,SW10,SW20,SW30,SW40,iCellCount
       Real MECHR,RGCF1, RGCF2, RGCF3,RGCF4,RGCF5
+      Real xMean(numElD), yMean(numElD)  ! x and y coordinates of distance to center of cell from seed
+      integer InitialRootCell   ! array that holds element numbers of cells that are assigned an initial root density
+      integer RootsInitiated
+      Real InitialRootCellArea,InitialRootWt
       Real PDWR_TOTAL   !for debugging
       Real RRRM,RRRY; ! root radial resistance for mature and young leaves (s-1 cm-1)
 	Real RVRL;    !root vascular resistance s-1 cm -1
@@ -31,7 +35,8 @@
      !       OSMREG,
      !       PILOSM,PSILZ,
      !       PPSILT,PPSIL,SGTLT,TPLT,TPLD,
-     !       BTPL,ET
+     !       BTPL,ET,InitialRootCell(NumElD),
+     !       RootsInitiated,iCellCount,InitialRootCellArea
 
       t=sngl(Time)
       If (lInput.eq.0) goto 11
@@ -100,7 +105,12 @@ C
       Do e=1,NumEl
         il=il+1
         Read(41,*,ERR=10) n,RTWT(n),(AdjCellNum(n,l),l=1,4)
-        TotalRootWeight=TotalRootWeight+RTWT(n)
+  !      if ((n.eq.49).or.(n.eq.61)) then
+  !      RTWT(n)=0.013
+  !       else 
+         RTWT(n)=0.
+  !      end if
+       
       Enddo
       Close(41)
 *
@@ -110,9 +120,13 @@ C
       Total_Pcrs=0.0
       TotalRootWt=0.0
       PSISM=0.
-      icount=0.
+      icount=0
+      iCellCount=0
+      RootsInitiated=0
       xMin=1.E+32
       xMax=-1.E+32
+      InitialRootCellArea=0.0
+      
       Do e = 1,NumEl
         i=KX(e,1)
         j=KX(e,2)
@@ -122,7 +136,7 @@ C
         HeightE(e)=Amax1(abs(y(i)-y(j)),abs(y(i)-y(k)),abs(y(i)-y(l)))
         xMin=Amin1(x(i),x(j),x(k),x(l),xMin)
         xMax=Amax1(x(i),x(j),x(k),x(l),xMax)
-        YRL(e) = RTWT(e)/RTWL
+!        YRL(e) = RTWT(e)/RTWL
         NumAng=3
         Do j=1,3
           iLoc(j)=KX(e,j)
@@ -136,26 +150,35 @@ C
         TS(e)    = 0.
         CXT(e)   = 0.
         Conc_e(e) =0.
-        xMean=0.
-        yMean=0.
-        Do i = 1,NumAng
+        xMean(e)=0.
+        yMean(e)=0.
+        InitialRootCell(e)=0
+         Do i = 1,NumAng
           j = iLoc(i)
           VH2OC(e) = VH2OC(e) + ThNew(j)
           PSIS(e)  = PSIS(e)  + hNew(j)/1000. ! convert from cm to bars
           TS(e)    = TS(e)    + Tmpr(j)
           CXT(e)   = CXT(e)   + g(j,2)
           Conc_e(e) =Conc_e(e)+ Conc(j,1)
-          xMean = xMean + (x(j)-xBSTEM)
-          yMean = yMean + (y(j)-yBSTEM)
+          xMean(e) = xMean(e) + (x(j)-xBSTEM)
+          yMean(e) = yMean(e) + (y(j)-yBSTEM)
+          
+                 
         Enddo
 	    VH2OC(e)  = VH2OC(e)/NumAng
 	    PSIS(e)   = PSIS(e)/NumAng
 	    TS(e)     = TS(e)/NumAng
 	    CXT(e)    = CXT(e)/NumAng
 	    Conc_e(e) =Conc_e(e)/NumAng
-	    xMean = xMean/NumAng
-	    yMean = yMean/NumAng
-        RVR(e) = RVRL*SQRT(xMean**2+yMean**2)/4
+	    xMean(e) = xMean(e)/NumAng
+	    yMean(e) = yMean(e)/NumAng
+        RVR(e) = RVRL*SQRT(xMean(e)**2+yMean(e)**2)/4
+        if ((abs(xMean(e)).lt.2).and.(yMean(e)>-15.0).and.
+     !          (yMean(e)<0)) then
+           InitialRootCell(e)=1
+           iCellCount=iCellCount+1
+           InitialRootCellArea=InitialRootCellArea+Area(e)
+             endif 
         If(RTWT(e).gt.0.) then
           PSISM=PSISM+PSIS(e)
           icount=icount+1
@@ -202,9 +225,24 @@ c                     Cell variables
 *     It has no shoot-associated parameters
 C
 CYAP  No Plant = No Root Activity
-      If(NShoot.eq.0) Return
+      If((NShoot.eq.0).or.(isGerminated.eq.0)) Return
        PDWR_TOTAL=0.0    ! for debugging purposes
 CYAPEND
+      If (isGerminated.and.RootsInitiated.eq.0) then
+         RootsInitiated=1
+         InitialRootWt=InitialRootCarbo/InitialRootCellArea   ! calculates average root wt density
+         ! Distribute this mass among cells with initial root distribution
+         AreaS=0
+          Do E=1, NumEl
+             if (InitialRootCell(e).gt.0) then
+               RTWT(e)=InitialRootWt*area(e)
+               YRL(e) = RTWT(e)/RTWL
+                TotalRootWeight=TotalRootWeight+RTWT(e)
+                AreaS=AreaS+area(e)
+              endif
+           enddo
+        Endif
+        
       Do e=1,NumEl
         NumAng=3
         Do j=1,3
@@ -327,10 +365,16 @@ C this one for nitrogen. Use the ratio between actual uptake of N and IMax
         RGCF(e) = AMIN1(RGCF1, RGCF2, RGCF3,RGCF5)
 
 c DT for debugging only
-c       RGCF(e)=RGCF5
+        !RGCF(e)=AMIN1(RGCF6,RGCF5)
         
         RGCF(e) = AMAX1(RGCF(e),0.0)
         RGCF(e) = AMIN1(RGCF(e),1.0)
+
+c 
+C if seed has just germinated and not emerged, then the RGCF is 1
+C      
+        if ((isEmerged.lt.1).and.(isGerminated.gt.0)) RGCF(e)=1.0
+C
 C
 C   CALCULATE POTENTIAL RATE OF CHANGE IN ROOT DRY WEIGHT IN EACH
 C   SOIL CELL

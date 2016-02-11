@@ -28,8 +28,6 @@ C
         tNext(ModNum) = time + 1
         AutoIrrAmt=IR
        End If
-C Since AutoIrrigateF is Initialized in Crop.cpp. We have to handle the initial case before it is initialized. This
-C is because AutoIrrigateF is called before crop. It will have a value after all the input is finished
 
        if (AutoIrrigateF.eq.0.and.lInput.lt.1)  tNext(ModNum)=1.0e10
        

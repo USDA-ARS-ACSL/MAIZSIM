@@ -203,7 +203,7 @@ C
           il=il+1
           Read(41,*,ERR=10)i,Nh(i),Ch(i),NL(i),CL(i),Nm(i),Cm(i),NNH4(i)
      &      ,(Conc(i,jjj),jjj=1,NumSol),Tmpr(i),hNew(i)
-
+     
           Ch_old(i)=Ch(i)
           Nh_old(i)=Nh(i)
           CL_old(i)=CL(i)

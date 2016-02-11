@@ -33,12 +33,6 @@ C
       Read(40,*,ERR=10)
       im=im+1
       il=il+1
-      Read(40,*,ERR=10) NL
-      im=im+1
-      il=il+1
-      Read(40,*,ERR=10)
-      im=im+1
-      il=il+1
       Read(40,*,ERR=10)
       im=im+1
       il=il+1

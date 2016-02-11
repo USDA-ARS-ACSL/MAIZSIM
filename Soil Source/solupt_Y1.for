@@ -141,8 +141,9 @@ C units of conc ug/liter
      !	   ThNew(j) * Tau(hNew(j)) + ThNew(l) * Tau(hNew(l))) / 3.0     		       			
  		Enddo
       	Csink_M(n) = CSink(n,1)   ! mean of concentration for element              
-		CSink(n,1) = CSink(n,1) * Sink(n)       
-          SIncrSink2 = SIncrSink2 + cSink(n,1) * step * 14. / 62. * AE
+		CSink(n,1) = CSink(n,1) * Sink(n) ! this is passive uptake
+		                                  ! - if N uptake comes only with water
+        SIncrSink2 = SIncrSink2 + cSink(n,1) * step * 14. / 62. * AE
 		Disp(n,1) = DmE/(NUS-2.0) + DlngR(M) * VUP(n,1)
 		Disp(n,2) = DmE/(NUS-2.0) + DlngR(M) * VUP(n,2)		
 	 Enddo	 

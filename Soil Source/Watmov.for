@@ -60,7 +60,8 @@ c      hCritS=1.0e9        !needs to be high for ponded infiltration to work
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
      !                  BlkDn,hTemp,Explic,ThNew,hTab1,hTabN,
      !                  hSat,ThSat,ThR, ThAvail,ThFull,
-     !                  FracOM, FracSind, FracClay,SoilFile)
+     !                  FracOM, FracSind, FracClay,
+     !                  TupperLimit, TLowerLimit,SoilFile)
 c  assign bulk density
        
              
@@ -179,7 +180,8 @@ C
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
      !                  BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
      !                  hSat,ThSat,ThR, ThAvail,ThFull,
-     !                  FracOM, FracSind, FracClay,SoilFile)
+     !                  FracOM, FracSind, FracClay,
+     !                  TupperLimit, TLowerLimit,SoilFile)
 
 c
 c  RESET: assembling of the matrixes
@@ -436,9 +438,9 @@ c head (if any)
 	          j=1
 			   if(lOrt) j=IADD(n)              
 			    A(j,n)=A(j,n)+Width(i)*F2/dt
-			    B(n)=B(n)+Width(i)*(F2*hNew(n)-(HNEWS-HOLDS))/dt          
-			      
-		 endif   !codew= -4
+			    B(n)=B(n)+Width(i)*(F2*hNew(n)-(HNEWS-HOLDS))/dt  
+		      
+         endif   !codew= -4
 
  
 c   pond   on the soil-atmosphere surface
@@ -563,7 +565,6 @@ C
 616   Continue
       If (.not.ItCrit) then
         If (Iter.lt.MaxIt.AND.hMax.lt.10.*abs(hCritA)) then
-c adjust for runoff within an iteration
  
 
           Goto 12
@@ -607,16 +608,32 @@ c
       tOld=Time
       dtOld=dt
       Step=dt
+      
+CDT adjust for runoff here    
+      Do i=1,NumBP
+          n=KXB(i)
+          If (CodeW(n).eq.-4) then
+               if (hnew(n).ge.-0.01) then
+                 RO(n)=(hOld(n)-hNew(n))/dt*Width(i)
+                 hNew(n)=-0.01
+                 hOld(n)=hNew(n)
+                endif
+             endif
+          Enddo
 c
 c   Calculation of velocities
 c
-cdt - moved this here              
+cdt - moved this here
+           
+           
+                         
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                  ConAxx,ConAzz,ConAxz,Vx,Vz)
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
      !               BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
      !               hSat,ThSat,ThR, ThAvail,ThFull,
-     !               FracOM, FracSind, FracClay,SoilFile)
+     !               FracOM, FracSind, FracClay,
+     !               TupperLimit, TLowerLimit,SoilFile)
 
 
 

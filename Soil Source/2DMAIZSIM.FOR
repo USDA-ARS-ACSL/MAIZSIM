@@ -8,6 +8,7 @@
       Include 'public.ins'
       include 'puplant.ins'
 	Include 'Puweath.ins'
+	Include 'Nitvar.ins'
 	
 	character*132 RunDat
 	integer len, status

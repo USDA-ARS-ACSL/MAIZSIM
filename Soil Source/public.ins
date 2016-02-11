@@ -79,10 +79,12 @@ c   will be transferred.
      !          ElemGeomFile,GeometryFile,SurfaceGraphics,
      !          FluxGraphics, MassBalanceFile,MassBalanceFileOut,
      !          LeafGraphics,RunFile
+     
+c the following blocks are not passed to the crop model
        Common /Nodal_pub_Aux/ ROForInfil(NumBPD)
        
        Common /Materials/BlkDn(NMatD),FracSind(NMatD), FracClay(NMatD),
-     !           FracOM(NMatD)
+     !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD)
      
       
 	  

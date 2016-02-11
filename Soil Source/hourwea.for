@@ -8,7 +8,7 @@ C**  MSW1-  switch to indicate if daily wet bulb temperatures are     **
 C**         available (=1 if YES).                                    **
 C**                                                                   **
 C**  MSW2-  switch to indicate if hourly wind is available (=1 if YES).**
-C**  MSW3-  Daily rain intensities                                    **
+C**  MSW3-  Not used in hourly data (Daily rain intensities)          **
 C** cdt don't think these two variables (above) are needed  for hourly data
 C**  MSW4-  Chemical concentrations in rain water                     **
 C**  MSW5-  1 for flood irrigation                                    **
@@ -43,12 +43,14 @@ C** CO2   -  If daily values are not available read average           **
 C**                                                                   **
 C**                                                                   **
 C**  (File 1, Line 3 to EOF, free format)                             **
-C**      (WIND, TWET and TDRY are optional)                           **
+C**      (RH, WIND, TWET and TDRY CO2 are optional)                  **
 C**                                                                   **
 C**  JDAY-  day of year- Julian Date.  Only used for management       **
 C**         of the weather file. Program converts calendar date       **
 C**         to a day of year relative to 3/1/1900                     **
+C**  DATE-  calendar date in quotes "01/01/2001"                      **
 C**                                                                   **
+C**  HOUR-  Hour of Day                                               **                                                                **
 C**                                                                   **
 C**  RI-    daily solar radiation integral (J m-2).                   **
 C**                                                                   **
@@ -59,6 +61,8 @@ C**                                                                   **
 C**  RAIN-  rainfall (or irrigation) (mm day-1).                      **
 C**                                                                   **
 C**  WIND-  windspeed at 2 meters (km hr-1).                          **
+C**                                                                   **
+C**  RH-    Relative Humidity, (%, i.e., 90.2)                        **
 C**                                                                   **
 C**  TWET-  wet bulb temperature (oC).                                **
 C**                                                                   **
@@ -147,14 +151,29 @@ C
       Read (5,*,ERR=10)
       im=im+1
       il=il+1
-       ISOL=NumSol*Movers(2)
+       ISOL=NumSol*Movers(2) ! Movers(2) is the solute mover
        Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
 cdt 10/25/2007 changed from 1-MSW4
       ISOL=NumSol*(MSW4)*Movers(2)
 cdt  9/10/2014 added CO2 as a weather variable. Made this line consistent
 Cdt   with the same line from the daily weather file 
 CDT    TODO this needs to be tested fully
-      NCD=4-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
+CDT  1/2016 fix for dew point and co2
+CDT  this line determines what is read from the last line in the climate file - this last line contains averages to be
+CDT  used when daily/hourly values are not available. 
+CDT at the minimum (for hourly) ncd will be three - wind, irav, CO2, because only these three have average values
+CDT to be used in the program.  
+
+CDT columns should be ordered as in the msw indices in the climate file
+CDT  hourly bulb, hourly wind, hourl rain intensity, hourly concentration, hourly furrow, hourly
+CDT  relative humidity, hourly CO2. For now we will only consider one solute in the 
+CDT  rainfall, that is Nitrogen. We may have more than one column of concentrations if there is more than one solute
+CDT  but this is not fully implemented yet 
+CDT if MSW6 is 0 then there is no column for RH and it is calculated from minimum temperature - no average is used
+CDT if MSW is one, then RH is not used even if present
+CDT daily concentration has been modified to use only nitrogen in rainfall (no gasses).
+
+      NCD=3-MSW2+ISOL-MSW3-MSW7
 C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
@@ -166,26 +185,29 @@ C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
       IF(MSW2.eq.0) WINDA=CLIMAT(1)
+      IF(MSW3.eq.0) IRAV= CLIMAT(2)
 C     IF(MSW4.eq.0.AND.NumSol.gt.0) then
 Cdt 02/03/2009 changed from 0-MSW4      
       IF(MSW4.eq.1.AND.NumSol.gt.0) then
         Do i=1,NumSol
-          CPREC(i)=CLIMAT(2-MSW2+i)
+          CPREC(i)=CLIMAT(2-MSW2-MSW3+i) ! should be 1 or 2 if no irav or winda and one or two solutes
         Enddo
       Endif
-      If(NumG.ne.0) then
-        PG=CLIMAT(3-MSW2+ISOL)
-        Do i=1,NumG
-          GAIR(i)=CLIMAT(3-MSW2-MSW3+ISOL+i)
-        Enddo
-      Endif
+CDT 1/2016 no gasses for now
+!      If(NumG.ne.0) then
+!        PG=CLIMAT(3-MSW2+ISOL)
+!        Do i=1,NumG
+!          GAIR(i)=CLIMAT(3-MSW2-MSW3+ISOL+i)
+!        Enddo
+!      Endif
       IF(MSW7.eq.0) then
-         CO2=CLIMAT(NCD)
+         CO2=CLIMAT(NCD)  ! last one is always co2
        Endif
 
       close(5)
 C
 C Total number of weather data
+C     minimum of three columns for radiation, temperature and rainfall (should always be first three) for hourly
 C
       NCD=3+2*MSW1+MSW2+ISOL*MSW4+MSW6+MSW7
 C
@@ -284,7 +306,7 @@ C    since the julian day is referenced to a time longer in the past
            write (date,'("01/01/",i4.4)') ThisYear  
            DayOfYear=JDAY-julday(date)
         
-           HSR(M)=climat(1)*BSOLAR/3600   ! convert to watts m-2 hard 
+           HSR(M)=max(0.0,climat(1))*BSOLAR/3600   ! convert to watts m-2 hard 
                                           !coded for hourly now
 
            if (lInput.ne.1) HTEMPY(M)=HTEMP(M)  ! save to yesterday's 

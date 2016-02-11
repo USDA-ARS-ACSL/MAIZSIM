@@ -42,7 +42,7 @@ C**  WIND-  if windspeed is unavailable read in average value for     **
 C**         site. windspeed at 2 meters (km hr-1).                    **
 C**                                                                   **
 C**  (File 1, Line 3 to EOF, free format)                             **
-C**      (WIND, TWET and TDRY are optional)                           **
+C**      (RH WIND, TWET and TDRY CO2 are optional)                    **
 C**                                                                   **
 C**  JDAY-  day of year- Julian Date.  Only used for management       **
 C**         of the weather file. Program converts calendar date       **
@@ -58,13 +58,17 @@ C**  RAIN-  rainfall (or irrigation) (mm day-1).                      **
 C**                                                                   **
 C**  WIND-  windspeed at 2 meters (km hr-1).                          **
 C**                                                                   **
+C**  RH-    Relative Humidity, (%, i.e., 90.2)                        **
+C**                                                                   **
+C**  IRAV-  avg Rainfall intensity for the day, (mm/day, hr?)              **
+C**                                                                   **
 C**  TWET-  wet bulb temperature (oC).                                **
 C**                                                                   **
 C**  TDRY- dry bulb temperature corresponding to TWET (oC).           **
 C**                                                                   **
 C**  CO2  - CO2 concentration of the atmosphere ppm                   **
 C**                                                                   **
-C**  Hourly values for radiation will be converted to watts m-2 as 
+C**  Daily values for radiation will be converted to watts m-2 as 
 C**   soon as they are read in. 
 C**                                                                   **
       Subroutine SetSurfaceD()
@@ -72,7 +76,6 @@ C**                                                                   **
       Include 'Puplant.ins'
       Include 'Puweath.ins'
       Parameter (PERIOD =1./24.)
-      
       integer jday, DayofYear,CurYear, ModNum,ThisYear
       Common /weather/ il,im,isol,ModNum
       
@@ -138,7 +141,7 @@ C
       il=il+1
       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
       ISOL=NumSol*Movers(2)
-      NCD=4-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
+      NCD=3-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
