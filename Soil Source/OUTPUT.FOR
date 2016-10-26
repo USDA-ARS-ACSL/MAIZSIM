@@ -80,16 +80,16 @@ C Potential values:
 *  add only if surface is not shaded
 * note that VarBW(i,3) is the adjusted et or rainfall - i.e., sum of rain + et, not separated
 * we may have to consider changing this in the future
+* 6/2016 DT changed CumRain sum to use varBW(i,1) which is actual rain.
+* Actual infiltration, after accounting for evap is calculated in ActualInfil
           Do i=1,NumBp
 	          n=KXB(i)
              If (VarBW(i,3).GE.0) Then
       	        PotentialSoilEvaporation=PotentialSoilEvaporation+
      & VarBW(i,3)*width(i)*step
 	         EndIf
-	        If(varBW(i,3).LT.0) then
-	          CumRain=CumRain+varBW(i,3)*width(i)*step
-	       EndIf
-          End Do
+	           CumRain=CumRain+varBW(i,1)*width(i)*step
+	       End Do
 	
 C Actual values
 

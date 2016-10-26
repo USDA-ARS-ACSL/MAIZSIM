@@ -35,7 +35,7 @@ C
       If(lInput.eq.1) then
         im=60
         il=0
-      Open(40,file=SoilFile,status='old',ERR=10)
+      Open(40,file=SoilFile,status='old',ERR=16)
         im=im+1
         il=il+1
         Read(40,*,ERR=10)
@@ -131,6 +131,7 @@ C calculate available water content
          End If          
 15    Continue
       Return
+16    Write(*,*) 'Soil file not found'      
 10    Call errmes(im,il)
       Return
       End
