@@ -117,10 +117,10 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		//but this appears to be the amount gained from the soil for the time step; so how does it represent totalNitrogen of a plant?
 
        double thermal_time = develop->get_GDDsum()-emerge_gdd;//record thermal time from emergency YY
+
 	    //Calculate faction of nitrogen in leaves (leaf NFraction) as a function of thermal time from emergence
 	    //Equation from Lindquist et al. 2007 YY
-
-        leaf_NFraction = 0.79688-0.00023747*thermal_time-0.000000086145*thermal_time*thermal_time;
+	    leaf_NFraction = 0.79688-0.00023747*thermal_time-0.000000086145*thermal_time*thermal_time;
 		if (leaf_NFraction <=0)
 		{
 			leaf_NFraction = 0;//fraction of leaf n in total shoot n can't be smaller than zero. YY
@@ -200,7 +200,9 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		{
 	        calcPerLeafRelativeAreaIncrease();
 			calcLeafArea();
-			calcGasExchange(weather);
+			if (develop->Emerged())
+			    calcGasExchange(weather);
+
 			double c_pool1 = C_pool;
 			double c_pool2 = assimilate*CH2O_MW/CO2_MW; // convert from grams CO2 to grams carbohydrate (per hour per plant)
             C_pool += c_pool2;
@@ -301,8 +303,11 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 
 	}
 
-
-		calcGasExchange(weather);
+	if (greenLeafArea > 10)
+	    { 
+		     calcGasExchange(weather);
+		}
+		
 		calcMaintRespiration(weather);
 		C_allocation(weather);
 		//	C_allocation(weather, potentialCarbonDemand); //Calculating carbon allocation with carbon demand known YY
@@ -547,7 +552,7 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
 
 	
-	photosynthesis_gross = (sunlit->A_gross*sunlitLAI() + shaded->A_gross*shadedLAI());//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
+	photosynthesis_gross = (sunlit->A_gross*sunlitLAI() + shaded->A_gross*shadedLAI());//plantsPerMeterSquare units are umol CO2 per plant s-1 ;
 	photosynthesis_net = (sunlit->A_net*sunlitLAI() + shaded->A_net*shadedLAI());//
 	SunlitLAI = sunlitLAI();
 	ShadedLAI = shadedLAI();
@@ -692,7 +697,6 @@ void CPlant::C_allocation(const TWeather & w)
 	double Fraction = __min(0.925, 0.50 + 0.50*scale); // eq 3 in Grant
 //	const double convFactor = 1/1.43; // equivalent Yg, Goudriaan and van Laar (1994)
 	double Yg = 0.750; // synthesis efficiency, ranges between 0.7 to 0.76 for corn, see Loomis and Amthor (1999), Grant (1989), McCree (1988)
-//  double Yg = 0.74;
 	
 	// this is the same as (PhyllochronsSinceTI - lvsAtTI/(totalLeaves - lvsAtTI)
 	shootPart = __max(0,Yg*(Fraction*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
@@ -704,14 +708,7 @@ void CPlant::C_allocation(const TWeather & w)
    }
     else if (!develop->TasselInitiated())
    {
-	
-   // shootPart was reduced to 0.37; rootPart was 0.43 in sourcesafe file yy
-// SK, commenting it out. Yg needs to be multiplied here because it represents growth respiration.
-//		   shootPart = __max(0, 0.67*(C_supply-maintRespiration)); //these are the amount of carbons allocated with no drought stress
-//         rootPart = __max(0, 0.33*(C_supply-maintRespiration));  //Yang, 6/22/2003
-
-
-	   if (w.pcrs>rootPart_old) // if in time step t-1, the value of pcrs is higher than that of pcrl
+ 	   if (w.pcrs>rootPart_old) // if in time step t-1, the value of pcrs is higher than that of pcrl
 	   { 
 // give a half of carbon from shoot needed to meet root demand? SK
 	      shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old)); //than take the difference between the two out of the carbon allocation to shoot at time step t
@@ -800,8 +797,6 @@ void CPlant::C_allocation(const TWeather & w)
 	   double maxKernelFillRate = 0.012*(initInfo.timeStep/(24*60)); // 
 	                                                                  //max kernel filling rate = 0.012g Kernel-1 day-1, Grant (1989)
 	   C_demand = maxKernelNo*maxKernelFillRate*tmprEffect*C_content; //dt added c_content
-//	   shootPart = __max(0,Yg*(Fraction*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
-//	   rootPart = __max(0,Yg*((1-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
 	   shootPart = __max(0,Yg*(C_supply-maintRespiration)); // gCH2O partitioned to shoot
 	   rootPart=0.0; // no more partitioning to root during grain fill
 
@@ -847,16 +842,7 @@ void CPlant::C_allocation(const TWeather & w)
    {
 	   //need to find demand first
 	   leaf= nodalUnit[i].get_leaf();  
-	 //Update SLA based on current shoot growth rate. Do this for every leaf
-	   // no sla adjustment until after emergence
-//	   double SLA_est;
-//	   if (shootPart_real > 0 && develop->Emered()) 
-//	   {
-//		   SLA_est=1/(25.0+150.0*shootPart_real)*10000; // see Grant, 1989, eq 9. 10000 converts from
-//		                                                // m2 to cm2
-//	       if (leaf->isGrowing()) leaf->set_SLA(min(400.0,SLA_est));
-//	   }
-	    double totLA;
+	   double totLA;
 
 	    if (nodalUnit[i].isInitiated()&& LeafPartSum >= 0.0)
 		{
@@ -867,9 +853,10 @@ void CPlant::C_allocation(const TWeather & w)
 			{
 			
                 totLA = calcPotentialLeafArea();
-				PCarboDemandPerLeaf=__max(0.0, leaf->get_potentialArea()/totLA*leafPart); //Adjusting C allocation based on leaf size if not aging. doing it based on current growth rate is more mechanistic but seems to have issue now. To revisit. SK
-//			   PCarboDemandPerLeaf=__max(0.0, leaf->get_RelativeAreaIncrease()*leafPart); // carbon allocated according to growth rate
-
+				PCarboDemandPerLeaf=__max(0.0, leaf->get_potentialArea()/totLA*leafPart); //Adjusting C allocation based on leaf size if not aging. 
+				                                                                          // doing it based on current growth rate is more mechanistic 
+				                                                                          //but seems to have issue now. To revisit. SK
+                                                                             
 				if (LeafPartSum >= PCarboDemandPerLeaf)
 			   {
 					leaf->import_CH2O(PCarboDemandPerLeaf);
@@ -906,16 +893,17 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 // based on McCree's paradigm, See McCree(1988), Amthor (2000), Goudriaan and van Laar (1994)
 // units very important here, be explicit whether dealing with gC, gCH2O, or gCO2
   {
-	const double Q10 = 2.0; // typical Q10 value for respiration, Loomis and Amthor (1999) Crop Sci 39:1584-1596
-	//const double Q10 = 2.1; // where does this value come from?
+	const double Q10 = 2.0; // typical Q10 value for respiration, Loomis and Amthor (1999) Crop Sci 39:1584-1596 - could try 1.8
 	double dt = initInfo.timeStep/(24*60);
 //	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
 	const double maintCoeff = 0.018;
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
 	agefn=1.0;
-	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature
-	maintRespiration = q10fn*maintCoeff*mass*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
+	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
+	                                            // total mass. Implement later after testing
+	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
+	maintRespiration = q10fn*maintCoeff*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 
@@ -923,7 +911,9 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // A daily mean ratio is calculated. We use a 3 parameter sigmoid function to model the effect
 {
 	//double Xo=0.43, B=0.05, A=1.2;
-	double Xo=0.6, B=0.13, A=2.0;
+	//double Xo=0.6, B=0.13, A=2.0; original
+	//double Xo=0.9, B=0.43, A=2.0;
+	double Xo=0.85, B=0.65, A=2.0;
 	double dt=initInfo.timeStep/(24.0*60);
 	double C2_effectTemp;
       //First set counter to 0 if it is the beginning of the day. 

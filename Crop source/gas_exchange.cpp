@@ -8,7 +8,7 @@
 // were not calibrated
 // Ver 1.0, S.Kim, 11/2002, Originally written in Pascal
 // Translated into C++ by S.Kim June 11, 2003 following D.Timlin's translation of C3 model
-// IMPORTANT: This model must not be released until validated and published
+
 // 2006-2007 modified to use leaf water potentials to adjust photosynthesis for water stress Y. Yang
 // modified 2009 to adjust photosynthesis for nitroge stress Y. Yang
 
@@ -85,7 +85,7 @@ void CGas_exchange::GasEx_psil(double leafp, double et_supply)
       Tleaf_old = Tleaf;
       Photosynthesis(leafp);
       EnergyBalance(et_supply);
-	  iter2 =++iter; //iter=iter+1, iter2=iter; 
+	  iter2 =++iter; 
     } 
 }
 
@@ -119,6 +119,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
    getParms(); //Reset values changed for N status
 //* Light response function parameters */
   Ia = PFD*(1-scatt);    //* absorbed irradiance */
+// DT -TODO 2-12-2016 need to output absorbed PAR for use in analysis 
   I2 = Ia*(1-f)/2;    //* useful light absorbed by PSII */
 
 //* other input parameters and constants */
@@ -194,6 +195,7 @@ void CGas_exchange::EnergyBalance(double Jw)
     const double psc = 6.66e-4;
     const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air (J mol-1 °C-1)
 	double gha, gv, gr, ghr, psc1, Ea, thermal_air, Ti, Ta;
+	bool badval=false;
     Ta = Tair;
     Ti = Tleaf;
     gha = gb*(0.135/0.147);  // heat conductance, gha = 1.4*.135*sqrt(u/d), u is the wind speed in m/s} Mol m-2 s-1 ?
@@ -213,6 +215,7 @@ void CGas_exchange::EnergyBalance(double Jw)
 	{
 		Tleaf = Ta + (R_abs-thermal_air-lamda*Jw)/(Cp*ghr);
 	}
+	if (isnan(Tleaf)) badval = true;
     double Es_leaf = Es(Tleaf);
 	double temp = Slope(Ta);
 	double temp1 = R_abs-thermal_air;

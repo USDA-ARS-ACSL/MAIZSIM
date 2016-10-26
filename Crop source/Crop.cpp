@@ -24,6 +24,13 @@ using namespace std;
            // fortran and C++ don't matter here because these are arguments and not
            // a function name. CROP must be upper case because it is a function
            // name
+int compare(const void *arg1, const void *arg2)
+{
+	/* Compare all of both strings: */
+	if (*(double*)arg1 > *(double*)arg2) return 1;
+	else if (*(double*)arg1 < *(double*)arg2) return -1;
+	return 0;
+};
 #ifdef _WIN32
 void _stdcall CROP(struct 
 #else
@@ -46,6 +53,8 @@ void crop_(struct
 	// and the pointers are not lost between invocations of the procedure
 	//First read input data if start of simulation
 	char* Buffer=(char*)calloc(256,sizeof(char));
+	
+
 	
 	static CController* pSC; //SK, declare as static to ensure only one copy is instantiated during 2DSOIL execution
 	// varFile contains variety information, GraphicFile holds output,LeafFile holds individual leaves
@@ -232,6 +241,7 @@ void crop_(struct
 			}
 			int end=grid_public->NumNP;
 			double soilT=0, maxY=0;
+			double soilMP[400];
 			int count=0;
 			double LowerBoundary=5;
 			// first find top of grid
@@ -247,11 +257,16 @@ void crop_(struct
 				if ( grid_public->y[i]>=LowerBoundary)
 				{
 					soilT=soilT+node_public->Tmpr[i];
+					soilMP[i] = node_public->hNew[i];
 					count++;
 				}
 			}
 
 			wthr.soilT=soilT/count;
+			std::qsort((void *)soilMP, count, sizeof(double),compare);
+			wthr.SoilMP_med = soilMP[count / 2];
+
+			
 // The model code to simulate growth ect begins here when the plant object is called :
 //TODO add some error catching code here
 			int ier = pSC->getErrStatus();
@@ -453,6 +468,6 @@ void crop_(struct
 			}
 		}// end hourly calculations code
 	 // end if NShhot>0 section 
-
-	return;
+		return;
+		
 }
