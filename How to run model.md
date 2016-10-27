@@ -13,7 +13,10 @@ In the examples, the run file is always prefixed with 'run' and has dat  as an e
 
 D:\Maizsim07\MDEasternShore>2dsoil .\DEL06\runDEL06.dat
 
-the .\ is a relative path address and will tell the operating system to look for the run file in a subdirectory called wye06. The model executable (exe file) is still called 2dsoil because of how the compiler was originally set up. We plan to change it in the future. The folder with the 2dsoil.exe file should also have the files crop.dll and lightenv.dll. There are 5 output files:
+the .\ is a relative path address and will tell the operating system to look for the run file in a subdirectory called wye06. The model executable (exe file) is still called 2dsoil because of how the compiler was originally set up. We plan to change it in the future. The folder with the 2dsoil.exe file should also have the files crop.dll and lightenv.dll. For this version there are two general files I keep in the root folder (Maizsim07\MDEasternShore) in this case. These are the water.dat (parameters for the water mover submodel) and WaterBound.dat which contains time dependent boundary conditions. This file is only read if there are time dependent boundary conditions (code =+3 or -3). But, is is opened so the file must be present. The contents are not used unless the BC is specified. 
+
+
+There are 5 output files:
 
 DEL06.g01  -- plant output
 DEL06.g02  --detaile leaf output
