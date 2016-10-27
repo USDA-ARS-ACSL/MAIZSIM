@@ -1,4 +1,5 @@
 Maizsim has to be run from the command line. A "run" file will contain paths and filenames of the input files:
+
 D:\MAIZSIM07\MDEasternShore\Del06\DEL06.wea
 D:\MAIZSIM07\MDEasternShore\Del06\DEL06.tim
 D:\MAIZSIM07\MDEasternShore\Del06\BiologyDefault.bio
@@ -9,6 +10,7 @@ D:\MAIZSIM07\MDEasternShore\Del06\WyeSoil.soi
 .
 .
 .
+
 In the examples, the run file is always prefixed with 'run' and has dat  as an extension, i.e., "RunDel06.dat". The model is run on the command from a DOS prompt. Assuming your executable is in the folder d:\maizsim07\MDEasternShore and the input data are in subfolders - d:\maizsim07\MDEasternShore\DEL06 and d:\maizsim07\MDEasternShore\DEL07 for example, you would run the model as:
 
 D:\Maizsim07\MDEasternShore>2dsoil .\DEL06\runDEL06.dat
