@@ -173,7 +173,7 @@ CDT if MSW6 is 0 then there is no column for RH and it is calculated from minimu
 CDT if MSW is one, then RH is not used even if present
 CDT daily concentration has been modified to use only nitrogen in rainfall (no gasses).
 
-      NCD=3-MSW2+ISOL-MSW3-MSW7
+      NCD=4-MSW2+ISOL-MSW3-MSW7
 C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
@@ -306,7 +306,7 @@ C    since the julian day is referenced to a time longer in the past
            write (date,'("01/01/",i4.4)') ThisYear  
            DayOfYear=JDAY-julday(date)
         
-           HSR(M)=max(0.0,climat(1))*BSOLAR/3600   ! convert to watts m-2 hard 
+           HSR(M)=max(0.0,climat(1))*BSOLAR/3600  ! convert to watts m-2 hard 
                                           !coded for hourly now
 
            if (lInput.ne.1) HTEMPY(M)=HTEMP(M)  ! save to yesterday's 
@@ -753,15 +753,16 @@ C
 C     Further we have hourly calculations
 
 C
-55    If(Abs(Time-tNext(ModNum)).lt.0.01*Step.or.lInput.eq.1) then
+55    If(Abs(Time-tNext(ModNum)).lt.0.001*Step.or.lInput.eq.1) then
        ITIME=Idint(dMOD(t+St,1.D0)/PERIOD+1)
        if(itime.eq.10) then
         iii=1;
         endif
         
        Do i=1, NumBP
-         do j=1, 3
-           VarBW(i,j)=0.0
+         do j=1, 4
+           if (j.lt.4) VarBW(i,j)=0.0
+           VarBT(i,j)=0.0
          Enddo
         Enddo
 
@@ -927,9 +928,10 @@ c................... Precipitation and irrigation
       Do i=1,NumBP
       n=KXB(i)
       k=CodeW(n)
-      If(K.eq.4.or.K.eq.-4) then
+      If(K.eq.4.or.K.eq.-4) then 
+         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
-       If(NumSol.ne.0) then
+      If(NumSol.ne.0) then
           do j=1,NumSol
 cdt was varbs(n,j)
           VarBS(i,j)=CPREC(j)

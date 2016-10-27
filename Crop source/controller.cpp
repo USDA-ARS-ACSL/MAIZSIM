@@ -67,6 +67,7 @@ CController::~CController()
 //**********************************************************************
 void CController::initialize()
 {
+	#ifndef _DEBUG_FILE
 	ofstream DebugOut(DebugFile, ios::out);
 	DebugOut
     		 << setw(10) << "date"
@@ -85,6 +86,7 @@ void CController::initialize()
 			<<endl
         ;
 	DebugOut.close();
+#endif
 
 	Timer dConvert; //object to convert dates 
 	int mm, dd,yy;  // for calendar dates
@@ -93,7 +95,7 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.1.00 2014                *" << endl
+		<< " *                     VERSION  1.1.42 2016                *" << endl
 		<< " *   USDA-ARS, CROP SYSTEMS AND GLOBAL CHANGE LABORATORY   *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
@@ -114,7 +116,7 @@ void CController::initialize()
 			<< setw(10) << "mass"
 			<< setw(10) << "Sen_Area"
 			<< setw(10) << "Pntl_Area"
-			<< setw(9) << "Longev"
+			<< setw(9) << "Elong_age"
 			<< setw(9) << "CarbRat"
 			<< setw(9) << "SLA"
 			<< setw(9) << "dropped"
@@ -133,8 +135,8 @@ void CController::initialize()
 			<< setw(8) << "time"
 			<< setw(8) << "Leaves"
 			<< setw(8) << "Dropped"
-			<< setw(8) << "LA/pl"
-			<< setw(8) << "LA_dead"
+			<< setw(9) << "LA/pl"
+			<< setw(9) << "LA_dead"
 			<< setw(8) << "LAI"
 			<< setw(8) << "RH"
 			<< setw(8) << "LeafWP"
@@ -171,7 +173,7 @@ void CController::initialize()
 
 	}
 
-
+// Read variety file here
 	try
 	{
 		ifstream cfs(varietyFile, ios::in);
@@ -185,6 +187,7 @@ void CController::initialize()
 		cfs.getline(Buffer, 255,'\n');
 		cfs.getline(Buffer, 255,'\n');
         cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
+			>>initInfo.stayGreen
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
 
 // end reading variety file
@@ -199,6 +202,7 @@ void CController::initialize()
 			<< setw(10)	<< "Cultivar: " << initInfo.cultivar << endl
 		    << setw(6) << "Generic Leaf Number: " << initInfo.genericLeafNo << endl
 			<< setw(6) << "Day Length Sensitive: " << initInfo.DayLengthSensitive << endl
+			<< setw(6) << "Stay Green Parameter: " <<initInfo.stayGreen << endl
 			<< setw(6) << "Rmax Leaf initiation rate: " << initInfo.Rmax_LIR << "  " << "Rmax Leaf tip appearance rate: " << initInfo.Rmax_LTAR << endl
 			<< setw(6) << "Phyllochrons to Silk: " << initInfo.PhyllochronsToSilk << endl <<endl
 			<< setw(6) << "Year: " << initInfo.year << endl
@@ -300,13 +304,14 @@ void CController::outputToCropFile()
 #endif
 			string s = "";
 			if (plant->get_develop()->Matured()) {s="Matured";}
-			else if (plant->get_develop()->GrainFillBegan()) {s="grainFill";}
-			else if (plant->get_develop()->Silked()) {s="Silked";}
-			else if (plant->get_develop()->Flowered()) {s="Flowered";}
-			else if (plant->get_develop()->TasselInitiated()) {s="Tasselinit";}
-			else if (plant->get_develop()->Emerged()) {s="Emerged";}
-			else if (plant->get_develop()->Germinated()) {s="Germinated";}
-    		else if (plant->get_develop()->Dead()) {s="Inactive";}
+			else if (plant->get_develop()->GrainFillBegan())   {s="grainFill";}
+			else if (plant->get_develop()->Silked())           {s="Silked";}
+			else if (plant->get_develop()->Flowered())         {s="Flowered";}
+			else if (plant->get_develop()->Tasseled())         {s = "Tasseled"; }
+			else if (plant->get_develop()->TasselInitiated())  {s="Tasselinit";}
+			else if (plant->get_develop()->Emerged())          {s="Emerged";}
+			else if (plant->get_develop()->Germinated())       {s="Germinated";}
+    		else if (plant->get_develop()->Dead())             {s="Inactive";}
 			else {s="none";}
 		//	if (FLOAT_EQ(plant->get_develop()->emergence.daytime,weather[iCur].daytime)){s = "Emergence";}
 		////	if (FLOAT_EQ(plant->get_develop()->tasselInitiation.daytime,weather[iCur].daytime)){s = "Tassel Initiation";}
@@ -323,8 +328,8 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(3) << weather[iCur].time*24.0
 				<< setw(8) << setprecision(2) << plant->get_develop()->get_LvsAppeared()
 				<< setw(8)  << setprecision(2) << plant->get_nodalUnit()->get_leaf()->get_TotalDroppedLeaves()
-				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()
-				<< setw(8) << setprecision(2) << plant->calcSenescentLeafArea()
+				<< setw(9) << setprecision(2) << plant->calcGreenLeafArea()
+				<< setw(9) << setprecision(2) << plant->calcSenescentLeafArea()
 				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
 				<< setw(8) << setprecision(2) << weather[iCur].RH
 				<< setw(8) << setprecision(4) << weather[iCur].LeafWP   //print out leaf water potential Yang 8/22/06
@@ -338,7 +343,7 @@ void CController::outputToCropFile()
 			
 				<< setw(8) << setprecision(4) << plant->get_Pn()   //g Carbo per plant per hour
 				<< setw(8) << setprecision(4) << plant->get_Pg()    
-				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() //dt 03/2011 added to better calc mass balance
+				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() //dt 03/2011 added to better calc mass balance g carbon per plant per hour
 				<< setw(8) << setprecision(4) << av_gs  //return average stomatal conductance Yang 10/31/06
 			    << setw(9) << setprecision(3) << vpd
 				<< setw(10) << setprecision(4) << plant->get_N()
@@ -399,7 +404,7 @@ void CController::outputToLeafFile()
 			<< fixed
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_senescentArea()
             << setw(9)   << setprecision(3) << nU->get_leaf()->get_potentialArea()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_longevity()
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_Elongation_Age()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_N_content() 
 			<< setw(9)   << setprecision(1) << nU->get_leaf()->get_SLA()
 			<< setw(9)   << setprecision(3) << nU->get_leaf()->isDropped()

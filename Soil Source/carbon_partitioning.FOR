@@ -308,7 +308,7 @@ C
 C  CALCULATE SOIL MECHANICAL RESISTANCE TO ROOT GROWTH IN EACH CELL
 C
       DO e=1,NumEl
-        MECHR = 10.03*abs(psis(e))**0.25
+        MECHR = 5.4*abs(psis(e))**0.25
      &     *EXP(-10.58*(1.7 - BlkDn(MatNumE(e))))
         IF (MECHR.LE.0.0) MECHR = 0.0
 C
@@ -356,19 +356,21 @@ c        RGCF4=Exp(psis(e)*0.6)
 c        if (abs(psis(e)).lt.0.45) RGCF4=1.0
 c        RGCF4=1.0
 C limit here is 0.03 gr cm-3 dt changed to 0.01 for testing
-        RGCF5=(1.0-AMIN1(1.0,RTWT(e)/Area(e)/0.03))
+        RGCF5=(1.0-AMIN1(1.0,RTWT(e)/Area(e)/0.02))
 C this one for nitrogen. Use the ratio between actual uptake of N and IMax
     
          dif=amax1(0.0,Conc_e(e)-CMin0(1))
 	   RGCF6 =  amax1(0.3,dif/ConstK(1))
 	   RGCF6 = AMIN1(1.0, RGCF6)
         RGCF(e) = AMIN1(RGCF1, RGCF2, RGCF3,RGCF5)
+      ! RGCF(e) = AMIN1(RGCF2, RGCF3,RGCF5)
 
 c DT for debugging only
         !RGCF(e)=AMIN1(RGCF6,RGCF5)
         
         RGCF(e) = AMAX1(RGCF(e),0.0)
         RGCF(e) = AMIN1(RGCF(e),1.0)
+      
 
 c 
 C if seed has just germinated and not emerged, then the RGCF is 1

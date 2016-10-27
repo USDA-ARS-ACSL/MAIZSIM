@@ -74,6 +74,7 @@
 			  NumGD = 3, NumPlD=100, 
               NMatD=15, NumModD=20, MBandD=15,
 	          NumSurfDatD=3+NumGD+NumSD;
+	int compare(const void *arg1, const void *arg2); //Function for comparing two numbers in a sort routine
 #pragma pack(2)
  struct ShootCommon{
     double PCRL,PCRQ,PCRS,HourlyCarboUsed,ET_demand,LCAI,Cover,Convr;
@@ -140,7 +141,8 @@
                 KXB[NumBPD];
 		   int CodeW[NumNPD],CodeS[NumNPD],CodeT[NumNPD],
 			     CodeG[NumNPD],PCodeW[NumNPD];
-		   float Width[NumBPD], VarBW[3][NumBPD],VarBS[NumSD][NumBPD],
+		   float Width[NumBPD], VarBW[3][NumBPD], VarBW_old[3][NumBPD],
+			     VarBS[NumSD][NumBPD],
 				 VarBT[4][NumBPD], VarBG[3][NumGD][NumBPD],EO,Tpot;
  };
 // Time

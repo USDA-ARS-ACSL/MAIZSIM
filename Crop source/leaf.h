@@ -32,6 +32,7 @@ public:
 	double get_actualgreenArea() {return actualgreenArea;}
 	double get_droppedArea () {return droppedArea;}
 	double get_GDD2mature() {return GDD2mature;}
+	double get_Elongation_Age() { return elongAge; }
 	int    get_TotalGrowingLeaves() {return TotalGrowingLeaves;}
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
 	int    get_Rank() {return rank;}
@@ -82,6 +83,7 @@ private:
 	bool   first;  //indicates if this is the first time we call the elongate method;
 	double N_content; 
 	double WLRATIO, A_LW;
+	double T_peak, Tb_Leaf;
 
 	/*
 	SK 8/22/10: Leaf N content in mg/m2

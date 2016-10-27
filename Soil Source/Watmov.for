@@ -11,6 +11,7 @@
       Double precision A,B,C
       Double precision dt,dtOld,t,tOld,PI,DPI,F2
       real ATG,HSP
+      Double precision CriticalH
       Logical Explic,ItCrit,FreeD
       Real  hOld_1(NumNPD)
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
@@ -21,14 +22,15 @@
      !                ConAxx(NumElD),ConAzz(NumElD),ConAxz(NumElD),
      !                MaxIt,TolTh,TolH,dt,dtOld,tOld,
      !                thR(NMatD),hSat(NMatD),thSat(NMatD),
-     !                 isat(NumBPD),FreeD
+     !                 isat(NumBPD),FreeD, CriticalH
       If (lInput.eq.0) goto 11  
        FreeD=.true.
+       CriticalH=0.0D0
        Do i=1,NumNP
           hOld(i) = hNew(i)
           hTemp(i) = hOld(i)
        Enddo
-*
+*      
        Do i=1,NumEl
         ConAxz(i)=0.
         ConAxx(i)=1.
@@ -419,7 +421,7 @@ cMK-----------------------------------------------------------------------------
 
 		if ((CodeW(n).eq.-4).and.(q(n).gt.0)) then
 c Ponded infiltration measurement is from Misha Kouznetzov
-			HSP=0.03D0 !EMPIRICAL PARAMETER, HSP~=dz/3
+			HSP=0.009D0 !EMPIRICAL PARAMETER, HSP~=dz/3 - was 0.03
 			PI=3.141592653589793238D0
 			DPI=1.0d0/PI
 c            ATG=0.0D0
@@ -430,8 +432,8 @@ c F2 is a weighting function
 			F2=(ATG+delta)*DPI
 			F2=Dmin1(F2,1.0D0)
 			
-		   IF(HNEW(N).LT.-0.01) F2=1.0D-10
-         		HNEWS=DMAX1(hNew(N),0.0D0)
+		   IF(HNEW(N).LT.CriticalH) F2=1.0D-10  !was LT.-0.01 as in the later code
+         		HNEWS=DMAX1(hNew(N),0.0D0) ! was 0.0D0
   	      	HOLDS=DMAX1(hold(N),0.0D0)	
 c update right and left sides of equation for flux due to the change in the ponded
 c head (if any) 
@@ -613,9 +615,9 @@ CDT adjust for runoff here
       Do i=1,NumBP
           n=KXB(i)
           If (CodeW(n).eq.-4) then
-               if (hnew(n).ge.-0.01) then
-                 RO(n)=(hOld(n)-hNew(n))/dt*Width(i)
-                 hNew(n)=-0.01
+               if (hnew(n).ge.CriticalH) then
+                 RO(n)=(hNew(n)-(CriticalH))/dt*Width(i)
+                 hNew(n)=CriticalH
                  hOld(n)=hNew(n)
                 endif
              endif

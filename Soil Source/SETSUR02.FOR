@@ -141,7 +141,8 @@ C
       il=il+1
       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
       ISOL=NumSol*Movers(2)
-      NCD=3-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
+c      the four basic variables are Daily wind, rain intensity daily concentration and co2     
+      NCD=4-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -165,7 +166,7 @@ C
         Enddo
       Endif
       IF(MSW7.eq.0) then
-         CO2=CLIMAT(NCD)
+         CO2=CLIMAT(NCD) ! last one is always co2
        Endif
       close(5)      
 C
@@ -823,6 +824,13 @@ c
         Enddo
         Call SORT03(ic,xS,iS,kS)
 C
+C initialize boundary values to 0
+         Do i=1, NumBP
+         do j=1, 4
+           if (j.lt.4) VarBW(i,j)=0.0
+           VarBT(i,j)=0.0
+         Enddo
+        Enddo
         Do 90 i=1,ic
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
 
@@ -841,11 +849,15 @@ C
               RNS = ((1.0 - LAMDAS)*D11) - RNLU
               If(RNS.LE.0.0) RNS = 0.0
 C
-C  CALCULATE POTENTIAL EVAPORATION RATE FROM EXPOSED SOIL CELLS
+C  CALCULATE POTENTIAL EVAPORATION RATE (g m-2 hr-1)FROM EXPOSED SOIL CELLS
 C
 C note that Penman's original wind function was F(u)=0.26(1+0.54u)
+C the 0.54 is a function of temperature and pressure
 C  where windspeed was in m s-1 and et mm d-1 cm-2 and e in mb
 C  109.375 = 0.26 * (10000*10)/24/10 (0.26 has probably been truncated)
+
+
+C See eqn 5.11 of http://mepas.pnnl.gov/mepas/formulations/source_term/5_0/5_13/5_13.html
               D12 = max(1.0,2.0-(2.0*COVER))
               If (D12.GE.1.0) D12 = 1.0
               ESO = ((DEL(ITIME)/GAMMA*RNS*3600.0/(2500.8

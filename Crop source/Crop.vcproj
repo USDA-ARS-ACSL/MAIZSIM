@@ -5,9 +5,6 @@
 	Name="Crop"
 	ProjectGUID="{E8E56F99-943A-4226-A0C8-24FF6419EAED}"
 	RootNamespace="Crop"
-	SccProjectName="&quot;$/corn/MaizeSim/DLL_VS9.1&quot;, GCDAAAAA"
-	SccLocalPath="."
-	SccProvider="MSSCCI:Microsoft Visual SourceSafe"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

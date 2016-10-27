@@ -3,7 +3,7 @@
 *     2DSOIL  - Numerical model of two-dimensional soil environment    *
 *                           for field crops                            *
 *                                                                      *
-*                              Release 04                              *
+*                              Release 1.1.4                              *
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
       Include 'public.ins'
       include 'puplant.ins'
@@ -27,7 +27,7 @@ C SetSurfaceD --  reading daily weather
 C SetSurfaceH --  reading hourly weather
       if ((HourlyWeather+DailyWeather.gt.1).or.
      !   ((HourlyWeather+DailyWeather).eq.0))then
-             Write (*,*) "error in weather file type"
+              Write (*,*) "error in weather file type"
          
         Endif
       if (HourlyWeather.eq.1) Call SetSurfaceH()

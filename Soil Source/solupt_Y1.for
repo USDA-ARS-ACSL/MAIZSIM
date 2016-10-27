@@ -175,7 +175,8 @@ c         iflag = 0
 c       Endif
        !if (iSink.EQ.0) SIncrSink=SIncrSink2   ! set passive uptake
       return
-10     Call errmes(im,il)
+10    Write(*,*) 'Error in solute file'
+      Call errmes(im,il)
       end
      
       subroutine massRootflux()

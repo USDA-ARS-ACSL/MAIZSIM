@@ -1,4 +1,5 @@
 cdt ToDo - simplyfy common blocks so only variables needed in plant model
+cdt ToDo May 2016 added VarBW_old for debugging purposes can be removed later
 c   will be transferred.  
       Parameter (NumNPD=4000, NumElD=3500, NumBPD=600, NSeepD = 2,
      !           NumSPD= 30, NumSD =10, NDrainD=2,NumDR=30,
@@ -50,7 +51,8 @@ c   will be transferred.
      !       KXB(NumBPD), 
      !       CodeW(NumNPD),CodeS(NumNPD),CodeT(NumNPD),CodeG(NumNPD),
      !       PCodeW(NumNPD),Width(NumBPD),
-     !       VarBW(NumBPD,3),VarBS(NumBPD,NumSD),VarBT(NumBPD,4),
+     !       VarBW(NumBPD,3),VarBW_Old(NumBPD,3),
+     !       VarBS(NumBPD,NumSD),VarBT(NumBPD,4),
      !       VarBG(NumBPD,NumGD,3),EO,Tpot
       Common /time_public/tNext(NumModD),dtMx(4),Time,Step,dtOpt, 
      !        dtMin, dMul1, dMul2,  tTDB(4), Tfin,tAtm, Tinit,

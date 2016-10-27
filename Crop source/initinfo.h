@@ -28,6 +28,8 @@ public:
 		Rmax_LTAR = 0.53;
 		DayLengthSensitive=true;
 		PhyllochronsToSilk=8;
+		PhyllochronsToTassel = 1;
+		stayGreen = 4.5;
 		
 	}
 	char description[255];
@@ -42,7 +44,13 @@ public:
 	double timeStep;
 	bool DayLengthSensitive; //1 if daylength sensitive
 	double Rmax_LIR, Rmax_LTAR; //  Maximum Leaf tip initiation and appearance rates
-	double PhyllochronsToSilk; //number of phyllochrons from tassel initiation for 50% silking. 
+	double stayGreen;  // staygreen trait of the hybrid (originally 4.5)
+                                  // stay green for this value times growth period after peaking before senescence begins
+                                  // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
+	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages
+	double PhyllochronsToSilk; //number of phyllochrons from tassel initiation for 75% silking.
+	double PhyllochronsToTassel; // number of phyllochrons past tassel initiation when tassels are fully emerged. (not input yet)
+	//todo these above 2 variables are also in development - need to remove them from there.
 	//check units
 
 };
