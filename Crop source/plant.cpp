@@ -609,6 +609,16 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	{
 		this->conductance =0;
 	}
+	sunlit_LAI = sunlai;
+	shaded_LAI = shadelai;
+    sunlit_PFD = temp8;
+    shaded_PFD = temp9;
+	sunlit_A_net = sunlit->A_net;
+	shaded_A_net = shaded->A_net;
+	sunlit_A_gross = sunlit->A_gross;
+	shaded_A_gross = shaded->A_gross;
+	sunlit_gs = temp3;
+	shaded_gs = temp4;
 	 delete sunlit;
 	 delete shaded;
 }

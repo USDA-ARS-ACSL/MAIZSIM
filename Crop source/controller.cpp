@@ -153,6 +153,16 @@ void CController::initialize()
 			<< setw(8) << "Pg,"
 			<< setw(10) << "Respir,"
 			<< setw(8) << "av_gs,"
+			<< setw(12) << "sunlit_LAI"
+			<< setw(12) << "shaded_LAI"
+			<< setw(12) << "sunlit_PFD"
+			<< setw(12) << "shaded_PFD"
+			<< setw(12) << "sunlit_An"
+			<< setw(12) << "shaded_An"
+			<< setw(12) << "sunlit_Ag"
+			<< setw(12) << "shaded_Ag"
+			<< setw(12) << "sunlit_gs"
+			<< setw(12) << "shaded_gs"
 			<< setw(9) << "VPD,"
 			<< setw(10) << "Nitr,"
 			<< setw(10) << "N_Dem,"
@@ -350,6 +360,16 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(4) << plant->get_Pg() << comma
 				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() << comma //dt 03/2011 added to better calc mass balance g carbon per plant per hour
 				<< setw(8) << setprecision(4) << av_gs << comma  //return average stomatal conductance Yang 10/31/06
+				<< setw(12) << setprecision(7) << plant->sunlit_LAI << comma
+				<< setw(12) << setprecision(7) << plant->shaded_LAI << comma
+				<< setw(12) << setprecision(7) << plant->sunlit_PFD << comma
+				<< setw(12) << setprecision(7) << plant->shaded_PFD << comma
+				<< setw(12) << setprecision(7) << plant->sunlit_A_net << comma
+				<< setw(12) << setprecision(7) << plant->shaded_A_net << comma
+				<< setw(12) << setprecision(7) << plant->sunlit_A_gross << comma
+				<< setw(12) << setprecision(7) << plant->shaded_A_gross << comma
+				<< setw(12) << setprecision(7) << plant->sunlit_gs << comma
+				<< setw(12) << setprecision(7) << plant->shaded_gs << comma
 			    << setw(9) << setprecision(3) << vpd << comma
 				<< setw(10) << setprecision(4) << plant->get_N() << comma
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma
