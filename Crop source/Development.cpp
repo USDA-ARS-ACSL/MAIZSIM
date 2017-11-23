@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include <cmath>
 #include "development.h"
-#include "radiation.h"
 #include <iostream>
 #include <string>
 #include <algorithm>

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B50533671FC6BB9E00E5AC6A /* solar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533641FC6BB9E00E5AC6A /* solar.cpp */; };
+		B50533691FC6BFCD00E5AC6A /* radtrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533681FC6BFCD00E5AC6A /* radtrans.cpp */; };
 		B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */; };
 		B5DB2E891B798EB4003A9266 /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5A1B798EB4003A9266 /* controller.cpp */; };
 		B5DB2E8A1B798EB4003A9266 /* cpmdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */; };
@@ -19,7 +21,6 @@
 		B5DB2E941B798EB4003A9266 /* nodalunit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E721B798EB4003A9266 /* nodalunit.cpp */; };
 		B5DB2E951B798EB4003A9266 /* organ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E741B798EB4003A9266 /* organ.cpp */; };
 		B5DB2E961B798EB4003A9266 /* plant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E761B798EB4003A9266 /* plant.cpp */; };
-		B5DB2E971B798EB4003A9266 /* radiation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E781B798EB4003A9266 /* radiation.cpp */; };
 		B5DB2E981B798EB4003A9266 /* roots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E7B1B798EB4003A9266 /* roots.cpp */; };
 		B5DB2E991B798EB4003A9266 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E7E1B798EB4003A9266 /* stdafx.cpp */; };
 		B5DB2E9A1B798EB4003A9266 /* stem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E801B798EB4003A9266 /* stem.cpp */; };
@@ -51,7 +52,6 @@
 		B5DB2ED81B798EC2003A9266 /* wateruptake.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBE1B798EC2003A9266 /* wateruptake.for */; };
 		B5DB2ED91B798EC2003A9266 /* Watmov.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBF1B798EC2003A9266 /* Watmov.for */; };
 		B5DB2EDE1B799427003A9266 /* Ex14-5.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA71B798EC2003A9266 /* Ex14-5.for */; };
-		B5DB2EE01B799468003A9266 /* libLightEnv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B5DB2EDF1B799468003A9266 /* libLightEnv.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -67,6 +67,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B50533621FC6BB9D00E5AC6A /* solar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = solar.h; sourceTree = "<group>"; };
+		B50533641FC6BB9E00E5AC6A /* solar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = solar.cpp; sourceTree = "<group>"; };
+		B50533651FC6BB9E00E5AC6A /* radtrans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radtrans.h; sourceTree = "<group>"; };
+		B50533681FC6BFCD00E5AC6A /* radtrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radtrans.cpp; sourceTree = "<group>"; };
 		B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.1.dylib"; path = "../../../../../../usr/lib/libc++.1.dylib"; sourceTree = "<group>"; };
 		B5DB2E2F1B798B16003A9266 /* MAIZSIM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MAIZSIM; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DB2E591B798EB4003A9266 /* assemblyinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assemblyinfo.cpp; sourceTree = "<group>"; };
@@ -99,8 +103,6 @@
 		B5DB2E751B798EB4003A9266 /* organ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = organ.h; sourceTree = "<group>"; };
 		B5DB2E761B798EB4003A9266 /* plant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plant.cpp; sourceTree = "<group>"; };
 		B5DB2E771B798EB4003A9266 /* plant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plant.h; sourceTree = "<group>"; };
-		B5DB2E781B798EB4003A9266 /* radiation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radiation.cpp; sourceTree = "<group>"; };
-		B5DB2E791B798EB4003A9266 /* radiation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radiation.h; sourceTree = "<group>"; };
 		B5DB2E7A1B798EB4003A9266 /* resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; };
 		B5DB2E7B1B798EB4003A9266 /* roots.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = roots.cpp; sourceTree = "<group>"; };
 		B5DB2E7C1B798EB4003A9266 /* Roots.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Roots.h; sourceTree = "<group>"; };
@@ -148,7 +150,6 @@
 		B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SYNCHRON.for; sourceTree = "<group>"; };
 		B5DB2EBE1B798EC2003A9266 /* wateruptake.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = wateruptake.for; sourceTree = "<group>"; };
 		B5DB2EBF1B798EC2003A9266 /* Watmov.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = Watmov.for; sourceTree = "<group>"; };
-		B5DB2EDF1B799468003A9266 /* libLightEnv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLightEnv.a; path = ../../Lightenv/libLightEnv.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,7 +157,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5DB2EE01B799468003A9266 /* libLightEnv.a in Frameworks */,
 				B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,7 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */,
-				B5DB2EDF1B799468003A9266 /* libLightEnv.a */,
 				B5DB2E391B798B4E003A9266 /* Source */,
 				B5DB2E301B798B16003A9266 /* Products */,
 			);
@@ -224,12 +223,14 @@
 				B5DB2E751B798EB4003A9266 /* organ.h */,
 				B5DB2E761B798EB4003A9266 /* plant.cpp */,
 				B5DB2E771B798EB4003A9266 /* plant.h */,
-				B5DB2E781B798EB4003A9266 /* radiation.cpp */,
-				B5DB2E791B798EB4003A9266 /* radiation.h */,
+				B50533681FC6BFCD00E5AC6A /* radtrans.cpp */,
+				B50533651FC6BB9E00E5AC6A /* radtrans.h */,
 				B5DB2E7A1B798EB4003A9266 /* resource.h */,
 				B5DB2E7B1B798EB4003A9266 /* roots.cpp */,
 				B5DB2E7C1B798EB4003A9266 /* Roots.h */,
 				B5DB2E7D1B798EB4003A9266 /* sheath.h */,
+				B50533641FC6BB9E00E5AC6A /* solar.cpp */,
+				B50533621FC6BB9D00E5AC6A /* solar.h */,
 				B5DB2E7E1B798EB4003A9266 /* stdafx.cpp */,
 				B5DB2E7F1B798EB4003A9266 /* stdafx.h */,
 				B5DB2E801B798EB4003A9266 /* stem.cpp */,
@@ -367,12 +368,12 @@
 				B5DB2ECC1B798EC2003A9266 /* N_Massbl.for in Sources */,
 				B5DB2ECD1B798EC2003A9266 /* ORTHOFEM.for in Sources */,
 				B5DB2ED41B798EC2003A9266 /* solmov.for in Sources */,
+				B50533671FC6BB9E00E5AC6A /* solar.cpp in Sources */,
 				B5DB2ED91B798EC2003A9266 /* Watmov.for in Sources */,
 				B5DB2E991B798EB4003A9266 /* stdafx.cpp in Sources */,
 				B5DB2E941B798EB4003A9266 /* nodalunit.cpp in Sources */,
 				B5DB2EC11B798EC2003A9266 /* AutoIrrigate.for in Sources */,
 				B5DB2ECB1B798EC2003A9266 /* MNGMB.for in Sources */,
-				B5DB2E971B798EB4003A9266 /* radiation.cpp in Sources */,
 				B5DB2ECA1B798EC2003A9266 /* MASSBLW.for in Sources */,
 				B5DB2E911B798EB4003A9266 /* leaf.cpp in Sources */,
 				B5DB2E9B1B798EB4003A9266 /* thermaltime.cpp in Sources */,
@@ -385,6 +386,7 @@
 				B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */,
 				B5DB2EC41B798EC2003A9266 /* ERRMES.for in Sources */,
 				B5DB2ED71B798EC2003A9266 /* SYNCHRON.for in Sources */,
+				B50533691FC6BFCD00E5AC6A /* radtrans.cpp in Sources */,
 				B5DB2E8F1B798EB4003A9266 /* initinfo.cpp in Sources */,
 				B5DB2EC21B798EC2003A9266 /* carbon_partitioning.for in Sources */,
 				B5DB2EC31B798EC2003A9266 /* dateFunctions.for in Sources */,
