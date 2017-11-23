@@ -35,7 +35,7 @@ int compare(const void *arg1, const void *arg2)
 #ifdef _WIN32
 void _stdcall CROP(struct 
 #else
-void crop_(struct 
+void crop(struct 
 #endif
 				   ShootCommon        *SHOOTR, 
 				   WeathCommon        *Weather,
