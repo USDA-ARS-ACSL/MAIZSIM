@@ -3,6 +3,7 @@
 #include "plant.h"
 #include "gas_exchange.h"
 #include "lightenv.h"
+#include "timer.h"
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -542,13 +543,22 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	  CGas_exchange * shaded = new CGas_exchange("Shaded", this->leaf_N_content);
 
 //TODO: lightenv.dll needs to be translated to C++. It slows down the execution, 3/16/05, SK
-	radTrans2(weather.jday, weather.time, initInfo.latitude, initInfo.longitude, weather.solRad, weather.PFD, LAI, LAF);
+    Timer timer;
+    int mm, dd, yy;
+    timer.caldat(weather.jday, mm, dd, yy);
+    int jday = timer.julday(1, 1, yy);
+    //int jday = 39022 + 1;
+	radTrans2(weather.jday - jday + 1, weather.time, initInfo.latitude, initInfo.longitude, weather.solRad, weather.PFD, LAI, LAF);
     double temp5, temp6, temp7,temp8, temp9;
 	temp5=sunlitLAI();
 	temp6=shadedLAI();
 	temp7=getNIRtot();
     temp8=sunlitPFD();
 	temp9=shadedPFD();
+    
+    if (weather.jday == 37356 && weather.time * 24 >= 6) {
+        double temp10 = 1;
+    }
 	 	
 	  //Calculating transpiration and photosynthesis without stomatal control Y
 	   // sunlit->SetVal_NC(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
