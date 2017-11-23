@@ -1,0 +1,533 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */; };
+		B5DB2E891B798EB4003A9266 /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5A1B798EB4003A9266 /* controller.cpp */; };
+		B5DB2E8A1B798EB4003A9266 /* cpmdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */; };
+		B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5E1B798EB4003A9266 /* Crop.cpp */; };
+		B5DB2E8C1B798EB4003A9266 /* Development.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E611B798EB4003A9266 /* Development.cpp */; };
+		B5DB2E8D1B798EB4003A9266 /* ear.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E631B798EB4003A9266 /* ear.cpp */; };
+		B5DB2E8E1B798EB4003A9266 /* gas_exchange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E651B798EB4003A9266 /* gas_exchange.cpp */; };
+		B5DB2E8F1B798EB4003A9266 /* initinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E671B798EB4003A9266 /* initinfo.cpp */; };
+		B5DB2E911B798EB4003A9266 /* leaf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E6B1B798EB4003A9266 /* leaf.cpp */; };
+		B5DB2E941B798EB4003A9266 /* nodalunit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E721B798EB4003A9266 /* nodalunit.cpp */; };
+		B5DB2E951B798EB4003A9266 /* organ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E741B798EB4003A9266 /* organ.cpp */; };
+		B5DB2E961B798EB4003A9266 /* plant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E761B798EB4003A9266 /* plant.cpp */; };
+		B5DB2E971B798EB4003A9266 /* radiation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E781B798EB4003A9266 /* radiation.cpp */; };
+		B5DB2E981B798EB4003A9266 /* roots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E7B1B798EB4003A9266 /* roots.cpp */; };
+		B5DB2E991B798EB4003A9266 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E7E1B798EB4003A9266 /* stdafx.cpp */; };
+		B5DB2E9A1B798EB4003A9266 /* stem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E801B798EB4003A9266 /* stem.cpp */; };
+		B5DB2E9B1B798EB4003A9266 /* thermaltime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E821B798EB4003A9266 /* thermaltime.cpp */; };
+		B5DB2E9C1B798EB4003A9266 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E841B798EB4003A9266 /* timer.cpp */; };
+		B5DB2E9D1B798EB4003A9266 /* weather.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E861B798EB4003A9266 /* weather.cpp */; };
+		B5DB2EC01B798EC2003A9266 /* 2DMAIZSIM.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E9F1B798EC2003A9266 /* 2DMAIZSIM.for */; };
+		B5DB2EC11B798EC2003A9266 /* AutoIrrigate.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */; };
+		B5DB2EC21B798EC2003A9266 /* carbon_partitioning.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */; };
+		B5DB2EC31B798EC2003A9266 /* dateFunctions.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA51B798EC2003A9266 /* dateFunctions.for */; };
+		B5DB2EC41B798EC2003A9266 /* ERRMES.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA61B798EC2003A9266 /* ERRMES.for */; };
+		B5DB2EC61B798EC2003A9266 /* GRID_BND.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA81B798EC2003A9266 /* GRID_BND.for */; };
+		B5DB2EC71B798EC2003A9266 /* HEATMOV.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA91B798EC2003A9266 /* HEATMOV.for */; };
+		B5DB2EC81B798EC2003A9266 /* hourwea.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EAA1B798EC2003A9266 /* hourwea.for */; };
+		B5DB2EC91B798EC2003A9266 /* Init.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EAB1B798EC2003A9266 /* Init.for */; };
+		B5DB2ECA1B798EC2003A9266 /* MASSBLW.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EAC1B798EC2003A9266 /* MASSBLW.for */; };
+		B5DB2ECB1B798EC2003A9266 /* MNGMB.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EAD1B798EC2003A9266 /* MNGMB.for */; };
+		B5DB2ECC1B798EC2003A9266 /* N_Massbl.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EAE1B798EC2003A9266 /* N_Massbl.for */; };
+		B5DB2ECD1B798EC2003A9266 /* ORTHOFEM.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB01B798EC2003A9266 /* ORTHOFEM.for */; };
+		B5DB2ECE1B798EC2003A9266 /* OUTPUT.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB11B798EC2003A9266 /* OUTPUT.for */; };
+		B5DB2ECF1B798EC2003A9266 /* root_grow_c.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB51B798EC2003A9266 /* root_grow_c.for */; };
+		B5DB2ED01B798EC2003A9266 /* SETMAT01.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB61B798EC2003A9266 /* SETMAT01.for */; };
+		B5DB2ED11B798EC2003A9266 /* SETSUR02.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB71B798EC2003A9266 /* SETSUR02.for */; };
+		B5DB2ED21B798EC2003A9266 /* SETTDB.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB81B798EC2003A9266 /* SETTDB.for */; };
+		B5DB2ED31B798EC2003A9266 /* soilnden.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EB91B798EC2003A9266 /* soilnden.for */; };
+		B5DB2ED41B798EC2003A9266 /* solmov.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBA1B798EC2003A9266 /* solmov.for */; };
+		B5DB2ED61B798EC2003A9266 /* solupt_Y1.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBC1B798EC2003A9266 /* solupt_Y1.for */; };
+		B5DB2ED71B798EC2003A9266 /* SYNCHRON.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */; };
+		B5DB2ED81B798EC2003A9266 /* wateruptake.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBE1B798EC2003A9266 /* wateruptake.for */; };
+		B5DB2ED91B798EC2003A9266 /* Watmov.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EBF1B798EC2003A9266 /* Watmov.for */; };
+		B5DB2EDE1B799427003A9266 /* Ex14-5.for in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2EA71B798EC2003A9266 /* Ex14-5.for */; };
+		B5DB2EE01B799468003A9266 /* libLightEnv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B5DB2EDF1B799468003A9266 /* libLightEnv.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B5DB2E2D1B798B16003A9266 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.1.dylib"; path = "../../../../../../usr/lib/libc++.1.dylib"; sourceTree = "<group>"; };
+		B5DB2E2F1B798B16003A9266 /* MAIZSIM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MAIZSIM; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5DB2E591B798EB4003A9266 /* assemblyinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assemblyinfo.cpp; sourceTree = "<group>"; };
+		B5DB2E5A1B798EB4003A9266 /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
+		B5DB2E5B1B798EB4003A9266 /* controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = controller.h; sourceTree = "<group>"; };
+		B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cpmdate.cpp; sourceTree = "<group>"; };
+		B5DB2E5D1B798EB4003A9266 /* cpmdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpmdate.h; sourceTree = "<group>"; };
+		B5DB2E5E1B798EB4003A9266 /* Crop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Crop.cpp; sourceTree = "<group>"; };
+		B5DB2E5F1B798EB4003A9266 /* Crop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Crop.h; sourceTree = "<group>"; };
+		B5DB2E601B798EB4003A9266 /* Crop.vcproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Crop.vcproj; sourceTree = "<group>"; };
+		B5DB2E611B798EB4003A9266 /* Development.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Development.cpp; sourceTree = "<group>"; };
+		B5DB2E621B798EB4003A9266 /* development.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = development.h; sourceTree = "<group>"; };
+		B5DB2E631B798EB4003A9266 /* ear.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ear.cpp; sourceTree = "<group>"; };
+		B5DB2E641B798EB4003A9266 /* ear.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ear.h; sourceTree = "<group>"; };
+		B5DB2E651B798EB4003A9266 /* gas_exchange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gas_exchange.cpp; sourceTree = "<group>"; };
+		B5DB2E661B798EB4003A9266 /* gas_exchange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gas_exchange.h; sourceTree = "<group>"; };
+		B5DB2E671B798EB4003A9266 /* initinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = initinfo.cpp; sourceTree = "<group>"; };
+		B5DB2E681B798EB4003A9266 /* initinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = initinfo.h; sourceTree = "<group>"; };
+		B5DB2E6A1B798EB4003A9266 /* jsoncpp.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = jsoncpp.o; sourceTree = "<group>"; };
+		B5DB2E6B1B798EB4003A9266 /* leaf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaf.cpp; sourceTree = "<group>"; };
+		B5DB2E6C1B798EB4003A9266 /* leaf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaf.h; sourceTree = "<group>"; };
+		B5DB2E6D1B798EB4003A9266 /* lightenv.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = lightenv.dll; sourceTree = "<group>"; };
+		B5DB2E6E1B798EB4003A9266 /* lightenv.exp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.exports; path = lightenv.exp; sourceTree = "<group>"; };
+		B5DB2E6F1B798EB4003A9266 /* lightenv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lightenv.h; sourceTree = "<group>"; };
+		B5DB2E701B798EB4003A9266 /* lightenv.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = lightenv.lib; sourceTree = "<group>"; };
+		B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = "looking at leaf senescense equations.xls"; sourceTree = "<group>"; };
+		B5DB2E721B798EB4003A9266 /* nodalunit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nodalunit.cpp; sourceTree = "<group>"; };
+		B5DB2E731B798EB4003A9266 /* nodalunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nodalunit.h; sourceTree = "<group>"; };
+		B5DB2E741B798EB4003A9266 /* organ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = organ.cpp; sourceTree = "<group>"; };
+		B5DB2E751B798EB4003A9266 /* organ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = organ.h; sourceTree = "<group>"; };
+		B5DB2E761B798EB4003A9266 /* plant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plant.cpp; sourceTree = "<group>"; };
+		B5DB2E771B798EB4003A9266 /* plant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plant.h; sourceTree = "<group>"; };
+		B5DB2E781B798EB4003A9266 /* radiation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radiation.cpp; sourceTree = "<group>"; };
+		B5DB2E791B798EB4003A9266 /* radiation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radiation.h; sourceTree = "<group>"; };
+		B5DB2E7A1B798EB4003A9266 /* resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; };
+		B5DB2E7B1B798EB4003A9266 /* roots.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = roots.cpp; sourceTree = "<group>"; };
+		B5DB2E7C1B798EB4003A9266 /* Roots.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Roots.h; sourceTree = "<group>"; };
+		B5DB2E7D1B798EB4003A9266 /* sheath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sheath.h; sourceTree = "<group>"; };
+		B5DB2E7E1B798EB4003A9266 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stdafx.cpp; sourceTree = "<group>"; };
+		B5DB2E7F1B798EB4003A9266 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
+		B5DB2E801B798EB4003A9266 /* stem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stem.cpp; sourceTree = "<group>"; };
+		B5DB2E811B798EB4003A9266 /* stem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stem.h; sourceTree = "<group>"; };
+		B5DB2E821B798EB4003A9266 /* thermaltime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thermaltime.cpp; sourceTree = "<group>"; };
+		B5DB2E831B798EB4003A9266 /* thermaltime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = thermaltime.h; sourceTree = "<group>"; };
+		B5DB2E841B798EB4003A9266 /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timer.cpp; sourceTree = "<group>"; };
+		B5DB2E851B798EB4003A9266 /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
+		B5DB2E861B798EB4003A9266 /* weather.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weather.cpp; sourceTree = "<group>"; };
+		B5DB2E871B798EB4003A9266 /* weather.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weather.h; sourceTree = "<group>"; };
+		B5DB2E9F1B798EC2003A9266 /* 2DMAIZSIM.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = 2DMAIZSIM.for; sourceTree = "<group>"; };
+		B5DB2EA01B798EC2003A9266 /* 2dsoil.u2d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 2dsoil.u2d; sourceTree = "<group>"; };
+		B5DB2EA11B798EC2003A9266 /* 2dsoil.vfproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = 2dsoil.vfproj; sourceTree = "<group>"; };
+		B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = AutoIrrigate.for; sourceTree = "<group>"; };
+		B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = carbon_partitioning.for; sourceTree = "<group>"; };
+		B5DB2EA41B798EC2003A9266 /* CopyToFOlder.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CopyToFOlder.bat; sourceTree = "<group>"; };
+		B5DB2EA51B798EC2003A9266 /* dateFunctions.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = dateFunctions.for; sourceTree = "<group>"; };
+		B5DB2EA61B798EC2003A9266 /* ERRMES.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = ERRMES.for; sourceTree = "<group>"; };
+		B5DB2EA71B798EC2003A9266 /* Ex14-5.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = "Ex14-5.for"; sourceTree = "<group>"; };
+		B5DB2EA81B798EC2003A9266 /* GRID_BND.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = GRID_BND.for; sourceTree = "<group>"; };
+		B5DB2EA91B798EC2003A9266 /* HEATMOV.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = HEATMOV.for; sourceTree = "<group>"; };
+		B5DB2EAA1B798EC2003A9266 /* hourwea.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = hourwea.for; sourceTree = "<group>"; };
+		B5DB2EAB1B798EC2003A9266 /* Init.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = Init.for; sourceTree = "<group>"; };
+		B5DB2EAC1B798EC2003A9266 /* MASSBLW.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = MASSBLW.for; sourceTree = "<group>"; };
+		B5DB2EAD1B798EC2003A9266 /* MNGMB.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = MNGMB.for; sourceTree = "<group>"; };
+		B5DB2EAE1B798EC2003A9266 /* N_Massbl.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = N_Massbl.for; sourceTree = "<group>"; };
+		B5DB2EAF1B798EC2003A9266 /* NITVAR.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NITVAR.INS; sourceTree = "<group>"; };
+		B5DB2EB01B798EC2003A9266 /* ORTHOFEM.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = ORTHOFEM.for; sourceTree = "<group>"; };
+		B5DB2EB11B798EC2003A9266 /* OUTPUT.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = OUTPUT.for; sourceTree = "<group>"; };
+		B5DB2EB21B798EC2003A9266 /* public.ins */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = public.ins; sourceTree = "<group>"; };
+		B5DB2EB31B798EC2003A9266 /* PUPLANT.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PUPLANT.INS; sourceTree = "<group>"; };
+		B5DB2EB41B798EC2003A9266 /* PUWEATH.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PUWEATH.INS; sourceTree = "<group>"; };
+		B5DB2EB51B798EC2003A9266 /* root_grow_c.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = root_grow_c.for; sourceTree = "<group>"; };
+		B5DB2EB61B798EC2003A9266 /* SETMAT01.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETMAT01.for; sourceTree = "<group>"; };
+		B5DB2EB71B798EC2003A9266 /* SETSUR02.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETSUR02.for; sourceTree = "<group>"; };
+		B5DB2EB81B798EC2003A9266 /* SETTDB.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETTDB.for; sourceTree = "<group>"; };
+		B5DB2EB91B798EC2003A9266 /* soilnden.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = soilnden.for; sourceTree = "<group>"; };
+		B5DB2EBA1B798EC2003A9266 /* solmov.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solmov.for; sourceTree = "<group>"; };
+		B5DB2EBB1B798EC2003A9266 /* solupt.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solupt.for; sourceTree = "<group>"; };
+		B5DB2EBC1B798EC2003A9266 /* solupt_Y1.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solupt_Y1.for; sourceTree = "<group>"; };
+		B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SYNCHRON.for; sourceTree = "<group>"; };
+		B5DB2EBE1B798EC2003A9266 /* wateruptake.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = wateruptake.for; sourceTree = "<group>"; };
+		B5DB2EBF1B798EC2003A9266 /* Watmov.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = Watmov.for; sourceTree = "<group>"; };
+		B5DB2EDF1B799468003A9266 /* libLightEnv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLightEnv.a; path = ../../Lightenv/libLightEnv.a; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B5DB2E2C1B798B16003A9266 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5DB2EE01B799468003A9266 /* libLightEnv.a in Frameworks */,
+				B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B5DB2E261B798B16003A9266 = {
+			isa = PBXGroup;
+			children = (
+				B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */,
+				B5DB2EDF1B799468003A9266 /* libLightEnv.a */,
+				B5DB2E391B798B4E003A9266 /* Source */,
+				B5DB2E301B798B16003A9266 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B5DB2E301B798B16003A9266 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B5DB2E2F1B798B16003A9266 /* MAIZSIM */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B5DB2E391B798B4E003A9266 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				B5DB2E581B798EB4003A9266 /* Crop source */,
+				B5DB2E9E1B798EC2003A9266 /* Soil Source */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		B5DB2E581B798EB4003A9266 /* Crop source */ = {
+			isa = PBXGroup;
+			children = (
+				B5DB2E591B798EB4003A9266 /* assemblyinfo.cpp */,
+				B5DB2E5A1B798EB4003A9266 /* controller.cpp */,
+				B5DB2E5B1B798EB4003A9266 /* controller.h */,
+				B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */,
+				B5DB2E5D1B798EB4003A9266 /* cpmdate.h */,
+				B5DB2E5E1B798EB4003A9266 /* Crop.cpp */,
+				B5DB2E5F1B798EB4003A9266 /* Crop.h */,
+				B5DB2E601B798EB4003A9266 /* Crop.vcproj */,
+				B5DB2E611B798EB4003A9266 /* Development.cpp */,
+				B5DB2E621B798EB4003A9266 /* development.h */,
+				B5DB2E631B798EB4003A9266 /* ear.cpp */,
+				B5DB2E641B798EB4003A9266 /* ear.h */,
+				B5DB2E651B798EB4003A9266 /* gas_exchange.cpp */,
+				B5DB2E661B798EB4003A9266 /* gas_exchange.h */,
+				B5DB2E671B798EB4003A9266 /* initinfo.cpp */,
+				B5DB2E681B798EB4003A9266 /* initinfo.h */,
+				B5DB2E691B798EB4003A9266 /* jsoncpp */,
+				B5DB2E6B1B798EB4003A9266 /* leaf.cpp */,
+				B5DB2E6C1B798EB4003A9266 /* leaf.h */,
+				B5DB2E6D1B798EB4003A9266 /* lightenv.dll */,
+				B5DB2E6E1B798EB4003A9266 /* lightenv.exp */,
+				B5DB2E6F1B798EB4003A9266 /* lightenv.h */,
+				B5DB2E701B798EB4003A9266 /* lightenv.lib */,
+				B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */,
+				B5DB2E721B798EB4003A9266 /* nodalunit.cpp */,
+				B5DB2E731B798EB4003A9266 /* nodalunit.h */,
+				B5DB2E741B798EB4003A9266 /* organ.cpp */,
+				B5DB2E751B798EB4003A9266 /* organ.h */,
+				B5DB2E761B798EB4003A9266 /* plant.cpp */,
+				B5DB2E771B798EB4003A9266 /* plant.h */,
+				B5DB2E781B798EB4003A9266 /* radiation.cpp */,
+				B5DB2E791B798EB4003A9266 /* radiation.h */,
+				B5DB2E7A1B798EB4003A9266 /* resource.h */,
+				B5DB2E7B1B798EB4003A9266 /* roots.cpp */,
+				B5DB2E7C1B798EB4003A9266 /* Roots.h */,
+				B5DB2E7D1B798EB4003A9266 /* sheath.h */,
+				B5DB2E7E1B798EB4003A9266 /* stdafx.cpp */,
+				B5DB2E7F1B798EB4003A9266 /* stdafx.h */,
+				B5DB2E801B798EB4003A9266 /* stem.cpp */,
+				B5DB2E811B798EB4003A9266 /* stem.h */,
+				B5DB2E821B798EB4003A9266 /* thermaltime.cpp */,
+				B5DB2E831B798EB4003A9266 /* thermaltime.h */,
+				B5DB2E841B798EB4003A9266 /* timer.cpp */,
+				B5DB2E851B798EB4003A9266 /* timer.h */,
+				B5DB2E861B798EB4003A9266 /* weather.cpp */,
+				B5DB2E871B798EB4003A9266 /* weather.h */,
+			);
+			path = "Crop source";
+			sourceTree = "<group>";
+		};
+		B5DB2E691B798EB4003A9266 /* jsoncpp */ = {
+			isa = PBXGroup;
+			children = (
+				B5DB2E6A1B798EB4003A9266 /* jsoncpp.o */,
+			);
+			path = jsoncpp;
+			sourceTree = "<group>";
+		};
+		B5DB2E9E1B798EC2003A9266 /* Soil Source */ = {
+			isa = PBXGroup;
+			children = (
+				B5DB2E9F1B798EC2003A9266 /* 2DMAIZSIM.for */,
+				B5DB2EA01B798EC2003A9266 /* 2dsoil.u2d */,
+				B5DB2EA11B798EC2003A9266 /* 2dsoil.vfproj */,
+				B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */,
+				B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */,
+				B5DB2EA41B798EC2003A9266 /* CopyToFOlder.bat */,
+				B5DB2EA51B798EC2003A9266 /* dateFunctions.for */,
+				B5DB2EA61B798EC2003A9266 /* ERRMES.for */,
+				B5DB2EA71B798EC2003A9266 /* Ex14-5.for */,
+				B5DB2EA81B798EC2003A9266 /* GRID_BND.for */,
+				B5DB2EA91B798EC2003A9266 /* HEATMOV.for */,
+				B5DB2EAA1B798EC2003A9266 /* hourwea.for */,
+				B5DB2EAB1B798EC2003A9266 /* Init.for */,
+				B5DB2EAC1B798EC2003A9266 /* MASSBLW.for */,
+				B5DB2EAD1B798EC2003A9266 /* MNGMB.for */,
+				B5DB2EAE1B798EC2003A9266 /* N_Massbl.for */,
+				B5DB2EAF1B798EC2003A9266 /* NITVAR.INS */,
+				B5DB2EB01B798EC2003A9266 /* ORTHOFEM.for */,
+				B5DB2EB11B798EC2003A9266 /* OUTPUT.for */,
+				B5DB2EB21B798EC2003A9266 /* public.ins */,
+				B5DB2EB31B798EC2003A9266 /* PUPLANT.INS */,
+				B5DB2EB41B798EC2003A9266 /* PUWEATH.INS */,
+				B5DB2EB51B798EC2003A9266 /* root_grow_c.for */,
+				B5DB2EB61B798EC2003A9266 /* SETMAT01.for */,
+				B5DB2EB71B798EC2003A9266 /* SETSUR02.for */,
+				B5DB2EB81B798EC2003A9266 /* SETTDB.for */,
+				B5DB2EB91B798EC2003A9266 /* soilnden.for */,
+				B5DB2EBA1B798EC2003A9266 /* solmov.for */,
+				B5DB2EBB1B798EC2003A9266 /* solupt.for */,
+				B5DB2EBC1B798EC2003A9266 /* solupt_Y1.for */,
+				B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */,
+				B5DB2EBE1B798EC2003A9266 /* wateruptake.for */,
+				B5DB2EBF1B798EC2003A9266 /* Watmov.for */,
+			);
+			path = "Soil Source";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B5DB2E2E1B798B16003A9266 /* MAIZSIM */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5DB2E361B798B16003A9266 /* Build configuration list for PBXNativeTarget "MAIZSIM" */;
+			buildPhases = (
+				B5DB2E2B1B798B16003A9266 /* Sources */,
+				B5DB2E2C1B798B16003A9266 /* Frameworks */,
+				B5DB2E2D1B798B16003A9266 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MAIZSIM;
+			productName = MAIZSIM;
+			productReference = B5DB2E2F1B798B16003A9266 /* MAIZSIM */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B5DB2E271B798B16003A9266 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = "Kyungdahm Yun";
+				TargetAttributes = {
+					B5DB2E2E1B798B16003A9266 = {
+						CreatedOnToolsVersion = 6.3.2;
+					};
+				};
+			};
+			buildConfigurationList = B5DB2E2A1B798B16003A9266 /* Build configuration list for PBXProject "MAIZSIM" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B5DB2E261B798B16003A9266;
+			productRefGroup = B5DB2E301B798B16003A9266 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B5DB2E2E1B798B16003A9266 /* MAIZSIM */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B5DB2E2B1B798B16003A9266 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5DB2ECF1B798EC2003A9266 /* root_grow_c.for in Sources */,
+				B5DB2E981B798EB4003A9266 /* roots.cpp in Sources */,
+				B5DB2ED21B798EC2003A9266 /* SETTDB.for in Sources */,
+				B5DB2EC81B798EC2003A9266 /* hourwea.for in Sources */,
+				B5DB2ED61B798EC2003A9266 /* solupt_Y1.for in Sources */,
+				B5DB2E8D1B798EB4003A9266 /* ear.cpp in Sources */,
+				B5DB2EC91B798EC2003A9266 /* Init.for in Sources */,
+				B5DB2EC01B798EC2003A9266 /* 2DMAIZSIM.for in Sources */,
+				B5DB2E951B798EB4003A9266 /* organ.cpp in Sources */,
+				B5DB2E9C1B798EB4003A9266 /* timer.cpp in Sources */,
+				B5DB2ED81B798EC2003A9266 /* wateruptake.for in Sources */,
+				B5DB2E9D1B798EB4003A9266 /* weather.cpp in Sources */,
+				B5DB2E8E1B798EB4003A9266 /* gas_exchange.cpp in Sources */,
+				B5DB2EDE1B799427003A9266 /* Ex14-5.for in Sources */,
+				B5DB2E9A1B798EB4003A9266 /* stem.cpp in Sources */,
+				B5DB2ED01B798EC2003A9266 /* SETMAT01.for in Sources */,
+				B5DB2ECC1B798EC2003A9266 /* N_Massbl.for in Sources */,
+				B5DB2ECD1B798EC2003A9266 /* ORTHOFEM.for in Sources */,
+				B5DB2ED41B798EC2003A9266 /* solmov.for in Sources */,
+				B5DB2ED91B798EC2003A9266 /* Watmov.for in Sources */,
+				B5DB2E991B798EB4003A9266 /* stdafx.cpp in Sources */,
+				B5DB2E941B798EB4003A9266 /* nodalunit.cpp in Sources */,
+				B5DB2EC11B798EC2003A9266 /* AutoIrrigate.for in Sources */,
+				B5DB2ECB1B798EC2003A9266 /* MNGMB.for in Sources */,
+				B5DB2E971B798EB4003A9266 /* radiation.cpp in Sources */,
+				B5DB2ECA1B798EC2003A9266 /* MASSBLW.for in Sources */,
+				B5DB2E911B798EB4003A9266 /* leaf.cpp in Sources */,
+				B5DB2E9B1B798EB4003A9266 /* thermaltime.cpp in Sources */,
+				B5DB2EC71B798EC2003A9266 /* HEATMOV.for in Sources */,
+				B5DB2E8C1B798EB4003A9266 /* Development.cpp in Sources */,
+				B5DB2ED11B798EC2003A9266 /* SETSUR02.for in Sources */,
+				B5DB2ED31B798EC2003A9266 /* soilnden.for in Sources */,
+				B5DB2E961B798EB4003A9266 /* plant.cpp in Sources */,
+				B5DB2EC61B798EC2003A9266 /* GRID_BND.for in Sources */,
+				B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */,
+				B5DB2EC41B798EC2003A9266 /* ERRMES.for in Sources */,
+				B5DB2ED71B798EC2003A9266 /* SYNCHRON.for in Sources */,
+				B5DB2E8F1B798EB4003A9266 /* initinfo.cpp in Sources */,
+				B5DB2EC21B798EC2003A9266 /* carbon_partitioning.for in Sources */,
+				B5DB2EC31B798EC2003A9266 /* dateFunctions.for in Sources */,
+				B5DB2ECE1B798EC2003A9266 /* OUTPUT.for in Sources */,
+				B5DB2E891B798EB4003A9266 /* controller.cpp in Sources */,
+				B5DB2E8A1B798EB4003A9266 /* cpmdate.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B5DB2E341B798B16003A9266 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IFORT_DATA_CMNALN = default;
+				IFORT_DBG_PARAM = all;
+				IFORT_DEBUG = YES;
+				IFORT_OPT_LEVEL = none;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B5DB2E351B798B16003A9266 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IFORT_DATA_CMNALN = default;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B5DB2E371B798B16003A9266 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../../Lightenv",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B5DB2E381B798B16003A9266 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../../Lightenv",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B5DB2E2A1B798B16003A9266 /* Build configuration list for PBXProject "MAIZSIM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5DB2E341B798B16003A9266 /* Debug */,
+				B5DB2E351B798B16003A9266 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5DB2E361B798B16003A9266 /* Build configuration list for PBXNativeTarget "MAIZSIM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5DB2E371B798B16003A9266 /* Debug */,
+				B5DB2E381B798B16003A9266 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B5DB2E271B798B16003A9266 /* Project object */;
+}
