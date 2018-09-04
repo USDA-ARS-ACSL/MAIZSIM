@@ -54,10 +54,12 @@ void CGas_exchange::getParms()
 	// Values in Kim (2006) are for 31C, and the values here are normalized for 25C. SK
 	Parms.Rd25     =          2.0;
 	Parms.Ear      =        39800;
-	Parms.g0 = 0.04;
-    Parms.g1 =  4.0;   //in P. J. Sellers, et al.Science 275, 502 (1997), g0 is b, of which the value for c4 plant is 0.04
+	//Parms.g0 = 0.04;
+	//Parms.g1 =  4.0;   //in P. J. Sellers, et al.Science 275, 502 (1997), g0 is b, of which the value for c4 plant is 0.04
 	                   //and g1 is m, of which the value for c4 plant is about 4 YY)
-	                   // need to update to new values from Bill Bauerle's 2017 paper g0=0.017 and g1=4.53
+	// Ball-Berry model parameters from Miner and Bauerle 2017, used to be 0.04 and 4.0, respectively (2018-09-04: KDY)
+	Parms.g0 = 0.017;
+	Parms.g1 = 4.53;
 	Parms.beta_ABA = 1.48e2; //Tardieu-Davies beta, Dewar (2002) Need the references !?
 	Parms.delta = -1.0;
 	Parms.a_ABA = 1.0e-4;
