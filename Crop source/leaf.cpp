@@ -152,7 +152,9 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
   //+(1-C2_effect) proposed C2_effect for elongAge, add to 1.0
 	if (appeared && !mature)
 	{
-		elongAge += dv->beta_fn(T, 1.0,dv->get_T_Opt(), dv->get_T_ceil())*dD; // Todo: implement Parent and Tardieu (2011, 2012) approach for leaf elongation in response to T and VPD, and normalized at 20C, SK, Nov 2012
+		// Todo: implement Parent and Tardieu (2011, 2012) approach for leaf elongation in response to T and VPD, and normalized at 20C, SK, Nov 2012
+		double dt = dv->beta_fn(T, 1.0, dv->get_T_Opt(), dv->get_T_ceil())*dD;
+		elongAge += dt;
 		// elongAge indicates where it is now along the elongation stage or duration. duration is determined by totallengh/maxElongRate which gives the shortest duration to reach full elongation in the unit of days.
 		elongAge = __min(growthDuration, elongAge);
 
@@ -163,7 +165,7 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 		// The following equation is a beta function. The analogs are - growthDuration is T_Ceil, growthDuration_half is optimum temp (T_OPT), 
 		 //                                          elongage is temperature
 		PotentialAreaIncrease =__max(0.0,maxExpansionRate*__max(0.0, (growthDuration-elongAge)/(growthDuration- growthDuration_half)*
-			                         pow(elongAge/growthDuration_half,growthDuration_half/(growthDuration-growthDuration_half)))*dD);
+			                         pow(elongAge/growthDuration_half,growthDuration_half/(growthDuration-growthDuration_half)))*dt);
 	                                           //potential leaf area increase without any limitations
       //C2_effect = 1.0; // place holder
 		double dA = PotentialAreaIncrease; // growth temperature effect is included in determining potential area
