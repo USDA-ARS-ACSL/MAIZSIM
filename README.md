@@ -1,4 +1,4 @@
-MAIZSIM is a corn simulation model developed by the USDA-ARS Crop Systems and Global Change Laboratory and Univ. of Washington School of Environmental and Forest Sciences. 
+MAIZSIM is a corn simulation model developed by the USDA-ARS Adaptive Cropping Systems Laboratory and Univ. of Washington School of Environmental and Forest Sciences. 
 
 The developers are 
 
@@ -18,8 +18,8 @@ The code compiles in visual studio.net. It has recently been revised to compile 
 
 There are two subprojects, Crop Source and Soil Source. 
 
-More documention is being prepared. 
+More documention is being prepared. See the "how to run model" file for information on how to set up the input files and run the executable from the command line. 
 
-Input files for one test case are in the folder Test_Ver9.1
+Input files for test cases related to the data from the Maryland Eastern Shore and Delaware used in the first paper are in the folder Test_Ver9.1 and MDEasternShore. The MDEasternShore data work with the newest version (1.42) of the crop model as of Oct 25, 2016. This file will be updated as changes occur
 
 
