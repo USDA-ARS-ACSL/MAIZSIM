@@ -185,7 +185,10 @@ C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
       IF(MSW2.eq.0) WINDA=CLIMAT(1)
-      IF(MSW3.eq.0) IRAV= CLIMAT(2)
+      IF(MSW3.eq.0) then 
+          IRAV= CLIMAT(2)
+          AutoIrrigAmt=IRAV*BIR   !need to handle case when and if intensities are given per hour
+       EndIf
 C     IF(MSW4.eq.0.AND.NumSol.gt.0) then
 Cdt 02/03/2009 changed from 0-MSW4      
       IF(MSW4.eq.1.AND.NumSol.gt.0) then
@@ -1001,7 +1004,7 @@ c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
 cdt change this for a test
-               VarBT(i,2)=VarBT(i,2)*4.1856*60.0*24.0/1000
+               VarBT(i,2)=VarBT(i,2)*4.1856*60.0*24.0
 cdt /1000.0
                VarBT(i,3)=VarBT(i,2)*TairN
 *  units are now J cm-2 d-1

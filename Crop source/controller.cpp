@@ -13,6 +13,7 @@
 #define EPSILON 0.001   // floating point comparison tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #endif
+#define comma ","
 #define MINUTESPERDAY (24*60);
 
 // const a = 17.27; b = 237.7; //constant in deg C
@@ -134,6 +135,7 @@ void CController::initialize()
  			<< setw(6) << "jday" 
 			<< setw(8) << "time"
 			<< setw(8) << "Leaves"
+			<< setw(11)<< "MaturLvs"
 			<< setw(8) << "Dropped"
 			<< setw(9) << "LA/pl"
 			<< setw(9) << "LA_dead"
@@ -160,8 +162,8 @@ void CController::initialize()
 		    << setw(8) << "totalDM"
 			<< setw(8) << "shootDM"
 			<< setw(8) << "earDM"
-			<< setw(8) << "GrleafDM"
-			<< setw(8) << "DrpLfDM"
+			<< setw(10) << "TotleafDM"
+			<< setw(10) << "DrpLfDM"
 			<< setw(8) << "stemDM"
 			<< setw(8) << "rootDM"
 			<< setw(8) << "SoilRt"
@@ -246,12 +248,12 @@ void CController::readWeatherFrom2DSOIL(const TWeather & wthr)
 
 
 
-int CController::run(const TWeather & wthr, double PredawnLWP)
+int CController::run(const TWeather & wthr)
 {
 	readWeatherFrom2DSOIL(wthr);
     if (weather[iCur].jday >= initInfo.sowingDay && weather[iCur].jday <= lastDayOfSim)
 	{
-		plant->update(weather[iCur], PredawnLWP);
+		plant->update(weather[iCur]);
 		RootWeightFrom2DSOIL=wthr.TotalRootWeight;
 		MaxRootDepth=        wthr.MaxRootDepth;
 		AvailableWater=      wthr.ThetaAvail;
@@ -323,47 +325,48 @@ void CController::outputToCropFile()
 		    ofstream ostr(cropFile, ios::app);
 			ostr << setiosflags(ios::right) 
 				<< setiosflags(ios::fixed)
-				<< setw(9) << DateForOutput
- 				<< setw(6) << weather[iCur].jday 
-				<< setw(8) << setprecision(3) << weather[iCur].time*24.0
-				<< setw(8) << setprecision(2) << plant->get_develop()->get_LvsAppeared()
-				<< setw(8)  << setprecision(2) << plant->get_nodalUnit()->get_leaf()->get_TotalDroppedLeaves()
-				<< setw(9) << setprecision(2) << plant->calcGreenLeafArea()
-				<< setw(9) << setprecision(2) << plant->calcSenescentLeafArea()
-				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100)
-				<< setw(8) << setprecision(2) << weather[iCur].RH
-				<< setw(8) << setprecision(4) << weather[iCur].LeafWP   //print out leaf water potential Yang 8/22/06
-				<< setw(8) << setprecision(2) << weather[iCur].PFD
-				<< setw(8) << setprecision(2) << weather[iCur].solRad
-				<< setw(8) << setprecision(2) << weather[iCur].soilT
-				<< setw(8) << setprecision(2) << weather[iCur].airT
-				<< setw(8) << setprecision(2) << plant->get_tmpr()
-                << setw(10) << setprecision(3) << plant->get_ET_Old()
-			    << setw(10) << setprecision(3) << ET_supply  //in both cases transpiration is grams per plant per hour 
+				<< setw(9) << DateForOutput << comma
+ 				<< setw(6) << weather[iCur].jday <<comma
+				<< setw(8) << setprecision(0) << weather[iCur].time*24.0 << comma 
+				<< setw(8) << setprecision(2) << plant->get_develop()->get_LvsAppeared() << comma
+				<< setw(8) << setprecision(2) << plant->get_nodalUnit()->get_leaf()->get_TotalMatureLeaves() << comma
+				<< setw(8)  << setprecision(2) << plant->get_nodalUnit()->get_leaf()->get_TotalDroppedLeaves() << comma
+				<< setw(9) << setprecision(2) << plant->calcGreenLeafArea() << comma
+				<< setw(9) << setprecision(2) << plant->calcSenescentLeafArea() << comma
+				<< setw(8) << setprecision(2) << plant->calcGreenLeafArea()*initInfo.plantDensity/(100*100) << comma
+				<< setw(8) << setprecision(2) << weather[iCur].RH << comma
+				<< setw(8) << setprecision(4) << weather[iCur].LeafWP << comma  //print out leaf water potential Yang 8/22/06
+				<< setw(8) << setprecision(2) << weather[iCur].PFD << comma
+				<< setw(8) << setprecision(2) << weather[iCur].solRad << comma
+				<< setw(8) << setprecision(2) << weather[iCur].soilT << comma
+				<< setw(8) << setprecision(2) << weather[iCur].airT << comma
+				<< setw(8) << setprecision(2) << plant->get_tmpr() << comma
+                << setw(10) << setprecision(3) << plant->get_ET_Old() << comma
+			    << setw(10) << setprecision(3) << ET_supply << comma //in both cases transpiration is grams per plant per hour 
 			
-				<< setw(8) << setprecision(4) << plant->get_Pn()   //g Carbo per plant per hour
-				<< setw(8) << setprecision(4) << plant->get_Pg()    
-				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() //dt 03/2011 added to better calc mass balance g carbon per plant per hour
-				<< setw(8) << setprecision(4) << av_gs  //return average stomatal conductance Yang 10/31/06
-			    << setw(9) << setprecision(3) << vpd
-				<< setw(10) << setprecision(4) << plant->get_N()
-				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand()
-				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake()
-				<< setw(10) << setprecision(4) << plant->get_LeafN() //return mass of N in leaves YY
-				<< setw(10)<< setprecision(4)<< plant->get_roots()->get_ActualCarboIncrement()
-				<< setw(8) << setprecision(3) << plant->get_mass()
-				<< setw(8) << setprecision(3) << plant->get_shootMass()  //masses are grams per plant
-				<< setw(8) << setprecision(2) << plant->get_earMass()
-				<< setw(8) << setprecision(2) << plant->get_leafMass()
-				<< setw(8) << setprecision(2) << plant->get_DroppedLeafMass()
-				<< setw(8) << setprecision(2) << plant->get_stemMass()
-				<< setw(8) << setprecision(3) << plant->get_rootMass()
-				<< setw(8) << setprecision(3) << RootWeightFrom2DSOIL
-				<< setw(8) << setprecision(1) << MaxRootDepth
-				<< setw(12) << setprecision(3) << AvailableWater
-				<< setw(8) << setprecision(2) << plant->get_C_reserve() 
-				<< setw(20)<< setiosflags(ios::skipws) << s
-				<< setw(9) << setprecision(2)  << weather[iCur].dayLength
+				<< setw(8) << setprecision(4) << plant->get_Pn() << comma   //g Carbo per plant per hour
+				<< setw(8) << setprecision(4) << plant->get_Pg() << comma
+				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() << comma //dt 03/2011 added to better calc mass balance g carbon per plant per hour
+				<< setw(8) << setprecision(4) << av_gs << comma  //return average stomatal conductance Yang 10/31/06
+			    << setw(9) << setprecision(3) << vpd << comma
+				<< setw(10) << setprecision(4) << plant->get_N() << comma
+				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma
+				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake() << comma
+				<< setw(10) << setprecision(4) << plant->get_LeafN() << comma //return mass of N in leaves YY
+				<< setw(10)<< setprecision(4)<< plant->get_roots()->get_ActualCarboIncrement() << comma
+				<< setw(8) << setprecision(3) << plant->get_mass() << comma
+				<< setw(8) << setprecision(3) << plant->get_shootMass() << comma  //masses are grams per plant
+				<< setw(8) << setprecision(2) << plant->get_earMass() << comma
+				<< setw(8) << setprecision(2) << plant->get_leafMass() << comma
+				<< setw(8) << setprecision(2) << plant->get_DroppedLeafMass() << comma
+				<< setw(8) << setprecision(2) << plant->get_stemMass() << comma
+				<< setw(8) << setprecision(3) << plant->get_rootMass() << comma
+				<< setw(8) << setprecision(3) << RootWeightFrom2DSOIL << comma
+				<< setw(8) << setprecision(1) << MaxRootDepth << comma
+				<< setw(12) << setprecision(3) << AvailableWater << comma
+				<< setw(8) << setprecision(2) << plant->get_C_reserve() << comma
+				<< setw(20)<< setiosflags(ios::skipws) << "\"" + s + "\"" 
+			//	<< setw(9) << setprecision(2)  << weather[iCur].dayLength
             //    << setw(9) << setprecision(2) << plant->get_develop()->get_GDDsum()
 				<< endl; 
 		ostr.close();
@@ -392,23 +395,23 @@ void CController::outputToLeafFile()
 	{ 
 		nU=&plant->get_nodalUnit()[i]; // note the use of "&" I needed to call a function
 		                              // outside the class as opposed to calling a function in  a class
-		ostr << setw(11) << DateForOutput
-			<< setw(7)   << weather[iCur].jday 
-			<< setw(3)   << setprecision(0) << weather[iCur].time*24.0
-			<< setw(9)   << setprecision(2) << plant->get_develop()->get_LvsInitiated()
-			<< setw(9)   << setprecision(2) << plant->get_develop()->get_LvsAppeared()
-			<< setw(9)   << setprecision (0)<< nU->get_leaf()->get_Rank()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_greenArea()
+		ostr << setw(11) << DateForOutput << comma
+			<< setw(7)   << weather[iCur].jday << comma
+			<< setw(3)   << setprecision(0) << weather[iCur].time*24.0 << comma
+			<< setw(9)   << setprecision(2) << plant->get_develop()->get_LvsInitiated() << comma
+			<< setw(9)   << setprecision(2) << plant->get_develop()->get_LvsAppeared() << comma
+			<< setw(9)   << setprecision (0)<< nU->get_leaf()->get_Rank() << comma
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_greenArea() << comma
 //			<< scientific
-			<< setw(10)   << setprecision(4) << nU->get_leaf()->get_mass()
+			<< setw(10)   << setprecision(4) << nU->get_leaf()->get_mass() << comma
 			<< fixed
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_senescentArea()
-            << setw(9)   << setprecision(3) << nU->get_leaf()->get_potentialArea()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_Elongation_Age()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_N_content() 
-			<< setw(9)   << setprecision(1) << nU->get_leaf()->get_SLA()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->isDropped()
-			<< setw(9)   << setprecision(3) << nU->get_leaf()->isGrowing()
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_senescentArea() << comma
+            << setw(9)   << setprecision(3) << nU->get_leaf()->get_potentialArea() << comma
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_Elongation_Age() << comma
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->get_N_content() << comma
+			<< setw(9)   << setprecision(1) << nU->get_leaf()->get_SLA() << comma
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->isDropped() << comma
+			<< setw(9)   << setprecision(3) << nU->get_leaf()->isGrowing() << comma
 			<< setw(9) << setprecision(2) << plant->get_develop()->get_GDDsum()
 			<< endl; 
 	}

@@ -71,6 +71,7 @@ int CDevelopment::update(const TWeather& wthr)
 {
 	double Jday = wthr.jday;
 	T_cur = max(0., wthr.airT);
+	T_air = wthr.airT;
 	if (LvsAppeared < 9) T_cur = max(0., wthr.soilT);
 	double addLeafPhotoPeriod, addLeafTemperature, addLeafTotal;
 	//	double dt = initInfo.timeStep/(24*60); //converting minute to day decimal, 1= a day
@@ -101,8 +102,9 @@ int CDevelopment::update(const TWeather& wthr)
 			{
 				emergence.done = true;
 				emergence.daytime = wthr.daytime;
-				GDDsum = 0.0; //reset GDDsum from emergernce, SK
+				
 				cout << "* Emergence: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				GDDsum = 0.0; //reset GDDsum from emergernce, SK
 				emerge_gdd = GDDsum; //gdd at emergence YY 4/2/09
 				//	corn->LvsAppeared = 1.0;
 			}
@@ -263,3 +265,22 @@ double CDevelopment::calcGDD(double T_avg)
 	//	if (Silked = false)  return b1*T_avg*T_avg*(1-0.6667*T_avg/T_opt);
 	//	else return 5.358 + 0.011178*T_avg*T_avg;
 }
+
+//create a function which simulates the reducing in leaf expansion rate
+//when predawn leaf water potential decreases. Parameterization of rf_psil
+//and rf_sensitivity are done with the data from Boyer (1970) and Tanguilig et al (1987) YY
+double CDevelopment::LWPeffect(double predawn_psi_bars, double threshold)
+{
+	//DT Oct 10, 2012 changed this so it was not as sensitive to stress near -0.5 lwp
+	//SK Sept 16, 2014 recalibrated/rescaled parameter estimates in Yang's paper. The scale of Boyer data wasn't set correctly
+	//sensitivity = 1.92, LeafWPhalf = -1.86, the sensitivity parameter may be raised by 0.3 to 0.5 to make it less sensitivy at high LWP, SK
+
+	double psi_f = -1.4251; // -1.0, was -1.4251   later changed to -2.3;
+	double s_f = 0.4258; // was 0.4258 0.5;
+	double psi_th = threshold; // threshold wp below which stress effect shows up
+	double effect;
+	effect = __min(1.0, (1 + exp(psi_f*s_f)) / (1 + exp(s_f*(psi_f - (predawn_psi_bars - psi_th)))));
+	if (effect >1) effect = 1;
+	return effect;
+}
+

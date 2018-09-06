@@ -50,6 +50,7 @@ local.properties
 *.suo
 *.user
 *.sln.docstates
+*.db
 
 # Build results
 
@@ -231,7 +232,21 @@ pip-log.txt
 # Mac / Linux #
 ###############
 *.o
-Crop source/copydll.bat
-Soil Source/CopyToTestVer.bat
+#Local files
+Crop source/*.bat
+Soil Source/*.bat
 Test_Ver9.1/Crop.dll
 Test_Ver9.1/2dsoil.exe
+AgMipFace/
+AgMipET/
+ASA2013/
+Backup/
+Debug/
+Documentation/
+Field2005/
+Interface stuff/
+MDEasternShore/
+Runoff and Ponding/
+SolarCorr/
+
+

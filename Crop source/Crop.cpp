@@ -14,6 +14,7 @@
 using namespace std;
 #include <cmath>
 #define endl "\n"
+#define comma ","
 
 			 // note that we have to dereference the variable in order to
 			 // assign a value that can be passed back to 2DSOIL. This is 
@@ -157,13 +158,13 @@ void crop_(struct
 				}
 				wthr.airT = Weather->TAIR[time_public-> iTime-1];
 				wthr.PFD = Weather->par[time_public->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
-				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //conversion from Wm-2 to J m-2 in one hour Total Radiation incident at soil surface
+				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //one hour Total Radiation incident at soil surface (Wm-2)
 				Es = (0.611*exp(17.502*wthr.airT/(240.97+wthr.airT))); // saturated vapor pressure at airT
 				wthr.RH = (1-(Weather->VPD[time_public->iTime-1]/Es))*100.0; // relative humidity in percent
 				wthr.rain = Weather->RINT[time_public->iTime-1];
 				wthr.wind = Weather->WIND*(1000.0/3600.0); // conversion from km hr-1 to m s-1
 				wthr.dayLength = Weather->daylng;
-				wthr.LeafWP = SHOOTR->LeafWP/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06
+				wthr.LeafWP = SHOOTR->LeafWP/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06 MPa
 				wthr.pcrl=SHOOTR->PCRL/PopSlab/24.;
 				wthr.pcrq=SHOOTR->PCRQ/PopSlab/24.;
 				//since LeafWP in 2dsoil is in bar but in maizesim is in MPa, so, have to
@@ -173,7 +174,7 @@ void crop_(struct
 					//from SHOOTR to the wthr object. YY
 
 				{
-					PredawnLWP=SHOOTR->LeafWP; //Here LeafWP is in bar. Since the LWPeffect in leaf.cpp uses leaf water potential
+					wthr.PredawnLWP=SHOOTR->LeafWP; //Here LeafWP is in bar. Since the LWPeffect in leaf.cpp uses leaf water potential
 					//in bar, so here PredawnLWP is in bar, instead of being scaled to MPa. YY
 				}
 
@@ -202,7 +203,7 @@ void crop_(struct
 				
 				if (NitrogenUptake >0 ) 
 				{
-					double nuptake = NitrogenUptake/PopSlab;
+					double nuptake = NitrogenUptake/PopSlab; //uptake is now grams per plant
 					double leafloss = pSC->getPlant()->get_droppedLfArea();
 					double nloss = leafloss*SLNmin;
 					
@@ -272,7 +273,7 @@ void crop_(struct
 			int ier = pSC->getErrStatus();
 			if ( ier == 0 ) 
 			{
-				ier = pSC->run(wthr, PredawnLWP); //Pass both weather and leaf water potential into the "run" function
+				ier = pSC->run(wthr); //Pass both weather and leaf water potential into the "run" function
 				//of the controller pSC YY
 				// need to get rid of other run module (with only wthr) done?
 				// need to add PredawnLWP to wthr structure
@@ -286,7 +287,7 @@ void crop_(struct
 				{
 					if (!pSC->getPlant()->get_develop()->Germinated())
 					{
-						cout << "Germinated on:" <<wthr.jday <<endl;
+						cout << "Germinating:" <<wthr.jday <<endl;
 					} 
 				}
 			}
@@ -388,12 +389,12 @@ void crop_(struct
 				
 				if (shoot_weightPerM2<100)
 				{
-					NitrogenRatio = a/100; //when shoot weight is lower than 100 g m-2, then nitrogen concentration is assumed to by .0410 g/g
+					NitrogenRatio = N_min/100; //when shoot weight is lower than 100 g m-2, then nitrogen concentration is assumed to by .0410 g/g
 				}
 				else
 				{
 					
-                    NitrogenRatio = a/100.0 *pow(shoot_weightPerM2,(1.0-b)); //sqrt(shoot_weightPerM2); //Calcualte above ground potential N concentration 
+                    NitrogenRatio = N_min/100.0 *pow(shoot_weightPerM2,(1.0-N_shape)); //sqrt(shoot_weightPerM2); //Calcualte above ground potential N concentration 
 				//concentration as a function of aboveground biomass (Greenwood et al., 1990; Lindquist et al., 2007) YY
 				}
                 pSC->getPlant()->set_NitrogenRatio(NitrogenRatio/10.0);
@@ -410,17 +411,17 @@ void crop_(struct
 				if (shoot_weightPerM2<100) //if shoot weight<100 (g m-2) then U_P is calculated this way 
 				{
 			
-					U_P = (a/100.0)*massIncrease*24; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
+					U_P = (N_min/100.0)*massIncrease*24; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
 				}
 				else //otherwise, it is calculated like this (Equation 6, Lindquist et al., 2007) YY
 				{
-					U_P = ((1.0-b)*a*10.0/100.0)*pow(shoot_weightPerM2,-b)*massIncrease*24;
+					U_P = ((1.0-N_shape)*N_min*10.0/100.0)*pow(shoot_weightPerM2,-N_shape)*massIncrease*24;
 				}
                 //unit of U_P is also g N m-2 ground d-1; however, the unit of massIncrease is g/step. Here
 				//in the simulation, the default length of one step is an hour; so, we have to scale it up to one
 				//day by multiplying it by 24
 
-				U_D = a*10/100*pow(shoot_weightPerM2,-b)-pSC->getPlant()->get_N()*(pSC->getInitInfo().plantDensity/(100*100));
+				U_D = N_min*10/100*pow(shoot_weightPerM2,-N_shape)-pSC->getPlant()->get_N()*(pSC->getInitInfo().plantDensity/(100*100));
 				//U_D U uptake rate (g N m-2 d-1) as limited by the difference between potential and actual amount of N 
 				//in existing biomass, equation 3 in Lindquist et al. 2007)
 				//the returned value from get_N() is in g N/plant. It has to be converted to g/m-2 ground

@@ -5,7 +5,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnTruncateSource="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" WarnArgMismatch="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/2dsoil.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies="&quot;Y:\maizsim\crop source\debug\crop.lib&quot;"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/2dsoil.exe" Version="1.14" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies="&quot;D:\maizsim07\crop source\debug\crop.lib&quot;"/>
 				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/2dsoil.tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -21,7 +21,8 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="*.ins;h;hpp;hxx;hm;inl;fi;fd">
 		<File RelativePath="NITVAR.INS"/>
@@ -36,6 +37,7 @@
 				<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration></File>
 		<File RelativePath=".\carbon_partitioning.FOR"/>
 		<File RelativePath="dateFunctions.for"/>
+		<File RelativePath=".\Drip.FOR"/>
 		<File RelativePath="ERRMES.FOR"/>
 		<File RelativePath="Ex14-5.for"/>
 		<File RelativePath="GRID_BND.FOR"/>

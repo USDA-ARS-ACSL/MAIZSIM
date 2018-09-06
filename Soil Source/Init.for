@@ -18,6 +18,7 @@ c     for writing frequency to output
 	read(9,'(A132)')SoluteFile
 	read(9,'(A132)')SoilFile
 	read(9,'(A132)')ManagementFile
+      read(9,'(A132)')DripFile
 	read(9,'(A132)')WaterFile
 	read(9,'(A132)')WaterBoundaryFile
 	read(9,'(A132)')InitialsFile
@@ -39,17 +40,6 @@ C45    Continue
       read(9,'(A132)')MassBalanceFileOut
 
 	close(9)
-c temporary block until guics is modified to use these files
-C	goto 50
-C10    NodeGraphics='Standard.g01'
-C      goto 15
-C20    ElemGraphics='Standard.g02'
-c      goto 25
-c30    SurfaceGraphics='Standard.g03'
-c      goto 35
-c40    FluxGraphics='Standard.g04'
-c      goto 45
-c50    Continue
       Open(4,file='2DSOIL03.LOG')
 c   end of temporary block
 c  These 4 variables are for the iterative solver Orthomin

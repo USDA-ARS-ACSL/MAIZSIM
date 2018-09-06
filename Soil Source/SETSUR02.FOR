@@ -1010,8 +1010,9 @@ cdt heat input due to rain is done now for both shaded and bare together
 *               Endif
 *  calculate convected heat
 cdt added FELWR from temperature paper results
-                 VarBT(i,3)=VarBT(i,3)+(FCSH+FELWR)*TAirN  
-                 VarBT(i,2)=VarBT(i,2)+FCSH+FELWR
+cdt 11/2/2016 removed summation for varbt Now is consistent with hourly
+                 VarBT(i,3)=(FCSH+FELWR)*TAirN  
+                 VarBT(i,2)=FCSH+FELWR
                     
           else 
 *  parameters beneath the canopy
@@ -1024,6 +1025,7 @@ cdt added FELWR from temperature paper results
 
 * Change units to Joules cm-2 d-1
 cdt changed 3600 to 60 based on temperature paper
+cdt 11/2/2016 check to see if we need the 100.
                VarBT(i,2)=VarBT(i,2)*4.1856/100.0*3600*24
 * cdt for now use a constant 62.6 cal /sec /cm /C
 * use 3600*4.184 as conversion

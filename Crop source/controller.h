@@ -68,7 +68,7 @@ public:
 	TInitInfo getInitInfo() {return initInfo;}
 
 	void initialize();
-	int run(const TWeather &, double PredawnLWP);
+	int run(const TWeather &);
 	double ET_supply;   //actual supply of water to plant mol m-2 (leaf) s-1
 
 

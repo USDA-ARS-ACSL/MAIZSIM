@@ -35,6 +35,7 @@ public:
 	double get_Elongation_Age() { return elongAge; }
 	int    get_TotalGrowingLeaves() {return TotalGrowingLeaves;}
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
+	int    get_TotalMatureLeaves() { return TotalMatureLeaves; }
 	int    get_Rank() {return rank;}
 	
 
@@ -44,6 +45,8 @@ public:
 	void set_SLA(double x) {SLA=x;}
 	void set_TotalGrowingLeaves(int x) {TotalGrowingLeaves=x;}
 	void set_TotalDroppedLeaves(int x) {TotalDroppedLeaves=x;}
+	void  set_TotalMatureLeaves(int x) {TotalMatureLeaves=x; }
+
 	double GTI(double);
 	void set_RelativeAreaIncrease(double x) {RelativeAreaIncrease=x;}
 	void update(CDevelopment *, double pdlwp);
@@ -62,7 +65,7 @@ private:
 	CLeaf(const CLeaf&);
 	bool initiated, appeared, growing, mature, aging, dead, dropped;
 	int rank;
-	int TotalGrowingLeaves, TotalDroppedLeaves;
+	int TotalGrowingLeaves, TotalDroppedLeaves, TotalMatureLeaves;
 	double PotentialArea; // potential leaf area
 	double FullyExpandedArea;
 	double PotentialAreaIncrease, old_leaf;//potential leaf area increase without temperature or water limitation YY

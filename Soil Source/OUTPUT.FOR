@@ -100,7 +100,8 @@ C  pressure head and flux is calculated CodeW >0 indicates head is set at 0 and 
 	     n=KXB(i)
 	     
 	     
-	     if ((CodeW(n).eq.(-7)).or.(CodeW(n).eq.(2))) then
+	     if ((CodeW(n).eq.(-7)).or.(CodeW(n).eq.(2))
+     &             .or.(CodeW(n).eq.(1))) then
 	        flux=flux+Q(n)*step
 	        if (flux.gt.0) then 
 	          iii=1
@@ -163,6 +164,7 @@ C
               FluxAct=FluxAct/EOMult/poprow*100
               Runoff=Runoff/EOMult/poprow*100
               CumRain=CumRain/EOMult/poprow*100
+              Flux=Flux/EOMult/poprow*100
               
 
 
@@ -240,7 +242,7 @@ C10    Call errmes(im,il)
      &     T97,A1, T108, A5, T119, A4, T129 A7)   ! format for nodal data header
   6   Format (1x,A16,T20,A4,T36,A1,T46,A1,T56,A4,T62,A4,T70,A7, T81,A9,
      &        T93, A7, T105, A7, T115, A4)
- 10   Format (1x,F17.6,A15,18F16.3)  !format for flux data
+ 10   Format (1x,F17.6,',', A15,',',16(F16.3, ','), F16.3)  !format for flux data
  20   Format (1x,19A16)              !format for flux header
       End        
 C/***************************************************/
@@ -268,7 +270,8 @@ C/***************************************************/
 C      Endif     
 130   format('     Time           x             y     Temp   RTWT_',
      !        '          Sink_       cSink       gSink'/)
- 140   format(1x,f14.6,A12,2(f11.2),i8,7(G11.3))
+ 140   format(1x,f14.6,',', A12,',', 2(f11.2,','),i8,',',
+     !   5(G11.3,','),G11.3)
       Return
       End      
 C/***************************************************/
@@ -288,7 +291,7 @@ C/***************************************************/
 130   format(//' Time            x            y       h____',
      !         '   Theta      vz____    vx____   Q____    Conc_ ',
      !         '    Tempr_     g____')
- 140   format(1x, f14.6,a12,2(f11.2),8(G11.3))
+ 140   format(1x, f14.6,',', a12,',', 2(f11.2,','),7(G11.3,','),G11.3)
       Return
       End
   
