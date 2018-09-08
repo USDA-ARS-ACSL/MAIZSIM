@@ -30,6 +30,7 @@ public:
 	double calcGTI(double, bool);
 	double calcGDD(double);
 	int update(const TWeather&); 
+	double LWPeffect(double predawn_psi_bars, double threshold);
 	TInitInfo get_initInfo() {return initInfo;}
 	int get_youngestLeaf() {return youngestLeaf;}
 	int get_totalLeaves() {return (int) totLeafNo;} // removed +1 that was previously here to count only those leaves fully initiated, SK 1-19-12
@@ -52,6 +53,7 @@ public:
 	double get_T_ceil() {return T_ceil;}
 	double get_Tgrow()  {return T_grow;}
     double get_shadeEffect()  {return shadeEffect;}
+	double get_T_Air() { return T_air; }
 
   
 	bool Germinated() {return germination.done;}
@@ -87,7 +89,7 @@ private:
 	double GTIsum; // cumulative GTI, Stewart et al (1998), equivalent to GDD of Tbase = 10 and Topt 30
 	double Rmax_LIR, Rmax_LTAR, Rmax_Germination, Rmax_Emergence, stayGreen;
 	bool DayLengthSensitive; //True if Day Length Sensitive
-	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum, T_ind; // T_grow: mean temperature of the growing season from day 1 up to now, SK
+	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum, T_ind, T_air; // T_grow: mean temperature of the growing season from day 1 up to now, SK
 	double totLeafNo, LvsToInduce, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation
 	double P2; //photoperiod sensitivity as used in CERES-Maize
 	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded, Anthesis, tasselDone, inductionPeriod;

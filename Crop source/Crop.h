@@ -27,7 +27,7 @@
 		  Trel,            // relative time since emergence
 		  Period,          // one hour of time
 		  Emergence;       // Day of year plant emerged
-   double PredawnLWP=-0.05;
+   //double PredawnLWP=-0.05; moved to tweather
    
 	TInitInfo			initInfo; //Initial input data stored here
   double old_shoot_weightPerM2 = 0; //Declare and initilize a variable to save 
@@ -58,8 +58,8 @@
 
 	double d = 0.075; //d: shape coefficient in the logistic function to simulate cumulative N uptake (Equation 9 in Lindquist et al. 2007)
 	double q_n = 0.032; //q_n the maximum ratio of daily N uptake to measured daily growth rate (g N g-1) (Lindquist et al., 2007)
-	double a = 4.10; //maximum nitrogen concentration for C4 species: 4.1% (Lindquist et al. 2007)
-	double b = 0.5; //shape coefficient in calculation of nitrogen concentration in relation to up-ground biomass (equation 4 Lindquist et al, 2007) YY
+	double N_min = 4.10; //maximum nitrogen concentration for C4 species: 4.1% (Lindquist et al. 2007)
+	double N_shape = 0.5; //shape coefficient in calculation of nitrogen concentration in relation to up-ground biomass (equation 4 Lindquist et al, 2007) YY
 //Common Structures defined here
 	double massIncrease=0; //increase in shoot biomass in each time step YY
 	double shoot_weightPerM2=0;
@@ -172,7 +172,7 @@
 	           char WeatherFile[132], TimeFile[132], BiologyFile[132],
                ClimateFile[132], NitrogenFile[132], SoluteFile[132],
                SoilFile[132], 
-               ManagementFile[132],
+               ManagementFile[132], DripFile[132],
                WaterFile[132], WaterBoundaryFile[132], 
                GraphicsFile[132], InitialsFile[132],VarietyFile[132],
 			   NodeGraphics[132],ElemGraphics[132],NodeGeomFile[132],

@@ -20,9 +20,9 @@ C  Initialization here
 C          
       Nlevel=1
       Do i=1,NMat
-        VSind(i)=BlkDn(i)*FracSind(i)/2.65/100.
-        VClay(i)=BlkDn(i)*FracClay(i)/2.65/100.
-        VOrgM(i)=BlkDn(i)*FracOm(i)/1.0/100.
+        VSind(i)=BlkDn(i)*FracSind(i)/2.65
+        VClay(i)=BlkDn(i)*FracClay(i)/2.65
+        VOrgM(i)=BlkDn(i)*FracOm(i)/1.0
         ThTot(i)=1-BlkDn(i)/2.65
         il=il+1
       Enddo     

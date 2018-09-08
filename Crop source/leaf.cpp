@@ -20,6 +20,7 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	RelativeAreaIncrease=0;
 	FullyExpandedArea=0;
 	TotalDroppedLeaves=0;
+	TotalMatureLeaves = 0;
 	actualArea = actualgreenArea=greenArea = senescentArea = droppedArea = unstressedArea=0;
 	actualLength=actualwidth=0;
 	initiated = appeared = growing = mature = aging = dead = dropped = false;
@@ -64,26 +65,33 @@ void CLeaf::initialize (CDevelopment * dv)
 
 void CLeaf::calc_dimensions(CDevelopment *dv)
 {
-	const double LM_min = 115, k = 24.0;
+	const double LM_min = 125, k = 24.0;
 	double totalLeaves = dv->get_totalLeaves(); //todo: should be a plant parameter not leaf
 	double L_max = (sqrt(LM_min*LM_min + k*(totalLeaves - dv->get_initInfo().genericLeafNo)));
-	                                     //LM_min is a length characteristic of the longest leaf,in Fournier and Andrieu 1998, it was 90 cm
-	                                     //LA_max is a fn of leaf no (Birch et al, 1998 fig 4) with largest reported value near 1000cm2. This is implemented as lfno_effect below, SK
-	                                     //LM_min of 115cm gives LA of largest leaf 1050cm2 when totalLeaves are 25 and Nt=Ng, SK 1-20-12
-	                                     // Without lfno_effect, it can be set to 97cm for the largest leaf area to be at 750 cm2 with Nt ~= Ng (Lmax*Wmax*0.75) 
-	                                     //                    based on Muchow, Sinclair, & Bennet (1990), SK 1-18-2012
-	                                     // Eventually, this needs to be a cultivar parameter and included in input file, SK 1-18-12
-	                                     // the unit of k is cm^2 (Fournier and Andrieu 1998 Pg239). YY
-  										 // L_max is the length of the largest leaf when grown at T_peak. Here we assume LM_min is determined at growing Topt with minmal (generic) leaf no, SK 8/2011
-                                         // If this routine runs before TI, totalLeaves = genericLeafNo, and needs to be run with each update until TI and total leaves are finalized, SK
+	                               /*    LM_min is a length characteristic of the longest leaf,in Fournier and Andrieu 1998, it was 90 cm
+	                                     LA_max is a fn of leaf no (Birch et al, 1998 fig 4) with largest reported value near 1000cm2. 
+	                                     This is implemented as lfno_effect below, SK
+	                                     LM_min of 115cm gives LA of largest leaf 1050cm2 when totalLeaves are 25 and Nt=Ng, SK 1-20-12
+	                                     Without lfno_effect, it can be set to 97cm for the largest leaf area to be at 750 cm2 with Nt ~= Ng (Lmax*Wmax*0.75) 
+	                                                         based on Muchow, Sinclair, & Bennet (1990), SK 1-18-2012
+	                                     Eventually, this needs to be a cultivar parameter and included in input file, SK 1-18-12
+	                                     The unit of k is cm^2 (Fournier and Andrieu 1998 Pg239). YY
+  										 L_max is the length of the largest leaf when grown at T_peak. Here we assume LM_min is determined at growing Topt with minmal (generic) leaf no, SK 8/2011
+                                         If this routine runs before TI, totalLeaves = genericLeafNo, and needs to be run with each update until TI and total leaves are finalized, SK
+								   */
 	double n_m, a, b;
-
+	int hrank=rank;
 	n_m = 5.93 + 0.33*totalLeaves; // the rank of the largest leaf. YY (need to adjust here for the maximum leaf size as a function of plant pop -DT 8/12/2015)
 	a = -10.61 + 0.25*totalLeaves;
 	b = -5.99 + 0.27*totalLeaves;
+	if (rank > int(n_m))
+	{
+		hrank = rank - 1;
+	}
     //equation 7 in Fournier and Andrieu (1998). YY
+    // Attempt to increase area of leaves above max leaf
 
-	ptnLength = L_max*exp(a/2*pow(rank/n_m-1,2)+b/2*pow(rank/n_m-1,3)); //*dv->get_shadeEffect()
+	ptnLength = L_max*exp(a/2*pow(hrank/n_m-1,2)+b/2*pow(hrank/n_m-1,3)); //*dv->get_shadeEffect()
 	                                                                    //equa 8(b)(Actually eqn 6? - eqn 8 deals with leaf age - DT)
 	                                                                   //in Fournier and Andrieu(1998). YY
 	growthDuration = ptnLength/maxElongRate; // shortest possible linear phase duration in physiological time (days instead of GDD) modeified form of equa 8(a)Fournier and Andrieu(1998)
@@ -93,7 +101,7 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
     double lfno_effect = max(0.5, min(1.0, exp(-1.17+0.047*totalLeaves))); // Fig 4 of Birch et al. (1998) 
 
 	{
-		PotentialArea=lfno_effect*LA_max*exp(a*pow(rank/n_m-1,2)+b*pow(rank/n_m-1,3)); //equa 6. Fournier and Andrieu(1998) multiplied by Birch et al. (1998) leaf no effect
+		PotentialArea=lfno_effect*LA_max*exp(a*pow(hrank/n_m-1,2)+b*pow(hrank/n_m-1,3)); //equa 6. Fournier and Andrieu(1998) multiplied by Birch et al. (1998) leaf no effect
 	                                                               //LA_max the area of the largest leaf
 	}                                                          //PotentialArea potential final area of a leaf with rank "n". YY
 
@@ -147,8 +155,11 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 		elongAge = __min(growthDuration, elongAge);
 
 //		area = __max(0.0, water_effect*T_effect_size*PotentialArea*(1.0 + (t_e-elongAge)/(t_e-growthDuration_half))*pow(elongAge/t_e, (t_e/(t_e-growthDuration_half))));
+	     // this following is a decay function for the effect of age on growth
 		double maxExpansionRate = T_effect_size*PotentialArea*(2*growthDuration- growthDuration_half)/(growthDuration*(growthDuration- growthDuration_half))*
 			                      pow(growthDuration_half /growthDuration, growthDuration_half /(growthDuration- growthDuration_half));
+		// The following equation is a beta function. The analogs are - growthDuration is T_Ceil, growthDuration_half is optimum temp (T_OPT), 
+		 //                                          elongage is temperature
 		PotentialAreaIncrease =__max(0.0,maxExpansionRate*__max(0.0, (growthDuration-elongAge)/(growthDuration- growthDuration_half)*
 			                         pow(elongAge/growthDuration_half,growthDuration_half/(growthDuration-growthDuration_half)))*dD);
 	                                           //potential leaf area increase without any limitations
@@ -199,7 +210,7 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	if (!mature && !aging && !dead)
 	{
 		stayGreenDuration = stayGreen*growthDuration;
-		seneDuration = growthDuration; // end of growth period, time to maturity
+		seneDuration = growthDuration*0.7; // end of growth period, time to maturity. Assume senesence is faster than growth
 	}
 	else if (mature && !aging && !dead)
 	{

@@ -14,6 +14,7 @@
       Double precision CriticalH
       Logical Explic,ItCrit,FreeD
       Real  hOld_1(NumNPD)
+      Real Dif(NumNPD)
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
      !    Cap(NumNPD),ListE(NumElD),E(3,3),iLoc(3),Fc(NumNPD),
      !    Sc(NumNPD),B_1(NumNPD),ThOld_1(NumNPD),A_1(MBandD,NumNPD)
@@ -558,6 +559,7 @@ C
                EpsTh=abs(ThNew(i)-Th)
              else
                EpsH=abs(hNew(i)-hTemp(i))
+               Dif(i)=EpsH
              endif
              if (EpsTh.gt.TolTh.or.EpsH.gt.TolH)then
                    ItCrit=.false.

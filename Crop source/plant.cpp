@@ -93,10 +93,11 @@ CPlant::~CPlant()
 
 
 
-void CPlant::update(const TWeather & weather, double PredawnLWP) 
+void CPlant::update(const TWeather & weather) 
 {
 	int TotalGrowingLeaves = 0;
 	int TotalDroppedLeaves = 0;
+	int TotalMatureLeaves = 0;
 	double PlantNitrogenContent;
 	double percentN;
 	if (develop->Emerged())
@@ -170,16 +171,17 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 			}
 			else
 			{
-				nodalUnit[i].update(develop,PredawnLWP);
+				nodalUnit[i].update(develop,weather.PredawnLWP);
 				// from germination to emergence, C supply is from the seed
 				if (nodalUnit[i].get_leaf()->isGrowing()) 
 				 {
 					 TotalGrowingLeaves++;
 				}
-				if (nodalUnit[i].get_leaf()->isDropped()) 
+				if (nodalUnit[i].get_leaf()->isDropped()) //Don't think we need this here, can delete
 				{
 					TotalDroppedLeaves++;
 				}
+				
 					
 			}
 		}	
@@ -188,6 +190,7 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 		//calcMaintRespiration(weather); // commented for now, have to test this for seedling
 		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves);
 		nodalUnit[0].get_leaf()->set_TotalDroppedLeaves(TotalDroppedLeaves);
+	
 
 		if(nodalUnit[1].get_leaf()->isInitiated() && !nodalUnit[1].get_leaf()->isAppeared())
 		{
@@ -227,7 +230,7 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 			else
 			{
          		nodalUnit[i].get_leaf()->set_N_content(leaf_N_content); //SK 8/22/10: set leaf N content before each nodal unit is updated
-                nodalUnit[i].update(develop, PredawnLWP); //Pass the predawn leaf water potential into a nodel
+                nodalUnit[i].update(develop, weather.PredawnLWP); //Pass the predawn leaf water potential into a nodel
 				//to enable the model to simulate leaf expansion with the
 				//effect of predawn leaf water potential YY
 			}
@@ -240,12 +243,17 @@ void CPlant::update(const TWeather & weather, double PredawnLWP)
 			{
 				TotalDroppedLeaves++;
 			}
+			if (nodalUnit[i].get_leaf()->isMature())
+			{
+				TotalMatureLeaves++;
+			}
 
 		}
  //SK 8/22/10: Why is this infor being stored in node0? this is confusing because it is supposed to be the coleoptile
 
 		nodalUnit[0].get_leaf()->set_TotalGrowingLeaves(TotalGrowingLeaves); //TODO make this a class variable and an CPlant:update method
 		nodalUnit[0].get_leaf()->set_TotalDroppedLeaves(TotalDroppedLeaves);
+		nodalUnit[0].get_leaf()->set_TotalMatureLeaves(TotalMatureLeaves);
 
 		if (TotalDroppedLeaves >= develop->get_totalLeaves()) 
 		{
@@ -329,7 +337,6 @@ void CPlant::setMass()
 //so individual leaf doesn't have mass but the first or the last one has it all
 {
 	double m = 0;
-	
 /*
 double agefn=1;
 	if (potentialLeafArea>0)
@@ -519,6 +526,8 @@ void CPlant::calcGasExchange(const TWeather & weather)
 {
 	const double tau = 0.50; // atmospheric transmittance, to be implemented as a variable => done
 	const double LAF = 1.37; // leaf angle factor for corn leaves, Campbell and Norman (1998)
+	//Make leaf width a function of growing leaves as average width will increase as the plant grows
+	// add it as a 
 	const double leafwidth = 5.0; //to be calculated when implemented for individal leaves
 	const double atmPressure= 100.0; //kPa, to be predicted using altitude
 	double activeLeafRatio = greenLeafArea/leafArea;
@@ -919,7 +928,7 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
       //First set counter to 0 if it is the beginning of the day. 
 	if (abs(weather.time)<0.0001)
 		{// have to rename C2_effect to Light_effect
-			//Journal of Experimental Botany, Vol. 65, No. 2, pp. 641–653, 2014
+			//Zhu et al. Journal of Experimental Botany, Vol. 65, No. 2, pp. 641–653, 2014
 			C2_effectTemp=exp(-(SunlitRatio-Xo)/B);
 			C2_effect=__min(1.0,A/(1.0+C2_effectTemp));
 			develop->set_shadeEffect(C2_effect);

@@ -31,6 +31,11 @@ C Cflux is loss of N in mg
 	     if ((CodeW(n).eq.(-7)).or.(CodeW(n).eq.(2))) then
 	        Cflux=Cflux+Q(n)*conc(n,1)*step*14/62
            endif
+C for case of downward drainage and a constrant BC 
+C (does not account for upward flow yet)
+           if ((CodeW(n).eq.(1))) then
+             if (Q(n).lt.0) Cflux=Cflux+Q(n)*conc(n,1)*step*14/62 ! only consider chemical out- flux>0
+           endif
 	  EndDo
 	  
         t=time
@@ -103,14 +108,15 @@ C of the domain
          iday=int(t)
 	   call caldat(iday,mm,id,iyyy) 
          write (date,'(i2.2,A1,i2.2,A1,i4.4)') mm,'/',id,'/',iyyy  
-          write(91,'(1F12.4,A12,9F12.4)') time,date,Min_N*fact,
+          write(91,10) 
+     !         time,date,Min_N*fact,
      !         Org_N*fact,Manure_N*fact,
      !         Litter_N*fact,Ammon_N*fact,All_N, W_Sum,Denitr*fact,
      !         CFLux*fact
 
           CFluxPrevious=CFlux
         endif
-
+10    Format (1F12.4,',', A12,',', 8(F12.4, ','),F12.4)
       return
       end
 

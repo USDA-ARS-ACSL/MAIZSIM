@@ -133,6 +133,12 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
   Km = Kc*(1+Om/Ko); //* effective M-M constant for Kc in the presence of O2 */
   Rd = Parms.Rd25*exp(Parms.Ear*(Tleaf-25)/(298*R*(Tleaf+273)));
 
+  // 07/12/18 DT adding a temperature function to photosynthesis to simulate negative feedback of low growth to photosynthesis
+
+//  double T = dv->get_Tcur();
+//  double T_gro = dv->get_Tgrow();
+//  double T_effect_size = __max(0.0, (T_gro - Tb_Leaf) / (T_peak - Tb_Leaf)*exp(1.0 - (T_gro - Tb_Leaf) / (T_peak - Tb_Leaf)));
+
   double CriticalNitrogen;
   CriticalNitrogen=__max(0.25,lfNContent);
   Parms.Vcm25 = Parms.Vcm25*(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1);

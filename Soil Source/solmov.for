@@ -341,7 +341,12 @@ C
                   cKod=2
                   Goto 112
                 Endif
-              Endif
+                If((CodeW(i)).eq.1)
+     &                    then   !bottom boundary and flux - DT Dec 14, 2017
+                  if (Q(i).lt.0) cKod=2 ! only consider flux out for now
+                  Goto 112
+                Endif
+               Endif
 111         Continue
 C
 C  Dirichlet boundary condition

@@ -336,8 +336,8 @@ C
           RGCF2 = (TS(e)/33.)**(-1.66)
         ELSE IF (TS(e).LE.0.0) THEN
           RGCF2 = 0.0
-        ELSE If (TS(e).lt.20.0) THEN
-          RGCF2 = (TS(e)/20.) **(1.66)
+        ELSE If (TS(e).lt.18.0) THEN
+          RGCF2 = (TS(e)/18.) **(1.66)
         ENDIF
 
 

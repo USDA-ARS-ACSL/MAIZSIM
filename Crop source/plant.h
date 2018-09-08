@@ -89,7 +89,7 @@ public:
 
 	
 
-	void update(const TWeather &, double PredawnLWP);
+	void update(const TWeather&);
 	void calcGasExchange(const TWeather & weather);
 	void calcMaintRespiration(const TWeather&);
 
@@ -103,9 +103,7 @@ public:
 	double calcPotentialLeafAreaIncrease(void);//calculate potential leaf area increase without carbon limitation YY
 	void calcPerLeafRelativeAreaIncrease();
 	double calcSenescentLeafArea();
-	double calcDroppedLeafArea();
-	double calcGreenLeafArea2(); // empirical fit of plant green leaf area from SPAR 02 field exp
-    double calcPotentialCarbondemand(); //calculate potential carbon demand for potential leaf growth YY
+	double calcPotentialCarbondemand(); //calculate potential carbon demand for potential leaf growth YY
 	void grow();
 	void C_allocation(const TWeather&);
 	void calcRed_FRedRatio(const TWeather&);

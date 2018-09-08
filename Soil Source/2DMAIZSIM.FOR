@@ -35,6 +35,7 @@ C SetSurfaceH --  reading hourly weather
       Call SetTDB()
       Call AutoIrrigate()
       Call Mngm()
+      Call Drip()
 
       Starter=1.0D0
       Call CROP(PCRL,MSW1, NumNP,NumSol,Sink(1),
