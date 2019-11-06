@@ -205,7 +205,7 @@ c calculate and alternative alphaK depending on demand
 	      If ((VUP(n,j).le.0).OR.(iSink.EQ.3)) Then
 	       GammaB=alphaK(n,j)*RootRadius/(Disp(n,j))
 	       PC=1-0.5*GammaB
-	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius**2)
+	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius*RootRadius)
 	       PC=1.0/(PC+PC2)
 	       PC=amax1(0.0,amin1(1.0,PC))
 	         Else

@@ -953,7 +953,7 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
       //First set counter to 0 if it is the beginning of the day. 
 	if (abs(weather.time)<0.0001)
 		{// have to rename C2_effect to Light_effect
-			//Zhu et al. Journal of Experimental Botany, Vol. 65, No. 2, pp. 641�653, 2014
+			//Zhu et al. Journal of Experimental Botany, Vol. 65, No. 2, pp. 641–653, 2014
 			C2_effectTemp=exp(-(SunlitRatio-Xo)/B);
 			C2_effect=__min(1.0,A/(1.0+C2_effectTemp));
 			develop->set_shadeEffect(C2_effect);

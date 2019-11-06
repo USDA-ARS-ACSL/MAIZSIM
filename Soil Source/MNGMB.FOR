@@ -34,8 +34,8 @@
         Read(40,*,Err=20) Fert_times
         Read(40,*,Err=20)
         Do i=1,Fert_times
-      Read(40,*,Err=20) Date(i), cAppl(i), cAppl_CL(i),  cAppl_NL(i),
-     !                      Num_nodes(i)
+	    Read(40,*,Err=20) Date(i), cAppl(i), cAppl_CL(i),  
+     !                cAppl_NL(i),  Num_nodes(i)
             Read(40,*,Err=20) 
             Read(40,*,Err=20) (nAppl(i,j),j=1,Num_nodes(i))
         EndDo
