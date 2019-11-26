@@ -22,4 +22,6 @@ More documention is being prepared. See the "how to run model" file for informat
 
 Input files for test cases related to the data from the Maryland Eastern Shore and Delaware used in the first paper are in the folder Test_Ver9.1 and MDEasternShore. The MDEasternShore data work with the newest version (1.42) of the crop model as of Oct 25, 2016. This file will be updated as changes occur
 
+The SolarCorr.Zip file contains intput and output corresponding to the 9/6/2018 update. I still have to fix the other input files so they work with this version.
+
 
