@@ -66,10 +66,11 @@ c
           thSat(M)    =FQ(0.0,Par(1,M)) 
           
           
-         
+CDT FracSind is sand + silt. Since we don't input silt, we 
+C     get it by difference
           BlkDn(M)=  Par(10,M)
           FracOM(M)   =Par(11,M)
-          FracSind(M) =Par(12,M)
+          FracSind(M) =1.0-(Par(12,M)+Par(13,M))
           FracClay(M) =Par(13,M)
           TUpperLimit(M)=FQ(-100.0,Par(1,M))
           TLowerLimit(M)=FQ(-150000.0,Par(1,M))

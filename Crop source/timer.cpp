@@ -90,7 +90,7 @@ void Timer::caldat(int julian, int &mm, int &id, int &iyyy)
 	const int IGREG=2299161;
 	int ja,jalpha,jb,jc,jd,je;
 
-	julian=julian+2415079 ;      //provide a reference of 1/1/1900
+	julian=julian+2415019 ;      //provide a reference of 1/1/1900 was 79 for 3/1/1900
 	if (julian >= IGREG) {
 		//jalpha=int((DP(julian-1867216)-0.25)/36524.25);
 		jalpha=int(((double)(julian-1867216)-0.25)/36524.25);

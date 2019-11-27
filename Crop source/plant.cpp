@@ -305,6 +305,8 @@ void CPlant::update(const TWeather & weather)
 		{
 			develop->maturity.done = true;
 			develop->maturity.daytime = weather.daytime;
+			develop->death.done = true;
+			develop->death.daytime = weather.daytime;
 			cout << "* Physiological maturity " << develop->get_GDDsum() << " T growth: " << develop->get_Tgrow() 
 				<< " green leaf %: " << greenLeafArea/leafArea*100 << endl;
 		}
@@ -605,7 +607,7 @@ void CPlant::C_allocation(const TWeather & w)
 // this needs to be f of temperature, source/sink relations, nitrogen, and probably water
 // a valve function is necessary because assimilates from CPool cannot be dumped instantanesly to parts
 // this may be used for implementing feedback inhibition due to high sugar content in the leaves
-// The following is based on Grant (1989) AJ 81:563-571
+// The following is based on Grant (1989) AJ 81:563-571 Simulation of Carbon Assimilation and Partitioning in Maize
 {
    double b1=2.325152587; // Normalized (0 to 1) temperature response fn parameters, Pasian and Lieth (1990)
                         // Lieth and Pasian Scientifica Hortuculturae 46:109-128 1991

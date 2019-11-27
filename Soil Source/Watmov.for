@@ -6,15 +6,14 @@
 *       Neumann boundary condition is prescribed or constant flux
 * CDT added a drainage boundary Nov 2007. This is like a seepage face but the nodes always have
 * drainage and it is usually horizontal.
-      subroutine WaterMover ()
+      subroutine WaterMover_New ()
       Include 'public.ins'
+      Include 'puplant.ins'
       Double precision A,B,C
       Double precision dt,dtOld,t,tOld,PI,DPI,F2
       real ATG,HSP
-      Double precision CriticalH
       Logical Explic,ItCrit,FreeD
       Real  hOld_1(NumNPD)
-      Real Dif(NumNPD)
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
      !    Cap(NumNPD),ListE(NumElD),E(3,3),iLoc(3),Fc(NumNPD),
      !    Sc(NumNPD),B_1(NumNPD),ThOld_1(NumNPD),A_1(MBandD,NumNPD)
@@ -26,12 +25,12 @@
      !                 isat(NumBPD),FreeD, CriticalH
       If (lInput.eq.0) goto 11  
        FreeD=.true.
-       CriticalH=0.0D0
+       CriticalH=-0.01D0
        Do i=1,NumNP
           hOld(i) = hNew(i)
           hTemp(i) = hOld(i)
        Enddo
-*      
+*
        Do i=1,NumEl
         ConAxz(i)=0.
         ConAxx(i)=1.
@@ -64,7 +63,7 @@ c      hCritS=1.0e9        !needs to be high for ponded infiltration to work
      !                  BlkDn,hTemp,Explic,ThNew,hTab1,hTabN,
      !                  hSat,ThSat,ThR, ThAvail,ThFull,
      !                  FracOM, FracSind, FracClay,
-     !                  TupperLimit, TLowerLimit,SoilFile)
+     !                  TupperLimit, TLowerLimit, SoilFile)
 c  assign bulk density
        
              
@@ -99,49 +98,58 @@ c
 C
 C  Recasting sinks 
 C
-         Do n=1,NumEl
-           NUS=4
-           if(KX(n,3).eq.KX(n,4)) NUS=3
-*         Loop on subelements
-           do k=1,NUS-2
-             i=KX(n,1)
-             j=KX(n,k+1)
-             l=KX(n,k+2)
-             Ci=x(l)-x(j)
-             Cj=x(i)-x(l)
-             Cl=x(j)-x(i)
-             Bi=y(j)-y(l)
-             Bj=y(l)-y(i)
-             Bl=y(i)-y(j)
-             AE=(Cl*Bj-Cj*Bl)/2.
-             Fc(i)=Fc(i)+Sink(n)*AE/3.
-             Fc(j)=Fc(j)+Sink(n)*AE/3.
-             Fc(l)=Fc(l)+Sink(n)*AE/3.
-             Sc(i)=Sc(i)+AE/3.
-             Sc(j)=Sc(j)+AE/3.
-             Sc(l)=Sc(l)+AE/3.
-            enddo
-         enddo
-*      Do n=1,NumEl
-*        NUS=4
-*        If(KX(n,3).eq.KX(n,4)) NUS=3
-*        Do j=1,NUS
-*          Fc(KX(n,j))=Fc(KX(n,j))+Sink(n)*Area(n)/NUS
-*          Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
-*        Enddo
-*      Enddo
-      Do i=1,NumNP
-        Fc(i)=Fc(i)/Sc(i)
+
+cccz zhuangji, delete this part, for the sink is already casted
+cccz based on node
+c         Do n=1,NumEl
+c           NUS=4
+c           if(KX(n,3).eq.KX(n,4)) NUS=3
+c*         Loop on subelements
+c           do k=1,NUS-2
+c             i=KX(n,1)
+c             j=KX(n,k+1)
+c             l=KX(n,k+2)
+c             Ci=x(l)-x(j)
+c             Cj=x(i)-x(l)
+c             Cl=x(j)-x(i)
+c             Bi=y(j)-y(l)
+c             Bj=y(l)-y(i)
+c             Bl=y(i)-y(j)
+c             AE=(Cl*Bj-Cj*Bl)/2.
+c             Fc(i)=Fc(i)+Sink(n)*AE/3.
+c             Fc(j)=Fc(j)+Sink(n)*AE/3.
+c             Fc(l)=Fc(l)+Sink(n)*AE/3.
+c             Sc(i)=Sc(i)+AE/3.
+c             Sc(j)=Sc(j)+AE/3.
+c             Sc(l)=Sc(l)+AE/3.
+c            enddo
+c         enddo
+c*      Do n=1,NumEl
+c*        NUS=4
+c*        If(KX(n,3).eq.KX(n,4)) NUS=3
+c*        Do j=1,NUS
+c*          Fc(KX(n,j))=Fc(KX(n,j))+Sink(n)*Area(n)/NUS
+c*          Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
+c*        Enddo
+c*      Enddo
+c     Do i=1,NumNP
+c        Fc(i)=Fc(i)/Sc(i)
+c      Enddo
+
+cccz directly take the sink and nodearea 
+      Do n=1,NumNP
+         Fc(n)=Sink(n)
+         Sc(n)=NodeArea(n)
       Enddo
-      
+    
 C calculate total available water in root zone.      
-       ThetaFull=0.0
+      ThetaFull=0.0
       Do n=1,NumEl
 		   NUS=4
 		   if(KX(n,3).eq.KX(n,4)) NUS=3
 		   Sum1=0.
 		   Sum2=0.
-*         Loop on subelements
+c*         Loop on subelements
 		   do k=1,NUS-2
 			 i=KX(n,1)
 			 j=KX(n,k+1)
@@ -155,9 +163,9 @@ C calculate total available water in root zone.
 			 AE=(Cii(3)*Bii(2)-Cii(2)*Bii(3))/2.
 			 m=MatNumN(i)
 			
-			 thAWi   =ThFull(MatNumN(i))
-			 thAWl   =ThFull(MatNumN(l))
-			 thAWj   =ThFull(MatNumN(j))
+			 thAWi=ThFull(MatNumN(i))
+			 thAWl=ThFull(MatNumN(l))
+			 thAWj=ThFull(MatNumN(j))
 			 if (rtwt(i).le.1.0e-6) ThAWi=0.0
 			 if (rtwt(j).le.1.0e-6) ThAWj=0.0
 			 if (rtwt(l).le.1.0e-6) ThAWl=0.0
@@ -184,7 +192,7 @@ C
      !                  BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
      !                  hSat,ThSat,ThR, ThAvail,ThFull,
      !                  FracOM, FracSind, FracClay,
-     !                  TupperLimit, TLowerLimit,SoilFile)
+     !                  TupperLimit, TLowerLimit, SoilFile)
 
 c
 c  RESET: assembling of the matrixes
@@ -233,7 +241,7 @@ C
           If (Iter.eq.0) then
             SinkE=Fc(i)+Fc(j)+Fc(l)
             DS(i)=DS(i)+Fmul*(SinkE+Fc(i))
-            DS(j)=DS(j)+FMul*(SinkE+Fc(j))
+            DS(j)=DS(j)+Fmul*(SinkE+Fc(j))
             DS(l)=DS(l)+Fmul*(SinkE+Fc(l))
           Endif
           F(i)=F(i)+FMul*4.
@@ -433,17 +441,17 @@ c F2 is a weighting function
 			F2=(ATG+delta)*DPI
 			F2=Dmin1(F2,1.0D0)
 			
-		   IF(HNEW(N).LT.CriticalH) F2=1.0D-10  !was LT.-0.01 as in the later code
-         		HNEWS=DMAX1(hNew(N),0.0D0) ! was 0.0D0
+		   IF(HNEW(N).LT.CriticalH) F2=1.0D-10
+         		HNEWS=DMAX1(hNew(N),0.0D0)
   	      	HOLDS=DMAX1(hold(N),0.0D0)	
 c update right and left sides of equation for flux due to the change in the ponded
 c head (if any) 
 	          j=1
 			   if(lOrt) j=IADD(n)              
 			    A(j,n)=A(j,n)+Width(i)*F2/dt
-			    B(n)=B(n)+Width(i)*(F2*hNew(n)-(HNEWS-HOLDS))/dt  
-		      
-         endif   !codew= -4
+			    B(n)=B(n)+Width(i)*(F2*hNew(n)-(HNEWS-HOLDS))/dt          
+			      
+		 endif   !codew= -4
 
  
 c   pond   on the soil-atmosphere surface
@@ -464,38 +472,40 @@ C added 4 lines
         if(lOrt) then
               A(IADD(n),n)=10.d30
                 B(n)=10.d30*hNew(n)
-        else
-        Do 411 m=2,MBand
+         else
+          Do 411 m=2,MBand
           k=n-m+1
           If (k.gt.0) then
             B(k)=B(k)-A(m,k)*hNew(n)
             A(m,k)=0.
           Endif
-          l=n+m-1
+           l=n+m-1
           If (NumNP-l.ge.0) then
             B(l)=B(l)-A(m,n)*hNew(n)
           Endif
             A(m,n)=0.
-411     Continue
-        A(1,n)=1.
-        B(n)=hNew(n)
+411      Continue
+          A(1,n)=1.
+          B(n)=hNew(n)
 C added 1 line
-         end if
-412   Continue
+           end if
+412      Continue
 
 cdt this is where the old solver sits
 c
-c   Solving of the system of equations   
+c  Solving of the system of equations   
 c
 
-      if(lOrt) then
-        call ILU (A,NumNP,MBandD,IAD,IADN,IADD,A1)
-        call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,IADN,IADD,A1,VRV,
+       if(lOrt) then
+cccz
+c         print*,time,',','Water Diff'
+         call ILU (A,NumNP,MBandD,IAD,IADN,IADD,A1)
+         call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,IADN,IADD,A1,VRV,
      !                RES,RQI,RQ,QQ,QI,RQIDOT,ECNVRG,RCNVRG,ACNVRG,0,
      !                MNorth,MaxItO)
 	endif
       if (.not.lOrt) then 
-*   Reduction
+c*   Reduction
       Do 513 n=1,NumNP
         Do 512 m=2,MBand
         If (abs(A(m,n)).lt.1.e-30) goto 512
@@ -512,7 +522,7 @@ c
 512     Continue
         B(n)=B(n)/A(1,n)
 513   Continue
-*   Back substitution
+c*   Back substitution
       n=NumNP
 514   Do 515 k=2,MBand
         l=n+k-1
@@ -544,9 +554,9 @@ cdt  conventional solver ends here
 C
 C    Test for convergence
 C
-       if (time.gt.38064.055) then
-          viii=0
-         endif
+c       if (time.gt.38064.055) then
+c          viii=0
+c         endif
        ItCrit=.true.
        do 615 i=1,NumNp
             m=MatNumN(i)
@@ -559,7 +569,7 @@ C
                EpsTh=abs(ThNew(i)-Th)
              else
                EpsH=abs(hNew(i)-hTemp(i))
-               Dif(i)=EpsH
+c               Dif(i)=EpsH
              endif
              if (EpsTh.gt.TolTh.or.EpsH.gt.TolH)then
                    ItCrit=.false.
@@ -569,6 +579,7 @@ C
 616   Continue
       If (.not.ItCrit) then
         If (Iter.lt.MaxIt.AND.hMax.lt.10.*abs(hCritA)) then
+c adjust for runoff within an iteration
  
 
           Goto 12
@@ -613,7 +624,7 @@ c
       dtOld=dt
       Step=dt
       
-CDT adjust for runoff here    
+c      CDT adjust for runoff here    
       Do i=1,NumBP
           n=KXB(i)
           If (CodeW(n).eq.-4) then
@@ -627,17 +638,14 @@ CDT adjust for runoff here
 c
 c   Calculation of velocities
 c
-cdt - moved this here
-           
-           
-                         
+cdt - moved this here              
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                  ConAxx,ConAzz,ConAxz,Vx,Vz)
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
      !               BlkDn, hTemp,Explic,ThNew,hTab1,hTabN,
      !               hSat,ThSat,ThR, ThAvail,ThFull,
      !               FracOM, FracSind, FracClay,
-     !               TupperLimit, TLowerLimit,SoilFile)
+     !               TupperLimit, TLowerLimit, SoilFile)
 
 
 
@@ -659,7 +667,7 @@ c  hNew will always be the same as hOld?
         Endif
       Enddo
       
-cdt - calculate available water content in root zone
+cdt - calculate available water content in root zone (cm3 per slab)
 
       ThetaAvail=0.0
       Do n=1,NumEl
@@ -667,7 +675,7 @@ cdt - calculate available water content in root zone
 		   if(KX(n,3).eq.KX(n,4)) NUS=3
 		   Sum1=0.
 		   Sum2=0.
-*         Loop on subelements
+c*         Loop on subelements
 		   do k=1,NUS-2
 			 i=KX(n,1)
 			 j=KX(n,k+1)
@@ -687,15 +695,8 @@ cdt - calculate available water content in root zone
 			 if (rtwt(l).ge.1e-6) Thl=Thavail(l)
 			 ThetaAvail=ThetaAvail+AE*(Thi+Thj+Thl)/3.
 		   Enddo
-
-		   
+	   
 		Enddo
-      
-      
-      
-      
-      
-
 
 
 cdt - calculate actual boundary fluxes to see what we have
@@ -744,7 +745,7 @@ c       Enddo
 10    Call errmes(im,il)
       Return
       End
-*
+c*
       subroutine Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,ConAxx,
      !                 ConAzz,ConAxz,Vx,Vz)
       Dimension hNew(NumNP),x(NumNP),y(NumNP),ListNE(NumNP),Con(NumNP),

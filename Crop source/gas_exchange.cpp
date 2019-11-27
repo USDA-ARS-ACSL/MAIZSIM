@@ -57,6 +57,7 @@ void CGas_exchange::getParms()
 	Parms.g0 = 0.04;
     Parms.g1 =  4.0;   //in P. J. Sellers, et al.Science 275, 502 (1997), g0 is b, of which the value for c4 plant is 0.04
 	                   //and g1 is m, of which the value for c4 plant is about 4 YY)
+	                   // need to update to new values from Bill Bauerle's 2017 paper g0=0.017 and g1=4.53
 	Parms.beta_ABA = 1.48e2; //Tardieu-Davies beta, Dewar (2002) Need the references !?
 	Parms.delta = -1.0;
 	Parms.a_ABA = 1.0e-4;
@@ -236,7 +237,10 @@ double CGas_exchange::gsw(double pressure)  // stomatal conductance for water va
 	double Ds, aa, bb, cc, hs, Cs, Gamma, tmp;
 		
 	double temp = set_leafpEffect(pressure);
+	temp = 1;
 	Gamma = 10.0;
+	//double gbc = gb / 1.37; need to incorporate this later (9/2018) after finishing current project
+	                         //change all instances of gb to gbc
     Cs = CO2 - (1.37*A_net/gb); // surface CO2 in mole fraction
 	    if (Cs <= Gamma) Cs = Gamma + 1;
         aa = temp*Parms.g1*A_net/Cs;

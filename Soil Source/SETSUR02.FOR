@@ -82,8 +82,8 @@ C**                                                                   **
       double precision St,t
       character*10 date
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
-     &           DIFWAT(24),SARANG(24),DIFINT(24),ROWINC(24),DIRINT(24),
-     &           SHADOW(24),SOLALT(24),SOLAZI(24)
+     &          SARANG(24),
+     &           SOLALT(24),SOLAZI(24)
       Dimension xS(NumBPD),iS(NumBPD),kS(NumBPD)
       Data SDERP/0.3964E-0,0.3631E1,0.3838E-1,0.7659E-1,0.0000E0,
      & -0.2297E2,-0.3885E0,-0.1587E-0,-0.1021E-1/,PI /3.1415926/,

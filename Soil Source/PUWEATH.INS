@@ -1,4 +1,5 @@
       REAL IRAV,IR,LAMDAS,LAMDAC,LATUDE,Longitude
+      REAL WATACT,WATRAT,WATPOT
       Integer AutoIrrigateF
       
       Common /Weath/ MSW1,MSW2,MSW3,MSW4,MSW5,MSW6,
@@ -7,8 +8,10 @@
      &               NCD,JDLAST, CLDFAC,DEL(24),RINT(24),GAMMA,RNS,
      &               RNC,RAIN,IR,WIND,CO2,TDUSK,TDUSKY,
      &               TWET,TDRY,CPREC(NumSD),TAIR(24),VPD(24),ROUGH,
-     &               RADINT(24),WATTSM(24),WATRAT,
+     &               RADINT(24),WATTSM(24),DIFINT(24),
+     &               ROWINC(24),CLOUD,SHADOW(24),DIFWAT(24),
+     &               DIRINT(24),WATACT,WATRAT,WATPOT,RNLU,
      &               NumF(40),NumFP,hFur(40),QF,IFUR,GAIR(NumGD),PG,
-     &               LATUDE,Longitude, Altitude, RI,par(24),
-     &               parint(24),daylng,AutoIrrigAmt,
+     &               LATUDE,Longitude, Altitude, RI,PAR(24),
+     &               PARINT(24),daylng,AutoIrrigAmt,
      &               AutoIrrigateF

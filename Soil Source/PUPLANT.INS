@@ -1,7 +1,7 @@
 	 
 	  REAL(8) PCRL, PCRQ,PCRS,ET_demand,LCAI,COVER,CONVR
 	  Real(8) HourlyCarboUsed 
-      REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
+        REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
 	  REAL LAREAT, MaxRootDepth, InitialRootCarbo
 	  integer isGerminated, isEmerged
 ! includes variables shared with crop model	 
@@ -20,19 +20,19 @@
         
    
 ! includes variables only used inside 2dsoil	                 
-      Common /shtR_public/ RVR(NumEld), AWUP(NumEld),PSISM,PSILT,EOR,
-     !                     YRL(NumEld), RGCF(NumEld),iFavRoot(NumEld),
-     !                     AdjCellNum(NumEld, 4),PSIS(NumEld),
-     !                     TS(NumEld),COND(NumEld),PDWR(NumEld),
-     !                     DRL(NumEld),WUPM(NumEld),
-     !                     WUPN(NumEld),WUPT(NumEld),TPL,PPDRL(NumEld),
-     !                     ADWR(NumEld), AWR(NumEld), ADRL(NumEld),RTWL,
+      Common /shtR_public/ RVR(NumNPD), AWUP(NumELD),PSISM,PSILT,EOR,
+     !                     YRL(NumNPD), RGCF(NumNPD),iFavRoot(NumNPD),
+     !                     PSIS(NumNPD),
+     !                     TS(NumNPD),COND(NumNPD),PDWR(NumNPD),
+     !                     DRL(NumNPD),WUPM(NumNPD),
+     !                     WUPN(NumNPD),WUPT(NumNPD),TPL,PPDRL(NumNPD),
+     !                     ADWR(NumNPD), AWR(NumNPD), ADRL(NumNPD),RTWL,
      !                     RtMinWtPerUnitArea,Wl,Wa,Wr,Wb,ALPY,
      !                     WidthE(NumEld),HeightE(NumEld),
      !                  PILD,VMAX,vegsrc, potential_T,
      !                   potential_T_EO,
      !                  AWUPS_old, WUPMS, EORSCF,WUPDS, WUP2S, 
      !                 WUP0S, DPSI02,SCF, PSIST,PROPAR,
-     !                 VUP(NumElD,2),FUP(NumEld,2)
+     !                 VUP(NumNPD,2),FUP(NumNPD,2)
      
      

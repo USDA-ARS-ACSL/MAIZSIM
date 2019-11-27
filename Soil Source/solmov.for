@@ -1,5 +1,6 @@
-      subroutine SoluteMover ()
+      subroutine SoluteMover_New ()
       Include 'Public.ins'
+      Include 'puplant.ins'
       Double precision A,B,C,P,Sum,dt1,dt2
       Integer cKod
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
@@ -11,7 +12,7 @@
      !                VxOld(NumNPD),VzOld(NumNPD),
      !       VxH(NumNPD),VzH(NumNPD),hOld(NumNPD),ConOld(NumNPD),
      !                Dispzz(NumNPD),Dispxx(NumNPD),Dispxz(NumNPD),
-     !                WeTab(3,2*NumElD)
+     !                WeTab(3,2*NumNPD)
       If (lInput.eq.0) goto 11
 C 
 C  Reading of the input files and initial calculations 
@@ -28,6 +29,12 @@ C
       im=im+1
       il=il+1
       Read(40,*,ERR=10) NumSol
+c      im=im+1
+c      il=il+1
+c      Read(40,*,ERR=10)
+c      im=im+1
+c      il=il+1
+c      Read(40,*,ERR=10) NL
       im=im+1
       il=il+1
       Read(40,*,ERR=10)
@@ -60,13 +67,15 @@ C
             Read(40,*,ERR=10) SN,LN, Dlng(M,NS),Dtrn(M,NS)
           enddo
       enddo
-*       
-      Do i=1,NumNP
-        ConOld(i)=Con(i)
-        hOld(i)=hNew(i)
-        VxOld(i)=Vx(i)
-        VzOld(i)=Vz(i)
-        ThOld(i)=ThNew(i)
+c*       
+      Do n=1,NumNP
+        !convert concentration from ugNO3/g soil to ugNO3/cm2 water
+        Conc(n,1)=Conc(n,1)/ThNew(n)*blkdn(MatNumN(n))
+        ConOld(n)=Con(n)
+        hOld(n)=hNew(n)
+        VxOld(n)=Vx(n)
+        VzOld(n)=Vz(n)
+        ThOld(n)=ThNew(n)
       Enddo
       Movers(2)=1
       Return
@@ -101,43 +110,52 @@ C GR
 C
 C  Recasting sinks 
 C
-         Do n=1,NumEl
-           NUS=4
-           if(KX(n,3).eq.KX(n,4)) NUS=3
+cccz zhuangji convert this section to node based
+c         Do n=1,NumEl
+c           NUS=4
+c           if(KX(n,3).eq.KX(n,4)) NUS=3
 *         Loop on subelements
-           do k=1,NUS-2
-             i=KX(n,1)
-             j=KX(n,k+1)
-             l=KX(n,k+2)
-             Ci(1)=x(l)-x(j)
-             Ci(2)=x(i)-x(l)
-             Ci(3)=x(j)-x(i)
-             Bi(1)=y(j)-y(l)
-             Bi(2)=y(l)-y(i)
-             Bi(3)=y(i)-y(j)
-             AE=(Ci(3)*Bi(2)-Ci(2)*Bi(3))/2.
-             CTotal=Conc(i,1)+Conc(j,1)+Conc(l,1)
-             if (CTotal.gt.0) then
-                Gc(i)=gc(i)+cSink(n,jjj)*AE*Conc(i,1)/CTotal
-                Gc(j)=gc(j)+cSink(n,jjj)*AE*Conc(j,1)/CTotal
-                Gc(l)=gc(l)+cSink(n,jjj)*AE*Conc(l,1)/CTotal
-             Endif
-             Sc(i)=Sc(i)+AE/3.
-             Sc(j)=Sc(j)+AE/3.
-             Sc(l)=Sc(l)+AE/3.
-            enddo
-         enddo
-*        Do n=1,NumEl
-*         NUS=4
-*          If(KX(n,3).eq.KX(n,4)) NUS=3
-*         Do j=1,NUS
-*            Gc(KX(n,j))=Gc(KX(n,j))+cSink(n,jjj)*Area(n)/NUS
-*            Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
-*          Enddo
-*        Enddo
-        Do i=1,NumNP
-          Gc(i)=Gc(i)/Sc(i)
-        Enddo
+c           do k=1,NUS-2
+c             i=KX(n,1)
+c             j=KX(n,k+1)
+c             l=KX(n,k+2)
+c             Ci(1)=x(l)-x(j)
+c             Ci(2)=x(i)-x(l)
+c             Ci(3)=x(j)-x(i)
+c             Bi(1)=y(j)-y(l)
+c             Bi(2)=y(l)-y(i)
+c             Bi(3)=y(i)-y(j)
+c             AE=(Ci(3)*Bi(2)-Ci(2)*Bi(3))/2.
+c             CTotal=Conc(i,1)+Conc(j,1)+Conc(l,1)
+c             if (CTotal.gt.0) then
+c                Gc(i)=gc(i)+cSink(n,jjj)*AE*Conc(i,1)/CTotal
+c                Gc(j)=gc(j)+cSink(n,jjj)*AE*Conc(j,1)/CTotal
+c                Gc(l)=gc(l)+cSink(n,jjj)*AE*Conc(l,1)/CTotal
+c             Endif
+c             Sc(i)=Sc(i)+AE/3.
+c             Sc(j)=Sc(j)+AE/3.
+c             Sc(l)=Sc(l)+AE/3.
+c            enddo
+c         enddo
+c*        Do n=1,NumEl
+c*         NUS=4
+c*          If(KX(n,3).eq.KX(n,4)) NUS=3
+c*         Do j=1,NUS
+c*            Gc(KX(n,j))=Gc(KX(n,j))+cSink(n,jjj)*Area(n)/NUS
+c*            Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
+c*          Enddo
+c*        Enddo
+c        Do i=1,NumNP
+c          Gc(i)=Gc(i)/Sc(i)
+c        Enddo
+cccz
+cccz zhuangji adopt node based expression
+cccz zhuangji: the previous sink recast use a concentration-based weight for "sink average"
+         Do n=1,NumNP
+            Gc(n)=cSink(n,jjj)
+            Sc(n)=NodeArea(n)
+         Enddo
+
 C
 C Assembling matrixes
 C
@@ -346,7 +364,7 @@ C
                   if (Q(i).lt.0) cKod=2 ! only consider flux out for now
                   Goto 112
                 Endif
-               Endif
+              Endif
 111         Continue
 C
 C  Dirichlet boundary condition
@@ -598,4 +616,3 @@ C GR
        Tau=ttau
        Return
       End
-

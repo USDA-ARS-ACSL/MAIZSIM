@@ -11,7 +11,8 @@ C Julian is a function that returns a julian day given a calendar day
       PARAMETER (IGREG=2299161)
 !(IGREG=2299161)
       INTEGER ja,jalpha,jb,jc,jd,je
-      Julian=julian+2415079   !provide a reference of 3/1/1900
+      !Julian=julian+2415079   !provide a reference of 3/1/1900
+      Julian=julian+2415019   ! now 12/30/1899
       if(julian.ge.IGREG)then
         jalpha=int(((julian-1867216)-0.25d0)/36524.25d0)
         ja=julian+1+jalpha-int(0.25d0*jalpha)
@@ -57,7 +58,8 @@ C Julian is a function that returns a julian day given a calendar day
         ja=int(0.01d0*jy)
         julday=julday+2-ja+int(0.25d0*ja)
         !julday=julday-2415019   ! 1/1/1900 JD zero
-        julday=julday-2415079;      ! on 3/1/1900 jday = 1
+        Julday=Julday-2415019 ! 12/30/1899 JD is 0
+        !julday=julday-2415079;      ! on 3/1/1900 jday = 1
       endif
       return
       END
