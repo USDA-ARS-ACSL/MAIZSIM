@@ -1,0 +1,13 @@
+****Script for chemical application module  *******mg/cm2= kg/ha* 0.01*rwsp*eomult*100
+Number of Fertilizer applications (max=25) mappl is in total mg N applied to grid (1 kg/ha = 1 mg/m2/width of application) application divided by width of grid in cm is kg ha-1
+ 2 
+tAppl(i)  mAppl(i),  Num_nodes(i)  (repeat these 3 lines for the number of fertilizer applications)
+'04/24/1980'   46.5            0       0  18  
+Nodes for the Application 1
+ 1  2  3  4  5  6  7  8  9  10  11  12  13  14  15 
+ 16  17  18 
+'05/29/1980'   93                0       0  18
+Nodes for the Application 2
+ 1  2  3  4  5  6  7  8  9  10  11  12  13  14  15 
+ 16  17  18 
+

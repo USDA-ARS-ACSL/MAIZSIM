@@ -245,7 +245,6 @@ Test_Ver9.1/2dsoil.exe
 /Soil Source/$tf
 /Field2005
 /Runoff and Ponding
-/SolarCorr
 /Test_Ver9.1git status
 
 /Test_Ver9.1/Graphics

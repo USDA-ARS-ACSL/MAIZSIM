@@ -1,0 +1,37 @@
+ Volume in drive D is WIn7D
+ Volume Serial Number is 5A2D-F354
+
+ Directory of d:\MAIZSIM07\SolarCorr\IOWA_01O1P1S1
+
+08/16/2018  01:43 PM    <DIR>          .
+08/16/2018  01:43 PM    <DIR>          ..
+08/16/2018  01:41 PM               362 BiologyDefault.bio
+08/16/2018  01:43 PM                 0 createError.log
+08/16/2018  01:43 PM                 0 dir.txt
+08/16/2018  01:41 PM             1,051 GH9014_m.var
+08/16/2018  01:41 PM               213 grid1.bat
+08/16/2018  01:41 PM                20 grid2.bat
+08/16/2018  01:41 PM             1,015 IOWA.nit
+08/16/2018  01:41 PM               590 IOWAClimate.dat
+08/07/2018  12:50 PM            12,798 IOWAWeather.dat
+08/13/2018  10:19 PM           390,141 IOWA_01O1P1S1.dbg
+08/16/2018  01:43 PM            27,542 IOWA_01O1P1S1.elm
+08/13/2018  10:19 PM         1,617,324 IOWA_01O1P1S1.g01
+08/13/2018  10:19 PM        10,145,603 IOWA_01O1P1S1.g02
+08/13/2018  10:19 PM        32,221,937 IOWA_01O1P1S1.G03
+08/13/2018  10:19 PM        21,407,880 IOWA_01O1P1S1.G04
+08/13/2018  10:19 PM            72,132 IOWA_01O1P1S1.G05
+08/13/2018  10:19 PM            15,691 IOWA_01O1P1S1.G06
+08/16/2018  01:43 PM            39,181 IOWA_01O1P1S1.grd
+08/16/2018  01:41 PM               603 IOWA_01O1P1S1.ini
+08/16/2018  01:41 PM             1,673 IOWA_01O1P1S1.lyr
+08/16/2018  01:41 PM               634 IOWA_01O1P1S1.man
+08/16/2018  01:43 PM            64,589 IOWA_01O1P1S1.nod
+08/16/2018  01:41 PM               338 IOWA_01O1P1S1.tim
+08/08/2018  11:56 AM         1,617,324 IOWA_01O1P1S1a.g01
+08/13/2018  10:19 PM            31,958 MassBl.out
+08/16/2018  01:41 PM               553 NitrogenDefault.sol
+08/16/2018  01:41 PM             1,232 RunIOWA_01O1P1S1.dat
+08/16/2018  01:43 PM               612 Wiota1.soi
+              28 File(s)     67,672,996 bytes
+               2 Dir(s)  204,266,217,472 bytes free
