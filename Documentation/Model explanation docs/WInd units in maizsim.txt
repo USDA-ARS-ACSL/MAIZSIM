@@ -1,0 +1,4 @@
+WInd in the hourly and setsurface modules are in km -hr
+     in the gas exchange we have m s-1
+in crop.cpp we change to m s-1 
+     wthr.wind = Weather->WIND*(1000.0/3600.0); // conversion from km hr-1 to m s-1

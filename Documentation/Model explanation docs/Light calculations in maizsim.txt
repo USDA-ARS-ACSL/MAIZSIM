@@ -1,0 +1,22 @@
+Light is input in the weather module and converted to Watts m-2 as HSR()
+
+HSR(M)=max(0.0,climat(1))*BSOLAR/3600
+BSOLAR converts radiation to MJ m2, then the 3600 converts to Watts m-2
+
+RI is translated to MJ m-2
+ RI = RI + amax1(0.0,HSR(M))*3600
+
+PAR is calculated as  0.43 DIRECT + 0.57 DIFFUSE RADIATION.
+           PAR(I) = WATTSM(I)
+     &          *((DIFWAT(I)*0.57) + ((1.0 - DIFWAT(I))*0.43))
+It is in units of Watts
+
+In the crop module watts are converted to umol s-1 m-2
+wthr.PFD = Weather->par[time_public->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
+
+SolRad in the plant module is in Watts
+wthr.solRad = Weather->WATTSM[time_public->iTime-1]
+
+
+
+
