@@ -1,0 +1,19 @@
+We use Visual Studio 2017 and Intel Fortran Composer 2019 to manage and compile the project. 
+The crop model is compiled as a DLL. You must tell the fortran compiler the location of the crop.lib file. In visual studio this is under the properties for the linker in the FORTRAN project. (Linker->input->additional dependencies). Under System, we use Subsystem:Console. This is the command line (for the debug version):
+/OUT:"Debug/2dsoil.exe" /VERSION:1.14 /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTFILE:"Debug\2dsoil.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"Debug/2dsoil.pdb" /SUBSYSTEM:CONSOLE /IMPLIB:"Y:\MAIZSIM\Soil Source\Debug\2dsoil.lib" "Y:\MAIZSIM\Crop Source\debug\crop.lib"
+
+The C++ program does not use common language runtime support (CLR). This is the VS commandline:
+/GS /analyze- /W3 /Zc:wchar_t /Zi /Gm- /Od /Fd"Debug\vc141.pdb" /Zc:inline /fp:precise /D "WIN32" /D "_DEBUG" /D "_USRDLL" /D "CROP_EXPORTS" /D "_VC80_UPGRADE=0x0710" /D "_WINDLL" /D "_MBCS" /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /MTd /FC /Fa"Debug\" /EHsc /nologo /Fo"Debug\" /Fp"Debug\Crop.pch" /diagnostics:classic 
+
+The crop module is the entry point into the crop model from fortran. The first members of each common block is passed to the crop model as arguments in the calling statement. These are associated with structures in the crop model. We use a simple dll export to decorate the C++ crop DLL entry point and arguments:
+#ifdef _WIN32
+#ifdef MYPLANT_EXPORTS
+#define PLANT_API __declspec(dllexport)
+#else
+#define PLANT_API __declspec(dllexport)
+#endif
+#else
+#define PLANT_API
+#endif
+This allows the fortran to call the dll using lower case naming. 
+All Microsoft/Windows specific code has been removed (as far as we know) so the program should compile on Linux/Mac systems
