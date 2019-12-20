@@ -234,6 +234,8 @@ pip-log.txt
 # Mac / Linux #
 ###############
 *.o
+
+#project specific files
 Crop source/copydll.bat
 Soil Source/CopyToTestVer.bat
 Test_Ver9.1/Crop.dll

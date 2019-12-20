@@ -540,6 +540,7 @@ C
 C  CALCULATE ACTUAL WATER VAPOR PRESSURE
 C
           AVP = SVPW - (GAMMA*(TDRY - TWET))
+C _todo   Calculate Relative humidity here if it is not input
         Endif
 
 CDT        
