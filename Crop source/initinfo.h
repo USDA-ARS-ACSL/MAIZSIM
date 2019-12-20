@@ -30,6 +30,7 @@ public:
 		PhyllochronsToSilk=8;
 		PhyllochronsToTassel = 1;
 		stayGreen = 4.5;
+		LM_min = 125.0;
 		
 	}
 	char description[255];
@@ -45,6 +46,7 @@ public:
 	bool DayLengthSensitive; //1 if daylength sensitive
 	double Rmax_LIR, Rmax_LTAR; //  Maximum Leaf tip initiation and appearance rates
 	double stayGreen;  // staygreen trait of the hybrid (originally 4.5)
+	double LM_min; //Length of largest leaf
                                   // stay green for this value times growth period after peaking before senescence begins
                                   // An analogy for this is that with no other stresses involved, it takes 15 years to grow up, stays active for 60 years, and age the last 15 year if it were for a 90 year life span creature.
 	                              //Once fully grown, the clock works differently so that the hotter it is quicker it ages

@@ -1,0 +1,168 @@
+From:	Timlin, Dennis
+Sent:	Monday, April 29, 2013 3:07 PM
+To:	'Soo-Hyung Kim'
+Cc:	Fleisher, David
+Subject:	create files for 2dsoil program
+Attachments:	BrandtSiCl.dat; AuroraLayer.dat; Run_dat generator.sas; Generate weather 
+files for bssg workshop.sas; ModelOutputTo SAS tables - store macro.sas; 
+ModelOutputToSAS Batch .sas; modelOutput To Sas tables batch for leaf 
+files.sas; modelOutput To Sas tables batch for water files.sas
+
+The source code for create files solution is in the plantmodel database. There 
+are three projects (under one solution), CreateSoils the C# overall interface, 
+GridGen, the fortran program to generate the gird with info passed from the C# 
+program, and Rosetta, a Cpp program to generate soil properties from texture. 
+This program runs on a command line and does not interact with CreateSoils in 
+terms of passing information.  You need these files for input (file names are 
+not fixed):
+
+ 
+
+Run.dat 
+
+Layer.dat 
+
+Mysoil.soi
+
+ 
+
+Thus you need a runfile to use this program.
+
+ 
+
+You pass them on the command  line:
+
+C:\>createSoils run.dat layer.dat
+
+ 
+
+The run.dat and layer.dat can have any name
+
+ 
+
+Your runfile.dat file  will refer to a soil file  as mysoil.dat. The 
+createsoils program will then look for an input (with texture info) file 
+called mysoil.soi. the actual file name is arbitrary, but you must have the 
+‘soi’ extension for the soil input file. That is why it is given above. There 
+probably is a more straightforward method to do this so I am open to 
+suggestions.
+
+ 
+
+I have attached two files:
+
+BrandtSiCl.soi
+
+AuroraLayer.dat
+
+ 
+
+The first (BrandtSiCl.soi) contains the soil properties – sand silt clay bd om
+
+The second (AurorLayer) contains the layer properties. See the header. You 
+don’t have to change the datagen2.dat file name. This is a temporary file 
+needed by the fortran grid generator program. If you already have a grid file 
+and you just want to change the layering or soil properties. This has not been 
+implemented yet, but will be (I have to learn again how to pass a string in an 
+argument list to the dll, I could do it before but have forgetten). 
+
+ 
+
+The project called Rosetta (I added this to CreateSoils solution) exists on a 
+different folder in my computer (as a separate project). I link to it in my 
+solution. Hopefully it will extract the files when you pull the project from 
+source safe. It is actually in another folder than the other create files 
+solution. If you have problems retrieving it, I can help.  The process should 
+be transparent. 
+
+ 
+
+The runfile as input tells the program where to write the nodal files (*.nod, 
+*.grd) except the element file. The element file needs initial root wt added 
+to it.  You will find this file, called ‘element.elm’ in the default folder 
+from where you run CreateSoils. I usually distribute test amounts and make 
+sure the sum adds to something reasonable – run the model till emergence and 
+look into the g01 file to see total root weight.  There are several approaches 
+to do this better: 1) use a polynomial to generate root density with depth, 2) 
+hard code it into the grid file generator (Annette did this) or 3 generate 
+root density from germination. 
+
+ 
+
+I want to do 3 but need time to implement it. I tried to have Annette do it 
+but she found it too confusing/difficult. I think she could have done it but 
+did not want to.  We did generate an initial root weight. I just have to start 
+root growth at germination, it is not too hard. 
+
+ 
+
+There is an output file ‘output’ that is generated but this is not used in 
+maizsim. 
+
+ 
+
+I will look through what David sent and see if I can put all this together 
+better.
+
+ 
+
+I’ve also attached some sas files I used to generate the run and weather 
+files. There are a number of tricks you can do with SAS depending on how many 
+levels of variations you have in the data. &loc and &name refer to folder 
+names. You can see how it turned out in my maizsim07\bsg-2013 folder. 
+
+ 
+
+I read the sas data using macros. I have generic macros that work with all 
+simulations (model output to sas tables – store macro). I store the macro so I 
+don’t have to rerun them everytime I launch sas.  The batch files vary by 
+simulation. The idea is to find the run files and then parse them for the 
+locations of the output and grid files. The grid file is used to set up 
+layers.  I don’t generally read the leaf and soil and root files as there is a 
+lot of data. I set up separate programs for them, if I need them. 
+
+ 
+
+The reading weather sas program also depends on the source of the data. The 
+code to write the maizsim weather file is the same. 
+
+ 
+
+This is probably confusing as hell. I have to do it once a month to remember 
+what to do. Writing this helps to formalize a manua.
+
+ 
+
+Dennis
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+--------------------------------------
+Dennis Timlin
+
+Soil Scientist
+USDA-ARS Crop Systems and Global Change Laboratory
+Bldg 001, Rm 342 BARC-W
+10300 Baltimore Ave
+Beltsville, MD 20705
+301-504-6255
+fax 301-504-5823
+Dennis.Timlin@ars.usda.gov
+http://www.ars.usda.gov/ba/csgcl
+
+ 
+
+ 
+

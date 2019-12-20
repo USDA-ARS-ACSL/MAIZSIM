@@ -210,8 +210,10 @@ C
           NL_old(i)=NL(i)
           Cm_old(i)=Cm(i)
           Nm_old(i)=Nm(i)
-          NNO3_old(i)=Amax1(0.,Conc(i,1)*ThNew(i)*14./62.)
-          NNH4_old(i) =  NNH4(i)
+C     right now conc is ug NO3 per g soil. further conversions will be done in the solute mover initialization routine when we have water contents.
+          NNO3_old(i)=Conc(i,1)  
+C   ammonia is input as ppm or ug /g soil here we convert it to ug/cm3 or mg per liter of soil volume
+          NNH4_old(i) =  NNH4(i)*blkdn(MatNumN(i))
           ThOld(i)=ThNew(i)
           TmprOld(i)=Tmpr(i)
           Denit(i)=0.

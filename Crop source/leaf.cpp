@@ -36,6 +36,7 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	WLRATIO = 0.106; // leaf lamina width to length ratio
 	A_LW = 0.75; // leaf area coeff with respect to L*W
 	stayGreen = dv->get_stayGreen();
+	LM_min = dv->get_LM_min();
 	
 	// T_peak is the optimal growth temperature at which the potential leaf size determined in calc_mophology achieved. Similar concept to fig 3 of Fournier and Andreiu (1998) 
 	T_peak = 18.7, Tb_Leaf = 8.0;
@@ -65,7 +66,7 @@ void CLeaf::initialize (CDevelopment * dv)
 
 void CLeaf::calc_dimensions(CDevelopment *dv)
 {
-	const double LM_min = 125, k = 24.0;
+	const double k = 24.0;
 	double totalLeaves = dv->get_totalLeaves(); //todo: should be a plant parameter not leaf
 	double L_max = (sqrt(LM_min*LM_min + k*(totalLeaves - dv->get_initInfo().genericLeafNo)));
 	                               /*    LM_min is a length characteristic of the longest leaf,in Fournier and Andrieu 1998, it was 90 cm
@@ -123,7 +124,8 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 {
     double CriticalNitrogen;
 	CriticalNitrogen= __max(0.25,this->N_content);
-	double N_effect=(2/(1+exp(-2.9*(CriticalNitrogen-0.25)))-1);
+	N_effect= __max(0.0, (2 / (1 + exp(-2.9*(N_content - 0.25))) - 1));
+	N_effect = __min(1, N_effect);
 	const double psi_threshold_bars = -0.8657; 
 	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
 	double shade_effect= dv->get_shadeEffect();
@@ -179,7 +181,7 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 		else growing = true;
 
 	}
-	return;
+	return; 
 }
 
 
@@ -192,11 +194,13 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	double T_grow = dv->get_Tgrow();
     double N_effect = __max(0.0, (2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
 	// This assumes 0.25mg/m2 minimum N required, and below this the value is 0.0.
+	N_effect = __min(1, N_effect);
 	const double psi_threshold_bars = -4.0; //threshold predawn leaf water potential (in bars) below which water stress triggers senescence, needs to be substantiated with lit or exp evidence, SK
 	// This is the water potential at which considerable reduction in leaf growth takes place in corn, sunflower, and soybean in Boyear (1970)
 	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
 	double shade_effect = dv->get_shadeEffect();
-
+	//water_effect = 1;
+	//N_effect = 1;
 	double  seneDuration_half; // max. growth rate assumed to be half of growthDuration
 
 	double Q10 = 2.0;

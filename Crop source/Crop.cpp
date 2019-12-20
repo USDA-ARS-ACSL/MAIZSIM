@@ -360,7 +360,7 @@ void crop_(struct
 				
 				SHOOTR->LCAI =pSC->getPlant()-> calcGreenLeafArea()* pSC->getInitInfo().plantDensity/(100*100);
 				SHOOTR->Cover= 1.0 - exp (-0.79*SHOOTR->LCAI);
-				SHOOTR->Shade=(float)SHOOTR->Cover*SHOOTR->RowSp;
+				SHOOTR->Shade=(float)SHOOTR->Cover*SHOOTR->RowSp*SHOOTR->EOMult;
 				SHOOTR->Height=min(SHOOTR->Shade,SHOOTR->RowSp);
 				SHOOTR->ET_demand = (pSC->getPlant()->get_ET()*24);//pass ET demand from shoot to root. Yang
 				/*In GasExchange, the unit of ET is mmol m-2(leaf) sec-1

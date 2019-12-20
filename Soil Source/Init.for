@@ -25,7 +25,6 @@ c     for writing frequency to output
 	read(9,'(A132)')VarietyFile
 	read(9,'(A132)')GeometryFile
       read(9,'(A132)')NodeGeomFile   
-      read(9,'(A132)')ElemGeomFile  
       read(9,'(A132)')MassBalanceFile
 	read(9,'(A132)')PlantGraphics
       read(9,'(A132)')LeafGraphics 	
@@ -64,7 +63,7 @@ cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'
         read(41,*,err=8)
         read(41,*,err=8)
         read(41,*,err=8) OutputSoilNo, OutPutSoilYes
-       Close(40)
+       Close(41)
         if (OutPutSoilNo+OutPutSoilYes.gt.1) then
            Write(*,*) 'error in soil output flag'
            Goto 11

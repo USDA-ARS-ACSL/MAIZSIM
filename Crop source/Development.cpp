@@ -22,6 +22,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	GTIsum = dGTI = 0;
 	emerge_gdd = 0;
 	stayGreen = info.stayGreen;
+	LM_min = info.LM_min;
 	Rmax_LIR = info.Rmax_LIR;
 	Rmax_LTAR = info.Rmax_LTAR;
 	DayLengthSensitive = info.DayLengthSensitive;

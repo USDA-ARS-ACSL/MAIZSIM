@@ -2,7 +2,7 @@
 
 * Note that the first day  for drip irrigation needs to be at least one day later than the 
 * initial time in the file in the time folder. This allows the program to initialize the soil properties and fluxes
-
+* test comment
 
       Subroutine Drip()
       Include 'public.ins'
@@ -31,8 +31,6 @@
            ModNum=NumMod
            tNext(ModNum)=1e22
         End if
-        Close(40)
-        return
         Read(40,*,Err=20)
         Do i=1,Drip_times
 	    Read(40,*,Err=20) Start_Date(i), Start_hour(i), Stop_Date(i), 
@@ -65,7 +63,7 @@ c case for start of dripping
                   endif
                EndDo
             EndDo
-           tnext(ModNum)=time + PERIOD
+           tnext(ModNum)=time + PERIOD/8  ! run in 7.5 minute periods
         Else 
          tnext(ModNum)=1e+32
          applied=applied+1
@@ -77,6 +75,6 @@ c case for start of dripping
        Endif
       Endif
       Return
-20    Stop 'Mngm data error'
+20    Stop 'Drip data error'
       End
         

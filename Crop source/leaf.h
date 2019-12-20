@@ -27,6 +27,7 @@ public:
 	double get_length() {return length;}
 	double get_SLA() {return SLA;}
 	double get_N_content() {return N_content;}
+	double get_N_Effect() { return N_effect; }
 	double get_potentialAreaIncrease () {return PotentialAreaIncrease;}
 	double get_RelativeAreaIncrease() {return RelativeAreaIncrease;}
 	double get_actualgreenArea() {return actualgreenArea;}
@@ -37,6 +38,7 @@ public:
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
 	int    get_TotalMatureLeaves() { return TotalMatureLeaves; }
 	int    get_Rank() {return rank;}
+	
 	
 
 	void initialize(CDevelopment * dv);
@@ -80,11 +82,12 @@ private:
 	double plastochrons, GDD2mature; // Fournier and Andrieu (1998), used for delay between initiation and elongation
 	double phase1Delay, growthDuration, elongAge, elongRate, maxElongRate, seneAge, activeAge, seneDuration;
 	double stayGreen, stayGreenDuration;
-	double ptnLength, ptnWidth;
+	double ptnLength, ptnWidth,LM_min;
 	double actualArea;
 	double actualLength,actualwidth; //actual length and width of leaf under both drought stress and carbon limitation
 	bool   first;  //indicates if this is the first time we call the elongate method;
 	double N_content; 
+	double N_effect;
 	double WLRATIO, A_LW;
 	double T_peak, Tb_Leaf;
 

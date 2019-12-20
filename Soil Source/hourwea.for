@@ -88,8 +88,8 @@ c inputs hourly data
      &     Interval
       
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
-     &           DIFWAT(24),SARANG(24),DIFINT(24),ROWINC(24),DIRINT(24),
-     &           SHADOW(24),SOLALT(24),SOLAZI(24),
+     &           SARANG(24),
+     &           SOLALT(24),SOLAZI(24),
      &           HTM(24)
       Dimension xS(NumBPD),iS(NumBPD),kS(NumBPD)
       Data SDERP/0.3964E-0,0.3631E1,0.3838E-1,0.7659E-1,0.0000E0,
@@ -339,7 +339,7 @@ C
           TMIN = 1000.0
           DO 1015 M = 1,24
 c RI should be total J m-2 -- work in Watts * time = total energy
-             RI = RI + amax1(0.0,HSR(M))*3600
+            RI = RI + amax1(0.0,HSR(M))*3600
              SUM24 = SUM24 + HRAIN(M)
              IF(TMAX .LT. HTEMP(M)) THEN
                TMAX = HTEMP(M)
@@ -370,7 +370,7 @@ c......................... Radiation submodel
 C
 C  CALCULATE SOLAR DECLINATION
 C
-        XLAT = LATUDE*DEGRAD
+        XLAT = LATUDE*DEGRAD  !convert to radians
         DEC = SDERP(1)
         Do I = 2,5
           N = I - 1
@@ -423,6 +423,7 @@ C
 C  CALCULATE ACTUAL RADIATION INCIDENT ON CROP AT SOLAR NOON
 C  GIVEN DAILY INTEGRAL AND ASSUMING RADIATION FLUX DENSITY
 C  VARIES AS A HALF SINE WAVE OVER THE PHOTOPERIOD
+C  Dividing by daylength and 3600 converts from MJ to watts
 C
         WATACT = RI*4.363E-4/DAYLNG     ! Watts per m2
 C       4.363E-4 = 3.1416/3600/2
@@ -471,7 +472,7 @@ C
           TIMH = I - 0.5
           WATTSM(I) = 0.0
           If(I.GE.IUP.AND.I.LE.IDN)
-cdbg check the units here
+cd   HSR is watts
      &      WATTSM(I) = HSR(I)
         Enddo
         If ((DDIf.GT.0.0).OR.(DDIf.LT.0.0)) then
@@ -855,7 +856,7 @@ c
 c  ELSE IF THE NODE IS COVERED
 c
           Else
-            VarBW(kS(i),2)=0.
+            VarBW(kS(i),2)=0.05*24.*ESO/10000.
           Endif
 c                Endif for the surface nodes
  90     Continue
@@ -897,12 +898,13 @@ C   HAS NOT YET EMERGED AND COVER =0
           WATPL = WATTSM(ITIME) !*RADINT(ITIME)/COVER /dt don't need when used in 2dsoil
         Endif
 C
-C   CALCULATE NET RADIATION ON THE CROP
+C   CALCULATE NET RADIATION ON THE CROP 
+C    (RNC already adjusted for cover? - no see two lines above could multiply by radint/cover)
 C
         RNC = ((1.0 - LAMDAC)*WATPL) - RNLU
         If (RNC.LE.0.0) RNC = 0.0
 C
-C   CALCULATE POTENTIAL TRANSPIRATION RATE FOR CROP ALLOWING FOR
+C   CALCULATE POTENTIAL TRANSPIRATION RATE (g/m2/hour) FOR CROP ALLOWING FOR
 C   INCOMPLETE GROUND COVER
 C
         EPO = ((DEL(ITIME)/GAMMA*RNC*3600.0/(2500.8
@@ -957,7 +959,7 @@ C FCSH is sensible heat flux when the ground is hotter than the air
        if(rowsp.le.0) then
          FCSH=4.0E-3+1.39E-3*Wind
         else
-         FCSH=4.0E-3+1.39E-3*Wind*max(1.0,(2.-(2.*height/rowsp)))
+         FCSH=4.0E-3+1.39E-3*Wind*max(1.0,(2.-(2.*height/rowsp*EOMULT)))
        endif
        
 c      FCSH=0.02
@@ -968,17 +970,24 @@ cdt
       FELWR=FELWR*4.1856*60.0*24.0
 * units are Joules cm-2 d-1 C-1
 CYAPEND
-C units are changed from cal cm-2 min-1 C-1 -->J cm-2 d-1 C-1
+C units are changed from cal cm-2 sec-1 C-1 -->J cm-2 d-1 C-1
       cWat=4.1856
       TairN=Tair(Itime)
-      Do i=1,NumBP
-        n=kxb(i)
+
+c  MARCH ALONG THE SURFACE TO FIND SOIL-ATMOSPHERE BOUNDARY NODES
+c  AND THEIR LATERAL COORDINATES
+c
+      Do 95 i=1,ic
+        PSh=FSh(i,xBSTEM,SHADE,xS,ic)
+        n=kS(i)
         k=codeT(n)
-        Varbt(i,4)=0.0
-        VarBT(i,3)=0.0
-        VarBT(i,2)=0.0
+        Varbt(kS(i),4)=0.0
+        VarBT(kS(i),3)=0.0
+        VarBT(kS(i),2)=0.0
+  
         If (k.eq.-4) then
-          If(abs(x(n)-xBSTEM).gt.SHADE.or.NShoot.eq.0) then
+C     if node is exposed     
+          If((PSh.gt.0).or.(NShoot.eq.0)) then
 * If evaporation
 * calc heat flux due to latent heat of evaporation 
 * given evaporation at it's potential rate
@@ -987,43 +996,50 @@ C units are changed from cal cm-2 min-1 C-1 -->J cm-2 d-1 C-1
 *  40.6 for mississippi 
 c           FELWR=max(0.0,(tmpr(i)-TairN)*FELWR)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(i,4)=RNS*3600.0*24.0/10000.0
+                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
 
 *  calculate convected heat  if soil is warmer than air
-     
-              VarBT(i,3)=(FCSH+FELWR)*TAirN
-              VarBT(i,2)=FCSH+FELWR 
+
+* FELWR should be zero when TAirN is warmer than soil
+              if(tmpr(kS(i)).GT.TAirN) then
+                VarBT(kS(i),2)=+FCSH+FELWR
+                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
+              endif
+C See if sensible heat transport works here in canopy              
+              TFac=((0.058+1.7e-4*TAirN)+
+     !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
+               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
+               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
+
          else
 
 *  the amount of heat added to the soil
 *     is determined by air temperature.
-*  units are millcal cm-2 min-1 C-1
-               VarBT(i,2)=((0.058+1.7e-4*TAirN)+
+*  units are millcal cm-2 sec-1 C-1
+               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
 * the first term is thermal conductivity of the air. 
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
-cdt change this for a test
-               VarBT(i,2)=VarBT(i,2)*4.1856*60.0*24.0
-cdt /1000.0
-               VarBT(i,3)=VarBT(i,2)*TairN
+
+               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
+               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
+
+Cdt and a part for radiative transfer               
+               if(tmpr(i).GT.TAirN) then
+                 VarBT(i,2)=VarBT(i,2)+(FCSH+FELWR)
+                 VarBT(i,3)=VarBT(i,3)+(FCSH+FELWR)*TAirN
+              endif
+c assume 5% of radiation reaches soil surface through canopy              
+              VarBT(kS(i),4)=amin1(0.0,1.0-BEERS)*RNS*3600.0*24.0/10000.0
+              
 *  units are now J cm-2 d-1
-*  heat into soil with rain
 * end if for crop canopy
-        endif
+          endif
 
-
-* add heat input with rain
-c       If(VarBW(i,3).lt.0.0) then
-c         VarBT(i,2)=VarBT(i,2)+varBW(i,3)*cWat
-c         VarBT(i,3)=VarBT(i,3)+VarBW(i,3)*cWat*TAirN
-         
-* should this be + varbw*width?
-c               Endif
-
-       VarBT(i,1)=TAirN
+           VarBT(ks(i),1)=TAirN
         Endif
-       Enddo
+95    Continue
 C ...............End of heat balance
 c................... Gas movement
       Do i=1,NumBP
@@ -1066,6 +1082,7 @@ c
 
       RETURN
 10    call errmes(im,il)
+      write(*,*) "Error in Weather File"
       END
 C
      

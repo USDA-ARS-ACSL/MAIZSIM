@@ -1,4 +1,5 @@
       Subroutine SoilNitrogen()
+C new comment
       Include 'Public.ins'
       Include 'NITVAR.ins'
       common /nitrog/ModNum
@@ -48,8 +49,10 @@ C                soil water concentration is ug NO3 cm-3 of water  (multiply by 
 C               The units of N in this routine are mg N liter-1 of soil. 
 C               The two are equivalent (both numerator and denominator differ by a factor of 1000)
 C                   
-        BNO3=Amax1(0.,Conc(i,1)*ThNew(i)*14./62.0)
+        BNO3=Conc(i,1)/Blkdn(m)*thNew(i) !conc(i,1) is ug NO3 per cm3 water so convert to ug/g soil (mg L-1)
         NNO3_OLD(i)=BNO3
+C 
+
         BNNH4=NNH4_Old(i) !8/28/2014 DT was BNH4 original typo
         BDENIT=Denit_old(i)
         DO IT=1,3
@@ -168,7 +171,7 @@ C End of iterations
           Denit(i)=BDENIT
           NNH4(i) = BNNH4
           NNO3_sol = BNO3
-          Conc(i,1)=NNO3_sol*62./ThNew(i)/14.0
+          Conc(i,1)=NNO3_sol/ThNew(i)*BlkDn(MatNumN(i))
           TotNitO=Nh_old(i)+Nl_old(i)+Nm_Old(i)+NNO3_Old(i)+NNH4_old(i)
           TotNit=Nh(i)+Nl(i)+Nm(i)+NNO3_sol+NNH4(i)  
           DTot=TotNit-TotNitO
@@ -180,7 +183,8 @@ C End of iterations
           Cm_old(i)=Cm(i)
           Denit_old(i)=Denit(i)
           NNH4_old(i)=NNH4(i)
-          NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i)*14./62.)
+          NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i))
+     &                         /Blkdn(MatNumN(i))
 CDT the following is OK if we sum BNO3 above          
 cdt          NNO3_old(i)=NNO3_sol
           ThOld(i)=ThNew(i)

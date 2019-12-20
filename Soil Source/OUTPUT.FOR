@@ -59,17 +59,26 @@ C*** FROM HourlyOut.for BEGIN
 	  Open(83,file=SurfaceGraphics)
         Open(84,file=FluxGraphics)
          
-      Write(81,5) "Date_time", "Date", "X", "Y", "hNew","thNew", "VZ", 
-     &   "VX","Q", "ConcN", "Temp","GasConc"  
+      Write(81,5) "Date_time,", "Date,", "X,", "Y,", "hNew,","thNew,",
+     &  "VZ,", "VX,","Q,", "ConcN,", "Temp,","GasConc"  
      
-      Write(82,6) "Date_time", "Date", "X", "Y", "Elem", "RTWT",
-     &         "TotalRT", "WaterSink", "NitSink", "GasSink", "Area"
+      Write(82,6) "Date_time,", "Date,", "X,", "Y,", "Node,", 
+     &      "RMassM,",
+     &      "RMassY,", "RDenM,", "RDenY,",
+     &      "WaterSink,", "NitSink,", "GasSink,", "Area"
          
-        Write(83,20) "Date_time", "Date", "PSoilEvap", 
-     &         "ASoilEVap", "PET_PEN",
-     &         "PE_T_int","transp","CumRain","infil","FLuxAct",
-     &         "Runoff","cover","PSIM", "SeasPSoEv","SeasASoEv" ,
-     &        "SeasPTran","SeasATran","SeasRain","SeasInfil" 
+        Write(83,20) "Date_time,", "Date,", "PSoilEvap,", 
+     &         "ASoilEVap,", "PET_PEN,",
+     &         "PE_T_int,","transp,",
+     &         "CumRain,","infil,",
+     &         "FLuxAct,", "Runoff,",
+     &         "cover,","PSIM,", "SeasPSoEv,",
+     $         "SeasASoEv," ,"SeasPTran,",
+     &         "SeasATran,","SeasRain,","SeasInfil" 
+       Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
+     &    "WattSM,", "RNS,","RNC,","WATPOT,","WATACT,",
+     &    "WATRAT,", "UpwardLW,","DifWat,","Cloud,",
+     &     "Shadow,","DIfInt,","Rowinc,", "PARInt,","RADInt"
       Endif     !end initialization
 C
 C Routine calculations every time step
@@ -137,9 +146,9 @@ C*** FROM HourlyOut.for END
      !                   ThNew,vz,vx,Q,Conc(1,1),Tmpr,g(1,1))
 
         If(NShoot.ne.0) then
-             Call ArrElemOut (Date,x,y,NumNP,NumEl,t,KX,NumElD,RTWT,
-     !                      RUTDEN,Sink,cSink(1,1),gSink(1,1),YRL,Area,
-     !                      MatNumE)
+             Call ArrRootOut (Date,x,y,t, NumNP,RMassM,RMassY,
+     !            RDenM, RDenY, Sink,
+     !            cSink(1,1),gSink(1,1),NodeArea)
             !Call OutToDB(Sink(1))
         Endif
         tNext(ModNum) = time + Period
@@ -185,18 +194,20 @@ CDT distribute runoff back into Q This makes it uniform. implement this later
        
            CurrentTrans=(AWUPSS-ActualTrans1)/EOMult/poprow*100
            p_ET=(potential_T-pot_ET)/EOMult/poprow*100
-           p_ET_EO=potential_T_EO-pot_ET_EO          ! already per plant
-           
+c pot_ET_EO is the EO summation from the previous time step.           
+           p_ET_EO=potential_T_EO-pot_ET_EO          ! already per plant, summation of EO from hourly weather and wateruptake
+                                                     ! pot_ET_EO is Potential_T_EO from the previous time step
+                                                     ! Potential_T_EO is the summation of EO over the simulation
+                                                     ! EO is potential transpiration rate
 c potential_T is calculated as a summation of EOR*Step so it is per slab and is cumulative over the simulation
 C EOR is calculated from ET demand in the crop model
 c  pot_ET is the value of potential_T from the previous hour
            
 C EO is the potential transpiration rate from Penman adjusted for plant cover, calculated in the weather subroutine
 c  potential_T_EO is the summation of EO which is soil surface evap from EO and the Penman equation.
-c pot_ET_EO is the EO summation from the previous time step.           
 c EOR_p is a rough estimate of potential ET. p_ET is a better estimate using time step to 
 c  integrate rather than use an average
-           EOR_p=EOR*period/EOMult/poprow*100
+           EOR_p=EOR*period/EOMult/poprow*100 ! EOR comes from ET_demand from plant
  
 
              
@@ -219,8 +230,12 @@ C
      &              SeasonActualSoilEvap, SeasonPotenTranspiration,
      &               SeasonActualTranspiration,  SeasonRainfall,  
      &              SeasonActualInfil
+        
+        Write(84,13) t,date,flux,ActualSoilEvap,Wattsm(itime),
+     &     RNS,RNC,WATPOT,WATACT, WATRAT,RNLU,
+     &     Difwat(itime),Cloud,Shadow(itime),Difint(itime),
+     &      RowInc(itime),Parint(itime), Radint(itime)
      
-        Write(84,10) t,date,flux,ActualSoilEvap
 
 	  flux=0
 	  ActualSoilEvap=0
@@ -238,40 +253,35 @@ C*** FROM HourlyOut.for END
            
       Return
 C10    Call errmes(im,il)
-  5   Format (1x,A16, T20,A4,T36,A1,T46,A1, T52,A4,T63,A5,T75,A2,T87,A2,
-     &     T97,A1, T108, A5, T119, A4, T129 A7)   ! format for nodal data header
-  6   Format (1x,A16,T20,A4,T36,A1,T46,A1,T56,A4,T62,A4,T70,A7, T81,A9,
-     &        T93, A7, T105, A7, T115, A4)
+C format 5 is water, 6 is roots
+  5   Format (1x,A12, T20,A7,T37,A2,T47,A2, T56,A5,T68,A6,T82,A3,T90,
+     &     A3,T102,A2, T114, A6, T126, A5, T138, A6)   ! format for nodal data header
+  6   Format (1x,A16,T20,A5,T36,A2,T46,A2,T56,A5,T65,A7,T78,A7, T90,A6,
+     &        T102, A6, T112, A11, T124, A8, T136, A8, T146, A5 )
  10   Format (1x,F17.6,',', A15,',',16(F16.3, ','), F16.3)  !format for flux data
+ 13   Format (1x,F17.6,',',A15,',',15(F16.3, ','), F16.3)  ! format for second flux data
  20   Format (1x,19A16)              !format for flux header
       End        
 C/***************************************************/
-      Subroutine ArrElemOut(Date,x,y,NumNP,NumEl,t,KX,NumElD,
-     !          RTWT,RUTDEN,SinkArr,cSinkArr,gSinkArr,YRL,Area, MatNumE)
+CDT !0/24/2018 modified to output nodal values for roots
+      Subroutine ArrRootOut(Date,x,y,t,NumNP,RMassM,RMassY,
+     !            RDenM, RDenY,
+     !           SinkArr,cSinkArr,gSinkArr,Area)
       Character *10 Date
-      Dimension RTWT(NumEl),Area(NumEl),x(NumNP),y(NumNP),
-     !        KX(NumElD,4),RUTDEN(NumEl),YRL(NumEl),MatNumE(NumEl),
-     !         SinkArr(NumEl),cSinkArr(NumEl),gSinkArr(NumEl)
-        
+      Dimension RMassM(NumNP), RMassY(NumNP), RDenM(NumNP), 
+     !           RDenY(NumNP),Area(NumNP),x(NumNP),y(NumNP),
+     !         SinkArr(NumNP),cSinkArr(NumNP),gSinkArr(NumNP)
 
-        Do m=1,NumEl
-          NUS=4
-          If(KX(m,3).eq.KX(m,4)) NUS=3
-          xgc=0.
-          ygc=0.
-          Do j=1,NUS
-            xgc=xgc+x(KX(m,j))
-            ygc=ygc+y(KX(m,j))
-          Enddo
-          TotalRootDensity=RUTDEN(m)+YRL(m)/Area(m)
-          Write(82,140)t, Date,  xgc/NUS,ygc/NUS, m, RTWT(m),
-     !     TotalRootDensity, SinkArr(m),cSinkArr(m),gSinkArr(m),Area(m)
+      do n=1,NumNP
+        Write(82,140)t, Date, x(n),y(n), n,RMassM(n), RMassY(n),
+     !      RDenM(n), RDenY(n),
+     !      SinkArr(n),cSinkArr(n),gSinkArr(n),Area(n)
         Enddo
 C      Endif     
 130   format('     Time           x             y     Temp   RTWT_',
      !        '          Sink_       cSink       gSink'/)
  140   format(1x,f14.6,',', A12,',', 2(f11.2,','),i8,',',
-     !   5(G11.3,','),G11.3)
+     !   7(G11.3,','),G11.3)
       Return
       End      
 C/***************************************************/
@@ -283,14 +293,11 @@ C/***************************************************/
      !         ConcArr(NumNP),TemprArr(NumNP),gArr(NumNP)
 
         !MyDate=ToCalendarDate(mm,id,iyyy)
-        Do m=1,NumNP
-          Write(81,140)t, date, x(m),y(m),Head(m),ThetaArr(m),
-     !     vzArr(m),vxArr(m),QArr(m),ConcArr(m),TemprArr(m),
-     !      gArr(NumNP)
+        Do n=1,NumNP
+          Write(81,140)t, date, x(n),y(n),Head(n),ThetaArr(n),
+     !     vzArr(n),vxArr(n),QArr(n),ConcArr(n),TemprArr(n),
+     !      gArr(n)
         Enddo
-130   format(//' Time            x            y       h____',
-     !         '   Theta      vz____    vx____   Q____    Conc_ ',
-     !         '    Tempr_     g____')
  140   format(1x, f14.6,',', a12,',', 2(f11.2,','),7(G11.3,','),G11.3)
       Return
       End

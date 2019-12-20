@@ -1,3 +1,4 @@
+
 * I adapted this to add a nitrogen fertilizer. In this case
 * Nitrogen is added to the concentration for node i
 * This module allows multiple fertilizer and water applications
@@ -10,15 +11,19 @@
 * Note that the first management day needs to be at least one day later than the 
 * initial time in the file in the time folder. Otherwise the applied fertilizer
 * will be divided by 0 value of thNew. 
+* dt - 9/10/2018 added organic fertilizer as residue (Litter)
 
       Subroutine Mngm()
       Include 'public.ins'
+      Include 'NitVar.ins'
       Integer Max_fert_times,Fert_times,Num_nodes,nAppl,applied
       Parameter (Max_fert_times=75, Max_fert_nodes=300)
       Dimension Bi(3),Ci(3)
       Character*10 Date(Max_fert_times)
+      Real AppliedAmount, AppliedAmount_NL, AppliedAmount_CL
 
       Common /Mngmnt/ tAppl(Max_fert_times), cAppl(Max_fert_times),
+     !         cAppl_CL(Max_fert_times), cAppl_NL(Max_fert_times),
      !         Num_nodes(Max_fert_nodes), nAppl(Max_fert_times,
      !         Max_fert_nodes),Fert_times,applied,ModNum
       t=time
@@ -29,7 +34,8 @@
         Read(40,*,Err=20) Fert_times
         Read(40,*,Err=20)
         Do i=1,Fert_times
-	    Read(40,*,Err=20) Date(i), cAppl(i), Num_nodes(i)
+	    Read(40,*,Err=20) Date(i), cAppl(i), cAppl_CL(i),  cAppl_NL(i),
+     !                      Num_nodes(i)
             Read(40,*,Err=20) 
             Read(40,*,Err=20) (nAppl(i,j),j=1,Num_nodes(i))
         EndDo
@@ -77,9 +83,13 @@ c find node numbers of vertices of triangle
  
 C convert mg N to total ug NO3 in the soil domain. 
             AppliedAmount=cAppl(jj)/AETotal
+            AppliedAmount_NL=cAppl_NL(jj)/AETotal
+            AppliedAmount_CL=cAppl_CL(jj)/AETotal
        Do in=1,Num_nodes(jj)
          Conc(nAppl(jj,in),1)=AppliedAmount/ ThNew(nAppl(jj,in))           
      &            *1000*62./14. +conc(nAppl(jj,in),1) 
+         Nl(nAppl(jj,in))=AppliedAmount_NL*1000
+         Cl(nAppl(jj,in))=AppliedAmount_CL*1000
        Enddo
 c             
              

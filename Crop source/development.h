@@ -37,6 +37,7 @@ public:
 	//double get_totalLeaves() {return totLeafNo;} // take the value as double , SK 1-19-12
 	double get_phyllochronsFromTI() {return phyllochronsFromTI;}
 	double get_stayGreen() { return stayGreen; }
+	double get_LM_min() { return LM_min; }
 	double get_LvsAtTI() {return LvsAtTI;}
 	double get_LvsInitiated(){return LvsInitiated;} 
 	double get_LvsAppeared(){return LvsAppeared;} // tip appreance rate is most conservative across cultivars and temperature regimes, persoanl comm with Dr. Tollenaar
@@ -87,7 +88,7 @@ private:
 	double GDDgrain; // cumulative GDD from silking
 	double dGTI; // delta GTI
 	double GTIsum; // cumulative GTI, Stewart et al (1998), equivalent to GDD of Tbase = 10 and Topt 30
-	double Rmax_LIR, Rmax_LTAR, Rmax_Germination, Rmax_Emergence, stayGreen;
+	double Rmax_LIR, Rmax_LTAR, Rmax_Germination, Rmax_Emergence, stayGreen, LM_min;
 	bool DayLengthSensitive; //True if Day Length Sensitive
 	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum, T_ind, T_air; // T_grow: mean temperature of the growing season from day 1 up to now, SK
 	double totLeafNo, LvsToInduce, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation

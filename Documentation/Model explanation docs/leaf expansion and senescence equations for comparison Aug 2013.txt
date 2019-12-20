@@ -1,0 +1,11 @@
+T_effect_te = pow(Q10_te, (T_cur-T_opt_te)/10.0);
+te = tt + (2.197/Ke_Topt)*T_effect_te; 
+
+T_effect_ts= pow(Q10_ts, (T_cur-T_opt_ts)/10.0);
+ts = tt + (2.197/Ks_Topt)*T_effect_ts; 
+
+
+Ks_Topt = 0.02+(0.2+N_stress)* exp(-(pow((double)rank-1,2)/(2*pow(Wk,2)))); //this slope is slower than expansion by half under no N stress (0.1 compared to 0.2)
+  
+
+Ke_Topt = 0.026+0.174*          exp(-(pow((double)rank-1,2)/(2*pow(Wk,2)))); // Eqn 8 in Lizaso et al. 

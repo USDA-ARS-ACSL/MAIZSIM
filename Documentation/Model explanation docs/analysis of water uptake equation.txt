@@ -1,0 +1,42 @@
+Original Equation:
+
+         WUPM(e) = (((PSIS(e) - PSILT)*Area(e)*RUTDEN(e))/(SR(e) + RRRM + RVR(e)))*0.02275*(24.5 + TS(e))
+ 
+
+
+ WUPM(e) = (A/Res)*TempDependence
+
+A=(P*Area(e)*RUTDEN(e))
+P=(PSIS(e) - PSILT)
+TempDependence=0.02275*(24.5 + TS(e))
+RES=SR(e) + RRRM + RVR(e)
+
+
+
+WUPM= [(ps-pl) x area x rutdensity]
+      ------------------------------  x temperature dependence
+         Resistances
+
+
+New Equation:
+
+ WUPM(e)=(PSIS(e)-PSILT)/((SR(e)+RRRM+RVR(e))/(RUTDEN(e)*Area(e)*0.02275*(24.5+TS(e)))+(19.26/(LAI*ROWSP)))
+    
+
+
+WUPM(e)=(PSIS(e)-PSILT)/(R/RT+SP)
+R=(SR(e)+RRRM+RVR(e))
+SP=(19.26/(LAI*ROWSP))
+TC=(24.5+TS(e))
+RutDensity=(RUTDEN(e)*Area(e)*0.02275*TC)
+
+WUPM=          Ps-Pl
+              ------------------
+                 R
+                ---                                         +SP
+              [Rutdensity x Area temperature dependence]
+
+ 
+
+
+

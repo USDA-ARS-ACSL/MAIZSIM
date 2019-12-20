@@ -36,6 +36,8 @@ C
 * units are in Joules, not calories. This is the value of the 
 * specific heat of water in J g-1 oC-1    
       cWat=1.0/.239
+c volumetric heat capacity of water j/ cm3 same as specific heat
+
       Movers(3)=1
       Return
 C
@@ -53,7 +55,8 @@ c
 C      GR 1 line   
       newjjj = MBand
       Do 13 i=1,NumNP
-        Ac(i)= - ((ThOld(i)*Alf+EPSI_Heat*Thnew(i))+HCS(i)/cWat)
+      
+        Ac(i)= -(HCS(i)+cWat*(ThOld(i)*Alf+EPSI_Heat*Thnew(i)))
         Ds(i)=0.
         Fc(i)=0.
         Sc(i)=0.
@@ -71,18 +74,13 @@ C      GR
         Endif
 13    Continue
 C
-C   Recasting sinks 
+C   Calculate sinks 
 C
-      Do n=1,NumEl
-        NUS=4
-        if(KX(n,3).eq.KX(n,4)) NUS=3
-        Do j=1,NUS
-          Fc(KX(n,j))=Fc(KX(n,j))+Sink(n)*Area(n)/NUS
-          Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
-        Enddo
-      Enddo
-      Do i=1,NumNP
-        Fc(i)=Fc(i)/Sc(i)
+cccz directly take the sink and nodearea 
+C need to add cWat here
+      Do n=1,NumNP
+         Fc(n)=Sink(n)*cWat
+         Sc(n)=NodeArea(n)
       Enddo
 C
 C Assembling matrixes
@@ -123,11 +121,11 @@ c
         Do 14 i=1,NumNP
           M=MatNumN(i)
           If(Level.ne.NLevel) then
-            DPom = dt/6./((ThOld(i) + HCS(i)/cWat))
+            DPom = dt*cWat**2/6./-Ac(i)       !CHECK UNITS
             TcSxx(i)=TcSxx(i)+VxH(i)*VxH(i)*DPom
             TcSzz(i)=TcSzz(i)+VzH(i)*VzH(i)*DPom
           Else
-            DPom=dt/6./(-Ac(i))
+            DPom=dt*cWat**2/6./(-Ac(i))
             TcSxx(i)=TcSxx(i)-VxH(i)*VxH(i)*DPom
             TcSzz(i)=TcSzz(i)-VzH(i)*VzH(i)*DPom
             Fc(i)=0.
@@ -164,8 +162,8 @@ C
             GcE= -tSink(n)
             Ec1=(TcSxx(i)+TcSxx(j)+TcSxx(l))/3.
             Ec3=(TcSzz(i)+TcSzz(j)+TcSzz(l))/3.
-            VxE=(VxH(i)+VxH(j)+VxH(l))/3.
-            VzE=(VzH(i)+VzH(j)+VzH(l))/3.
+            VxE=(VxH(i)+VxH(j)+VxH(l))*cWat/3.
+            VzE=(VzH(i)+VzH(j)+VzH(l))*cWat/3.
             AcE = (Ac(i)+Ac(j)+Ac(l))/3.
             FcE=(Fc(i)+Fc(j)+Fc(l))/3.
             GcE=(Gc(i)+Gc(j)+Gc(l))/3.
@@ -179,8 +177,8 @@ C
               Do 16 j2=1,3
                 i2=List(j2)
                 S(j1,j2)=SMul1*(Ec1*Bi(j1)*Bi(j2)+Ec3*Ci(j1)*Ci(j2))
-                S(j1,j2)=S(j1,j2)-(Bi(j2)/8.*(VxE+VxH(i1)/3.)+
-     !                            Ci(j2)/8.*(VzE+VzH(i1)/3.))*xMul
+                S(j1,j2)=S(j1,j2)-(Bi(j2)/8.*(VxE+(VxH(i1)*cWat)/3.)+
+     !                    Ci(j2)/8.*(VzE+(VzH(i1)*cWat)/3.))*xMul
                 ic=1
                 if(i1.eq.i2) ic=2
                 S(j1,j2)=S(j1,j2)+SMul2*ic*(FcE+(Fc(i1)+Fc(i2))/3.)
@@ -203,11 +201,11 @@ C     GR
 
         Do 20 i=1,NumNP
 	    if (Level.ne.NLevel) then
-               B(i)=B(i)-alf*F(i)/cWat	 
+               B(i)=B(i)-alf*F(i)	 
 	else
 	    if (lOrt) newjjj=IADD(i)
              A(newjjj,i)=A(newjjj,i)+DS(i)/dt           
-             b(i)=b(i)+ds(i)/dt*Tmpr(i)-EPSI_Heat*F(i)/cWat
+             b(i)=b(i)+ds(i)/dt*Tmpr(i)-EPSI_Heat*F(i)
           Endif
 		 
 20      Continue
@@ -244,8 +242,9 @@ c not evaporated.
                   else
                     If(Q(i).ge.0) then
                         Qn=VarBT(j,4)+VarBW(j,2)   
-     &                     *(2500.8-2.3668*VarBT(j,1))
-                        Qn=Qn*width(j) !goes with above take out width above
+     &                     *cWat
+c     &                     *(2500.8-2.3668*VarBT(j,1))
+                        Qn=Qn*width(j) !goes with above take out width above, units are J day-1
                      endif
                 endif
 c Ph and Qh are two components of convected heat, Qh has air temperature
@@ -272,9 +271,9 @@ c   incorporated into it.
         Endif
 *     Cauchy boundary condition
         If(tKod.eq.3) then
-          B(i)=B(i)+(alf*Ph*tmpr(i)-Qh)/cWat
+          B(i)=B(i)+(alf*Ph*tmpr(i)-Qh)
 	    if(lOrt) newjjj=IADD(i)
-          A(newjjj,i)=A(newjjj,i)-EPSI_Heat*Ph/cWat
+          A(newjjj,i)=A(newjjj,i)-EPSI_Heat*Ph
         End if
       End if
 114   Continue
@@ -290,8 +289,8 @@ C  SURFACE POND FOR TRANSPORT
 		    HOLDS=DMAX1(hold(N),0.0D0)
 		    newjjj=1	
 		    if(lOrt) newjjj=IADD(n)             
-              A(newjjj,n)=A(newjjj,n)+HNEWS/dt
-              B(n)=B(n)+tmpr(n)*HOLDS/dt
+              A(newjjj,n)=A(newjjj,n)+HNEWS/dt*cWat
+              B(n)=B(n)+tmpr(n)*HOLDS/dt*cWat
           END IF
  313	  CONTINUE	 
 C
@@ -388,13 +387,15 @@ C calculate thermal conducivity
 
       alf=1.0-EPSI_Heat
 C     ---- THERMAL CONDUCTIVITY OF WATER SATURATED AIR ----
+C  --- HCS is volumetric heat capacity of the mineral part of the soil soil J cm3-1 'C-1
+C   using 0.46 cal/cm3/C for mineral and 0.6 for OM
+C 4.186 converts calories to joules
       Do 10, i=1,NumNP
         m=MatNumN(i)
-         HCS(i)=(0.46*(VSind(m)+VClay(m)) + 0.6*VOrgM(m)
-     !      + ThNew(i))*4.186
-       TCH2O=1.33+4.4E-03*tmpr(i)
+         HCS(i)=1.9225*(VSind(m)+VClay(m)) + 2.51*VOrgM(m)
+        TCH2O=1.33+4.4E-03*tmpr(i) ! milical cm-1 s-1 Value checks OK
 ** calculate the thermal conduc of air at a temp of 30 degrees C
-        TCAIR=0.058+1.7E-04*30.0
+        TCAIR=0.058+1.7E-04*30.0  !milical cm-1 s-1 (value checks ok)
         TCVAP=0.052*EXP(0.058*tmpr(i))
         TCSAT=TCAIR + TCVAP*ThNew(i)/ThTot(m)
 C
@@ -408,7 +409,7 @@ C         ---- INTERMEDIATE PARAMETERS ----
           XMUCK=((2.0/(1.0+(((0.6/TCair)-1.0)*0.5)))+1.0)/3.
           
 C
-C     ----- THERMAL CONDUCTIVITY (CAL/CM/SEC/'C) ----
+C     ----- THERMAL CONDUCTIVITY (milliCAL/CM/SEC/'C) ----
           Tcsxx(i)=(((XSIND*VSind(m)*20.4)
      *      + (XCLAY*VCLAY(m)*7.0) + (XMUCK*VOrgM(m)*0.6)
      *      + (ThTot(m)*TCair))
@@ -430,7 +431,7 @@ C
      !      (1.0/(1.0+(((TCSAT/TCH2O)-1.0)*
      !      (1.0-2.0*XGAIR)))))/3.0
 C
-C     ----- THERMAL CONDUCTIVITY (CAL/CM/SEC/'C) ----
+C     ----- THERMAL CONDUCTIVITY (10-3 CAL/CM/SEC/'C) ----
 C
           Tcsxx(i)=((Thnew(i)*TCH2O) + (XSIND*VSind(m)*20.4)
      *    + (XCLAY*VCLAY(m)*7.0) + (XMUCK*VOrgM(m)*0.6)
@@ -438,10 +439,11 @@ C
      *    /(ThNew(i)+(XSIND*VSind(m)) + (XCLAY*VCLAY(m))
      *    + (XMUCK*VOrgM(m)) + (XAIR*(ThTot(m)-ThNew(i))))
         Endif
-        Tcsxx(i)=TcSxx(i)*24.*3600./1000.0*4.186
+CDT debugging -check to see if 4.186 is needed, not sure it is.
+C 0.004184 J per milical 
+        Tcsxx(i)=TcSxx(i)*0.004184*24.*3600
         Tcszz(i)=Tcsxx(i)
  10   Continue
-C
 C     -----------
       Return
       End

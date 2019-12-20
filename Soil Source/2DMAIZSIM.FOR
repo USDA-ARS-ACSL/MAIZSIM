@@ -18,36 +18,37 @@
 	  RunFile=RunDat
 	  endif
 	  	
-	
+! dt comment	
       Call Initialize()
       Call Get_Grid_and_Boundary()
 1     Call Synchronizer()
+
 C       
 C SetSurfaceD --  reading daily weather
 C SetSurfaceH --  reading hourly weather
       if ((HourlyWeather+DailyWeather.gt.1).or.
      !   ((HourlyWeather+DailyWeather).eq.0))then
               Write (*,*) "error in weather file type"
-         
         Endif
       if (HourlyWeather.eq.1) Call SetSurfaceH()
       if (DailyWeather.eq.1) Call SetSurfaceD()                         
       Call SetTDB()
       Call AutoIrrigate()
       Call Mngm()
-      Call Drip()
+c      Call Drip()
 
       Starter=1.0D0
       Call CROP(PCRL,MSW1, NumNP,NumSol,Sink(1),
      !      NumBP,TNext(1),NumMod,Starter)
-      Call Carbon_Partitioning()   
-      Call Rootgrow()
-      Call WaterUptake()  
-      Call SoluteUptake()
+      Call Carbon_Partitioning_New()   
+      Call Rootgrow_New()
+      call Root_Mover_New()
+      Call WaterUptake_New()
+      Call SoluteUptake_New()
       Call GasUptake()
      
-      Call WaterMover()
-      Call SoluteMover()
+      Call WaterMover_New()
+      Call SoluteMover_New()
       Call HeatMover()
       Call GasMover()
       Call SoilNitrogen()

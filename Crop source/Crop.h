@@ -97,7 +97,9 @@
 	 int   JDAY, NCD,JDLAST;
      float CLDFAC,DEL[24],RINT[24],GAMMA,RNS,RNC,RAIN,IR;
 	 float WIND,CO2,TDUSK,TDUSKY,TWET,TDRY,CPREC[NumSD],TAIR[24],VPD[24],ROUGH,
-           RADINT[24],WATTSM[24],WATRAT;
+           RADINT[24],WATTSM[24],DIFINT[24],ROWINC[24];
+	 float CLOUD, SHADOW[24],DIFWAT[24],DIRINT[24];
+	 float WATACT, WATRAT, WATPOT, RULU;
 	 int   NumF[40],NumFP;
 	 float hFur[40],QF;
 	 int   IFUR;
@@ -110,7 +112,7 @@
  //grid
  struct GridCommon{
 	     int     NumNP, NumEl, IJ, KAT, MBand,Nmat, KX[4][NumElD];
-		 float   x[NumNPD], y[NumNPD], Area[NumElD];
+		 float   x[NumNPD], y[NumNPD], Area[NumElD], nodeArea[NumNPD];
  };
 
 //nodal
@@ -127,9 +129,9 @@
 //elements
  struct ElementCommon{
 	       int    MatNumE[NumElD];
-	       float Sink[NumElD], cSink[NumSD][NumElD],
-                 gSink[NumGD][NumElD],tSink[NumElD], 
-                 RTWT[NumElD],RUTDEN[NumElD];
+	       float Sink[NumNPD], cSink[NumSD][NumNPD],
+                 gSink[NumGD][NumNPD],tSink[NumNPD], 
+                 RTWT[NumElD],RUTDEN[NumNPD];
 		   
  };
 
@@ -176,7 +178,7 @@
                WaterFile[132], WaterBoundaryFile[132], 
                GraphicsFile[132], InitialsFile[132],VarietyFile[132],
 			   NodeGraphics[132],ElemGraphics[132],NodeGeomFile[132],
-			   ElementInfoFile[132],GeometryFile[132], SurfaceGraphics[132],
+			   GeometryFile[132], SurfaceGraphics[132],
 			   FluxGraphics[132], MasssBalanceFile[132],MassBalanceFileOut[132],
 			   LeafFileIn[132], RunFile[132];
  };

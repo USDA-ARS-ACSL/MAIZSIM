@@ -22,7 +22,7 @@ inline double E_sat(double T){return 0.6105*exp(17.27*T/(237.7+T));}
 using namespace std;
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CController::CController(const char* filename, const char* outfile, const char* LFile, TInitInfo iniInfo)
 {
@@ -107,22 +107,22 @@ void CController::initialize()
 		ofstream LeafOut(LeafFile, ios::out);
 		LeafOut << setiosflags(ios::left)
 			<< setiosflags(ios::fixed)
-            << setw(10) << "date"
-			<< setw(6) << "jday"
-			<< setw(7) << "time"
-			<< setw(9) << "Lvs_Init"
-			<< setw(9) << "Lvs_Apr"
-			<< setw(9) << "Leaf_#"
-			<< setw(7) << "area"
-			<< setw(10) << "mass"
-			<< setw(10) << "Sen_Area"
-			<< setw(10) << "Pntl_Area"
-			<< setw(9) << "Elong_age"
-			<< setw(9) << "CarbRat"
-			<< setw(9) << "SLA"
-			<< setw(9) << "dropped"
-			<< setw(9) << "state"
-			<< setw(9) << "GDD Sum"
+            << setw(10) << "date,"
+			<< setw(6) << "jday,"
+			<< setw(7) << "time,"
+			<< setw(9) << "Lvs_Init,"
+			<< setw(9) << "Lvs_Apr,"
+			<< setw(9) << "Leaf_#,"
+			<< setw(7) << "area,"
+			<< setw(10) << "mass,"
+			<< setw(10) << "Sen_Area,"
+			<< setw(10) << "Pntl_Area,"
+			<< setw(9) << "Elong_age,"
+			<< setw(9) << "CarbRat,"
+			<< setw(9) << "SLA,"
+			<< setw(9) << "dropped,"
+			<< setw(9) << "state,"
+			<< setw(9) << "GDDSum"
 			<< endl;
 	}
 
@@ -131,45 +131,46 @@ void CController::initialize()
 		ofstream cropOut(cropFile, ios::out); 
 		cropOut << setiosflags(ios::left) 
 			<< setiosflags(ios::fixed)
- 			<< setw(9) << "date" 
- 			<< setw(6) << "jday" 
-			<< setw(8) << "time"
-			<< setw(8) << "Leaves"
-			<< setw(11)<< "MaturLvs"
-			<< setw(8) << "Dropped"
-			<< setw(9) << "LA/pl"
-			<< setw(9) << "LA_dead"
-			<< setw(8) << "LAI"
-			<< setw(8) << "RH"
-			<< setw(8) << "LeafWP"
-			<< setw(8) << "PFD"
-			<< setw(8) << "SolRad"
-			<< setw(8) << "SoilT"
-			<< setw(8) << "Tair"
-			<< setw(8) << "Tcan"
-            << setw(11) << "ETdmd"
-			<< setw(11) << "ETsply"
-			<< setw(5) << "Pn"
-			<< setw(8) << "Pg"
-			<< setw(10) << "Respir"
-			<< setw(8) << "av_gs"
-			<< setw(9) << "VPD"
-			<< setw(10) << "Nitr"
-			<< setw(10) << "N_Dem"
-			<< setw(10) << "NUpt"
-			<< setw(10) << "LeafN"
-			<< setw(10) << "PCRL"
-		    << setw(8) << "totalDM"
-			<< setw(8) << "shootDM"
-			<< setw(8) << "earDM"
-			<< setw(10) << "TotleafDM"
-			<< setw(10) << "DrpLfDM"
-			<< setw(8) << "stemDM"
-			<< setw(8) << "rootDM"
-			<< setw(8) << "SoilRt"
-			<< setw(8) << "MxRtDep"
-            << setw(8) << "AvailW"
-			<< setw(9) << "solubleC"
+ 			<< setw(9) << "date," 
+ 			<< setw(6) << "jday," 
+			<< setw(8) << "time,"
+			<< setw(8) << "Leaves,"
+			<< setw(11)<< "MaturLvs,"
+			<< setw(8) << "Dropped,"
+			<< setw(9) << "LA/pl,"
+			<< setw(9) << "LA_dead,"
+			<< setw(8) << "LAI,"
+			<< setw(8) << "RH,"
+			<< setw(8) << "LeafWP,"
+			<< setw(8) << "PFD,"
+			<< setw(8) << "SolRad,"
+			<< setw(8) << "SoilT,"
+			<< setw(8) << "Tair,"
+			<< setw(8) << "Tcan,"
+            << setw(11) << "ETdmd,"
+			<< setw(11) << "ETsply,"
+			<< setw(5) << "Pn,"
+			<< setw(8) << "Pg,"
+			<< setw(10) << "Respir,"
+			<< setw(8) << "av_gs,"
+			<< setw(9) << "VPD,"
+			<< setw(10) << "Nitr,"
+			<< setw(10) << "N_Dem,"
+			<< setw(10) << "NUpt,"
+			<< setw(10) << "LeafN,"
+			//<< setw(10) << "N_Effect,"
+			<< setw(10) << "PCRL,"
+		    << setw(8) << "totalDM,"
+			<< setw(8) << "shootDM,"
+			<< setw(8) << "earDM,"
+			<< setw(10) << "TotleafDM,"
+			<< setw(10) << "DrpLfDM,"
+			<< setw(8) << "stemDM,"
+			<< setw(8) << "rootDM,"
+			<< setw(8) << "SoilRt,"
+			<< setw(8) << "MxRtDep,"
+            << setw(8) << "AvailW,"
+			<< setw(9) << "solubleC,"
 			<< setw(9) << "Note"
 		    << endl;
 
@@ -189,7 +190,7 @@ void CController::initialize()
 		cfs.getline(Buffer, 255,'\n');
 		cfs.getline(Buffer, 255,'\n');
         cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
-			>>initInfo.stayGreen
+			>>initInfo.stayGreen >>initInfo.LM_min
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
 
 // end reading variety file
@@ -205,6 +206,7 @@ void CController::initialize()
 		    << setw(6) << "Generic Leaf Number: " << initInfo.genericLeafNo << endl
 			<< setw(6) << "Day Length Sensitive: " << initInfo.DayLengthSensitive << endl
 			<< setw(6) << "Stay Green Parameter: " <<initInfo.stayGreen << endl
+			<< setw(6) << "Maximum area of largest leaf" << initInfo.LM_min <<endl
 			<< setw(6) << "Rmax Leaf initiation rate: " << initInfo.Rmax_LIR << "  " << "Rmax Leaf tip appearance rate: " << initInfo.Rmax_LTAR << endl
 			<< setw(6) << "Phyllochrons to Silk: " << initInfo.PhyllochronsToSilk << endl <<endl
 			<< setw(6) << "Year: " << initInfo.year << endl
@@ -353,6 +355,7 @@ void CController::outputToCropFile()
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake() << comma
 				<< setw(10) << setprecision(4) << plant->get_LeafN() << comma //return mass of N in leaves YY
+				//<< setw(10) << setprecision(4) << plant->
 				<< setw(10)<< setprecision(4)<< plant->get_roots()->get_ActualCarboIncrement() << comma
 				<< setw(8) << setprecision(3) << plant->get_mass() << comma
 				<< setw(8) << setprecision(3) << plant->get_shootMass() << comma  //masses are grams per plant
