@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		B50533671FC6BB9E00E5AC6A /* solar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533641FC6BB9E00E5AC6A /* solar.cpp */; };
 		B50533691FC6BFCD00E5AC6A /* radtrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533681FC6BFCD00E5AC6A /* radtrans.cpp */; };
+		B574669323B001F60042CE2F /* Drip.FOR in Sources */ = {isa = PBXBuildFile; fileRef = B574669123B001F60042CE2F /* Drip.FOR */; };
+		B574669423B001F60042CE2F /* root_diff_new.for in Sources */ = {isa = PBXBuildFile; fileRef = B574669223B001F60042CE2F /* root_diff_new.for */; };
 		B5DB2E891B798EB4003A9266 /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5A1B798EB4003A9266 /* controller.cpp */; };
 		B5DB2E8A1B798EB4003A9266 /* cpmdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */; };
 		B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5E1B798EB4003A9266 /* Crop.cpp */; };
@@ -70,6 +72,8 @@
 		B50533641FC6BB9E00E5AC6A /* solar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = solar.cpp; sourceTree = "<group>"; };
 		B50533651FC6BB9E00E5AC6A /* radtrans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radtrans.h; sourceTree = "<group>"; };
 		B50533681FC6BFCD00E5AC6A /* radtrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radtrans.cpp; sourceTree = "<group>"; };
+		B574669123B001F60042CE2F /* Drip.FOR */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = Drip.FOR; sourceTree = "<group>"; };
+		B574669223B001F60042CE2F /* root_diff_new.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = root_diff_new.for; sourceTree = "<group>"; };
 		B5DB2E2F1B798B16003A9266 /* MAIZSIM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MAIZSIM; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DB2E591B798EB4003A9266 /* assemblyinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assemblyinfo.cpp; sourceTree = "<group>"; };
 		B5DB2E5A1B798EB4003A9266 /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
@@ -244,6 +248,7 @@
 				B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */,
 				B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */,
 				B5DB2EA51B798EC2003A9266 /* dateFunctions.for */,
+				B574669123B001F60042CE2F /* Drip.FOR */,
 				B5DB2EA61B798EC2003A9266 /* ERRMES.for */,
 				B5DB2EA71B798EC2003A9266 /* Ex14-5.for */,
 				B5DB2EA81B798EC2003A9266 /* GRID_BND.for */,
@@ -259,6 +264,7 @@
 				B5DB2EB21B798EC2003A9266 /* public.ins */,
 				B5DB2EB31B798EC2003A9266 /* puplant.ins */,
 				B5DB2EB41B798EC2003A9266 /* puweath.ins */,
+				B574669223B001F60042CE2F /* root_diff_new.for */,
 				B5DB2EB51B798EC2003A9266 /* root_grow_c.for */,
 				B5DB2EB61B798EC2003A9266 /* SETMAT01.for */,
 				B5DB2EB71B798EC2003A9266 /* SETSUR02.for */,
@@ -365,6 +371,8 @@
 				B5DB2E961B798EB4003A9266 /* plant.cpp in Sources */,
 				B5DB2EC61B798EC2003A9266 /* GRID_BND.for in Sources */,
 				B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */,
+				B574669423B001F60042CE2F /* root_diff_new.for in Sources */,
+				B574669323B001F60042CE2F /* Drip.FOR in Sources */,
 				B5DB2EC41B798EC2003A9266 /* ERRMES.for in Sources */,
 				B5DB2ED71B798EC2003A9266 /* SYNCHRON.for in Sources */,
 				B50533691FC6BFCD00E5AC6A /* radtrans.cpp in Sources */,
