@@ -112,11 +112,8 @@
 		B5DB2E861B798EB4003A9266 /* weather.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weather.cpp; sourceTree = "<group>"; };
 		B5DB2E871B798EB4003A9266 /* weather.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weather.h; sourceTree = "<group>"; };
 		B5DB2E9F1B798EC2003A9266 /* 2DMAIZSIM.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = 2DMAIZSIM.for; sourceTree = "<group>"; };
-		B5DB2EA01B798EC2003A9266 /* 2dsoil.u2d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 2dsoil.u2d; sourceTree = "<group>"; };
-		B5DB2EA11B798EC2003A9266 /* 2dsoil.vfproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = 2dsoil.vfproj; sourceTree = "<group>"; };
 		B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = AutoIrrigate.for; sourceTree = "<group>"; };
 		B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = carbon_partitioning.for; sourceTree = "<group>"; };
-		B5DB2EA41B798EC2003A9266 /* CopyToFOlder.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CopyToFOlder.bat; sourceTree = "<group>"; };
 		B5DB2EA51B798EC2003A9266 /* dateFunctions.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = dateFunctions.for; sourceTree = "<group>"; };
 		B5DB2EA61B798EC2003A9266 /* ERRMES.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = ERRMES.for; sourceTree = "<group>"; };
 		B5DB2EA71B798EC2003A9266 /* Ex14-5.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = "Ex14-5.for"; sourceTree = "<group>"; };
@@ -139,7 +136,6 @@
 		B5DB2EB81B798EC2003A9266 /* SETTDB.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETTDB.for; sourceTree = "<group>"; };
 		B5DB2EB91B798EC2003A9266 /* soilnden.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = soilnden.for; sourceTree = "<group>"; };
 		B5DB2EBA1B798EC2003A9266 /* solmov.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solmov.for; sourceTree = "<group>"; };
-		B5DB2EBB1B798EC2003A9266 /* solupt.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solupt.for; sourceTree = "<group>"; };
 		B5DB2EBC1B798EC2003A9266 /* solupt_Y1.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = solupt_Y1.for; sourceTree = "<group>"; };
 		B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SYNCHRON.for; sourceTree = "<group>"; };
 		B5DB2EBE1B798EC2003A9266 /* wateruptake.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = wateruptake.for; sourceTree = "<group>"; };
@@ -245,11 +241,8 @@
 			isa = PBXGroup;
 			children = (
 				B5DB2E9F1B798EC2003A9266 /* 2DMAIZSIM.for */,
-				B5DB2EA01B798EC2003A9266 /* 2dsoil.u2d */,
-				B5DB2EA11B798EC2003A9266 /* 2dsoil.vfproj */,
 				B5DB2EA21B798EC2003A9266 /* AutoIrrigate.for */,
 				B5DB2EA31B798EC2003A9266 /* carbon_partitioning.for */,
-				B5DB2EA41B798EC2003A9266 /* CopyToFOlder.bat */,
 				B5DB2EA51B798EC2003A9266 /* dateFunctions.for */,
 				B5DB2EA61B798EC2003A9266 /* ERRMES.for */,
 				B5DB2EA71B798EC2003A9266 /* Ex14-5.for */,
@@ -272,7 +265,6 @@
 				B5DB2EB81B798EC2003A9266 /* SETTDB.for */,
 				B5DB2EB91B798EC2003A9266 /* soilnden.for */,
 				B5DB2EBA1B798EC2003A9266 /* solmov.for */,
-				B5DB2EBB1B798EC2003A9266 /* solupt.for */,
 				B5DB2EBC1B798EC2003A9266 /* solupt_Y1.for */,
 				B5DB2EBD1B798EC2003A9266 /* SYNCHRON.for */,
 				B5DB2EBE1B798EC2003A9266 /* wateruptake.for */,
