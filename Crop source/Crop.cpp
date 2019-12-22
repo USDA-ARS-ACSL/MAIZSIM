@@ -2,7 +2,7 @@
 //#define MYPLANT_EXPORTS
 
 #include "stdafx.h"
-#include "crop.h"
+#include "Crop.h"
 #include "controller.h"
 
 #include "time.h"

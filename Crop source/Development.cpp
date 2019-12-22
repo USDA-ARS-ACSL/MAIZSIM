@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include <cmath>
 #include "development.h"
 #include <iostream>

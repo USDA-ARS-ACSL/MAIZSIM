@@ -2,9 +2,9 @@
 #ifndef _PLANT_H_
 #define _PLANT_H_
 #include "organ.h"
-#include "nodalUnit.h"
+#include "nodalunit.h"
 #include "development.h"
-#include "roots.h"
+#include "Roots.h"
 #include "ear.h"
 #include "gas_exchange.h"
 #include <iostream>
