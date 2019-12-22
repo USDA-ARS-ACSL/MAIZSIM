@@ -15,7 +15,7 @@
 
       Subroutine Mngm()
       Include 'public.ins'
-      Include 'NitVar.ins'
+      Include 'nitvar.ins'
       Integer Max_fert_times,Fert_times,Num_nodes,nAppl,applied
       Parameter (Max_fert_times=75, Max_fert_nodes=300)
       Dimension Bi(3),Ci(3)

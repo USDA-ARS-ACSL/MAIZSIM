@@ -6,7 +6,7 @@ C it is called once a day, at 5:00 am
 
        Subroutine AutoIrrigate()
        include 'public.ins'
-       include 'puWeath.ins'
+       include 'puweath.ins'
        Parameter (PERIOD =1./24.)
        
        

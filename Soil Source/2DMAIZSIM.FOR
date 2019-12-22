@@ -7,8 +7,8 @@
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
       Include 'public.ins'
       include 'puplant.ins'
-	Include 'Puweath.ins'
-	Include 'Nitvar.ins'
+	Include 'puweath.ins'
+	Include 'nitvar.ins'
 	
 	character*132 RunDat
 	integer len, status

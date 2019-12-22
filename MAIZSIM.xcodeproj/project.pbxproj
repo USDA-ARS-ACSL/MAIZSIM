@@ -127,12 +127,12 @@
 		B5DB2EAC1B798EC2003A9266 /* MASSBLW.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = MASSBLW.for; sourceTree = "<group>"; };
 		B5DB2EAD1B798EC2003A9266 /* MNGMB.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = MNGMB.for; sourceTree = "<group>"; };
 		B5DB2EAE1B798EC2003A9266 /* N_Massbl.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = N_Massbl.for; sourceTree = "<group>"; };
-		B5DB2EAF1B798EC2003A9266 /* NITVAR.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NITVAR.INS; sourceTree = "<group>"; };
+		B5DB2EAF1B798EC2003A9266 /* nitvar.ins */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nitvar.ins; sourceTree = "<group>"; };
 		B5DB2EB01B798EC2003A9266 /* ORTHOFEM.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = ORTHOFEM.for; sourceTree = "<group>"; };
 		B5DB2EB11B798EC2003A9266 /* OUTPUT.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = OUTPUT.for; sourceTree = "<group>"; };
 		B5DB2EB21B798EC2003A9266 /* public.ins */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = public.ins; sourceTree = "<group>"; };
-		B5DB2EB31B798EC2003A9266 /* PUPLANT.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PUPLANT.INS; sourceTree = "<group>"; };
-		B5DB2EB41B798EC2003A9266 /* PUWEATH.INS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PUWEATH.INS; sourceTree = "<group>"; };
+		B5DB2EB31B798EC2003A9266 /* puplant.ins */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = puplant.ins; sourceTree = "<group>"; };
+		B5DB2EB41B798EC2003A9266 /* puweath.ins */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = puweath.ins; sourceTree = "<group>"; };
 		B5DB2EB51B798EC2003A9266 /* root_grow_c.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = root_grow_c.for; sourceTree = "<group>"; };
 		B5DB2EB61B798EC2003A9266 /* SETMAT01.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETMAT01.for; sourceTree = "<group>"; };
 		B5DB2EB71B798EC2003A9266 /* SETSUR02.for */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = SETSUR02.for; sourceTree = "<group>"; };
@@ -260,12 +260,12 @@
 				B5DB2EAC1B798EC2003A9266 /* MASSBLW.for */,
 				B5DB2EAD1B798EC2003A9266 /* MNGMB.for */,
 				B5DB2EAE1B798EC2003A9266 /* N_Massbl.for */,
-				B5DB2EAF1B798EC2003A9266 /* NITVAR.INS */,
+				B5DB2EAF1B798EC2003A9266 /* nitvar.ins */,
 				B5DB2EB01B798EC2003A9266 /* ORTHOFEM.for */,
 				B5DB2EB11B798EC2003A9266 /* OUTPUT.for */,
 				B5DB2EB21B798EC2003A9266 /* public.ins */,
-				B5DB2EB31B798EC2003A9266 /* PUPLANT.INS */,
-				B5DB2EB41B798EC2003A9266 /* PUWEATH.INS */,
+				B5DB2EB31B798EC2003A9266 /* puplant.ins */,
+				B5DB2EB41B798EC2003A9266 /* puweath.ins */,
 				B5DB2EB51B798EC2003A9266 /* root_grow_c.for */,
 				B5DB2EB61B798EC2003A9266 /* SETMAT01.for */,
 				B5DB2EB71B798EC2003A9266 /* SETSUR02.for */,

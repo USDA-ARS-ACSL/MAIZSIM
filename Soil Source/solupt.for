@@ -1,7 +1,7 @@
       subroutine SoluteUptake()
       include 'public.ins'
-      IncLude 'Puplant.ins'
-      Include 'Puweath.ins'
+      IncLude 'puplant.ins'
+      Include 'puweath.ins'
       real MMUpN, bi(3),ci(3)
       Common /SUP/ TotWSink,TotSSink,WincrSink,TotSSINK2
       Common /Biom/ BM

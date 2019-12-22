@@ -1,7 +1,7 @@
 cdt 7/9/07 added code to calculate loss of N in flux out of the domain 
 Cdt N in 2DSOIL is nitrate (NO3) and the units are ug per cm3 or milligram/liter
        Subroutine Nitrogen_Mass_Balance()
-        include 'Public.ins'
+        include 'public.ins'
         include 'nitvar.ins'
         include 'puplant.ins'
         Dimension Bi(3),Ci(3)

@@ -3,8 +3,8 @@ c p_ET is used to save the difference between the accumulated transpiration in t
 c previous N step and N+1 step; thus in fact it is the potential transpiration rate per time step
       subroutine Output ()
       Include 'public.ins'
-      Include 'PuWeath.ins'
-	  Include 'PuPlant.ins'
+      Include 'puweath.ins'
+	  Include 'puplant.ins'
 
       Integer Plevel,e
       
