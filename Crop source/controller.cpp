@@ -37,7 +37,7 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	char *next=(char*)calloc(133,sizeof(char));
 	char *ext=".dbg";
 	char* temp=(char*)calloc(133,sizeof(char)); 
-	strcpy_s(temp,133,cropFile);
+	strcpy_s(temp, cropFile);
 	pch=strtok_s(temp,".",&next);
 	temp=strcat(pch,ext);
 	strcpy_s(DebugFile,temp);
