@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		B50533671FC6BB9E00E5AC6A /* solar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533641FC6BB9E00E5AC6A /* solar.cpp */; };
 		B50533691FC6BFCD00E5AC6A /* radtrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50533681FC6BFCD00E5AC6A /* radtrans.cpp */; };
-		B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */; };
 		B5DB2E891B798EB4003A9266 /* controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5A1B798EB4003A9266 /* controller.cpp */; };
 		B5DB2E8A1B798EB4003A9266 /* cpmdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5C1B798EB4003A9266 /* cpmdate.cpp */; };
 		B5DB2E8B1B798EB4003A9266 /* Crop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5DB2E5E1B798EB4003A9266 /* Crop.cpp */; };
@@ -71,7 +70,6 @@
 		B50533641FC6BB9E00E5AC6A /* solar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = solar.cpp; sourceTree = "<group>"; };
 		B50533651FC6BB9E00E5AC6A /* radtrans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radtrans.h; sourceTree = "<group>"; };
 		B50533681FC6BFCD00E5AC6A /* radtrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radtrans.cpp; sourceTree = "<group>"; };
-		B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.1.dylib"; path = "../../../../../../usr/lib/libc++.1.dylib"; sourceTree = "<group>"; };
 		B5DB2E2F1B798B16003A9266 /* MAIZSIM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MAIZSIM; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DB2E591B798EB4003A9266 /* assemblyinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assemblyinfo.cpp; sourceTree = "<group>"; };
 		B5DB2E5A1B798EB4003A9266 /* controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = controller.cpp; sourceTree = "<group>"; };
@@ -92,10 +90,6 @@
 		B5DB2E6A1B798EB4003A9266 /* jsoncpp.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = jsoncpp.o; sourceTree = "<group>"; };
 		B5DB2E6B1B798EB4003A9266 /* leaf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaf.cpp; sourceTree = "<group>"; };
 		B5DB2E6C1B798EB4003A9266 /* leaf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaf.h; sourceTree = "<group>"; };
-		B5DB2E6D1B798EB4003A9266 /* lightenv.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = lightenv.dll; sourceTree = "<group>"; };
-		B5DB2E6E1B798EB4003A9266 /* lightenv.exp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.exports; path = lightenv.exp; sourceTree = "<group>"; };
-		B5DB2E6F1B798EB4003A9266 /* lightenv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lightenv.h; sourceTree = "<group>"; };
-		B5DB2E701B798EB4003A9266 /* lightenv.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = lightenv.lib; sourceTree = "<group>"; };
 		B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = "looking at leaf senescense equations.xls"; sourceTree = "<group>"; };
 		B5DB2E721B798EB4003A9266 /* nodalunit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nodalunit.cpp; sourceTree = "<group>"; };
 		B5DB2E731B798EB4003A9266 /* nodalunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nodalunit.h; sourceTree = "<group>"; };
@@ -157,7 +151,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5A6377A1E1DC0FC0072DF04 /* libc++.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -167,7 +160,6 @@
 		B5DB2E261B798B16003A9266 = {
 			isa = PBXGroup;
 			children = (
-				B5A637791E1DC0FC0072DF04 /* libc++.1.dylib */,
 				B5DB2E391B798B4E003A9266 /* Source */,
 				B5DB2E301B798B16003A9266 /* Products */,
 			);
@@ -212,10 +204,6 @@
 				B5DB2E691B798EB4003A9266 /* jsoncpp */,
 				B5DB2E6B1B798EB4003A9266 /* leaf.cpp */,
 				B5DB2E6C1B798EB4003A9266 /* leaf.h */,
-				B5DB2E6D1B798EB4003A9266 /* lightenv.dll */,
-				B5DB2E6E1B798EB4003A9266 /* lightenv.exp */,
-				B5DB2E6F1B798EB4003A9266 /* lightenv.h */,
-				B5DB2E701B798EB4003A9266 /* lightenv.lib */,
 				B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */,
 				B5DB2E721B798EB4003A9266 /* nodalunit.cpp */,
 				B5DB2E731B798EB4003A9266 /* nodalunit.h */,
@@ -319,7 +307,7 @@
 		B5DB2E271B798B16003A9266 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 1030;
 				ORGANIZATIONNAME = "Kyungdahm Yun";
 				TargetAttributes = {
 					B5DB2E2E1B798B16003A9266 = {
@@ -329,10 +317,11 @@
 			};
 			buildConfigurationList = B5DB2E2A1B798B16003A9266 /* Build configuration list for PBXProject "MAIZSIM" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = B5DB2E261B798B16003A9266;
 			productRefGroup = B5DB2E301B798B16003A9266 /* Products */;
@@ -402,97 +391,19 @@
 		B5DB2E341B798B16003A9266 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IFORT_DATA_CMNALN = default;
-				IFORT_DBG_PARAM = all;
-				IFORT_DEBUG = YES;
-				IFORT_OPT_LEVEL = none;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
 		B5DB2E351B798B16003A9266 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IFORT_DATA_CMNALN = default;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		B5DB2E371B798B16003A9266 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/../../Lightenv",
-				);
+				OTHER_LDFLAGS = "-cxxlib";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -500,10 +411,7 @@
 		B5DB2E381B798B16003A9266 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/../../Lightenv",
-				);
+				OTHER_LDFLAGS = "-cxxlib";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
