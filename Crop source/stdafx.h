@@ -14,7 +14,9 @@
 #define __max(a, b) (((a)>(b))?(a):(b))
 
 #include <cstring>
+#ifdef _WIN32
 #include <minmax.h>
+#endif
 //KY workaround for Windows-only functions
 #ifndef _WIN32
 #define strcpy_s(t, s) strcpy(t, s)
