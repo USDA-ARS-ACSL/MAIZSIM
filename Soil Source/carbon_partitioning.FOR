@@ -236,7 +236,7 @@ CYAP  No Plant = No Root Activity
       If((NShoot.eq.0).or.(isGerminated.eq.0)) Return
 c       PDWR_TOTAL=0.0    ! for debugging purposes  AD and zhuangji  delete it
 CYAPEND
-      If (isGerminated.and.RootsInitiated.eq.0) then
+      If ((isGerminated.eq.1).and.(RootsInitiated.eq.0)) then
          RootsInitiated=1
          InitialRootWt=InitialRootCarbo/InitialRootCellArea   ! calculates average root wt density
          ! Distribute this mass among cells with initial root distribution
