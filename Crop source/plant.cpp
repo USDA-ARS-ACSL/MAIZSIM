@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "plant.h"
 #include "gas_exchange.h"
-#include "lightenv.h"
+#include "radtrans.h"
+#include "timer.h"
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -542,13 +543,26 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	  CGas_exchange * shaded = new CGas_exchange("Shaded", this->leaf_N_content);
 
 //TODO: lightenv.dll needs to be translated to C++. It slows down the execution, 3/16/05, SK
-	radTrans2(weather.jday, weather.time, initInfo.latitude, initInfo.longitude, weather.solRad, weather.PFD, LAI, LAF);
+    CSolar *sun = new CSolar();
+    CRadTrans *light = new CRadTrans();
+    
+    Timer timer;
+    int mm, dd, yy;
+    timer.caldat(weather.jday, mm, dd, yy);
+    int jday = timer.julday(1, 1, yy);
+    //int jday = 39022 + 1;
+    sun->SetVal(weather.jday - jday + 1, weather.time, initInfo.latitude, initInfo.longitude, initInfo.altitude, weather.solRad);
+    light->SetVal(*sun, LAI, LAF);
     double temp5, temp6, temp7,temp8, temp9;
-	temp5=sunlitLAI();
-	temp6=shadedLAI();
-	temp7=getNIRtot();
-    temp8=sunlitPFD();
-	temp9=shadedPFD();
+	temp5=light->LAIsl();
+    temp6=light->LAIsh();
+    temp7=sun->GetNIRTotal();
+    temp8=light->Qsl();
+    temp9=light->Qsh();
+    
+    if (weather.jday == 37356 && weather.time * 24 >= 6) {
+        double temp10 = 1;
+    }
 	 	
 	  //Calculating transpiration and photosynthesis without stomatal control Y
 	   // sunlit->SetVal_NC(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
@@ -557,38 +571,37 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	          //     weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply);
 
 	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential LeafWP Y
-	    sunlit->SetVal_psil(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
+	    sunlit->SetVal_psil(light->Qsl(), weather.airT, weather.CO2, weather.RH,
 	                weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
-	    shaded->SetVal_psil(shadedPFD(), weather.airT, weather.CO2, weather.RH, 
+	    shaded->SetVal_psil(light->Qsh(), weather.airT, weather.CO2, weather.RH,
 	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
 
-	
-	photosynthesis_gross = (sunlit->A_gross*sunlitLAI() + shaded->A_gross*shadedLAI());//plantsPerMeterSquare units are umol CO2 per plant s-1 ;
-	photosynthesis_net = (sunlit->A_net*sunlitLAI() + shaded->A_net*shadedLAI());//
-	SunlitLAI = sunlitLAI();
-	ShadedLAI = shadedLAI();
+	double sunlitLAI = light->LAIsl();
+	double shadedLAI = light->LAIsh();
+	photosynthesis_gross = (sunlit->A_gross*sunlitLAI + shaded->A_gross*shadedLAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
+	photosynthesis_net = (sunlit->A_net*sunlitLAI + shaded->A_net*shadedLAI);//
 	transpirationOld=transpiration;  // when outputting the previous step transpiration is compared to the current step's water uptake
 	transpiration=0;
-	if (sunlitLAI()>0) transpiration=sunlit->ET*sunlitLAI();
-	if (shadedLAI()>0) transpiration+=shaded->ET*shadedLAI();
+	if (sunlitLAI > 0) transpiration=sunlit->ET*sunlitLAI;
+	if (shadedLAI > 0) transpiration+=shaded->ET*shadedLAI;
 	transpiration=transpiration/(initInfo.plantDensity)*3600.0*18.01;//plantsPerMeterSquare units are grams per plant per hour ;
 	// Units of Transpiration from sunlit->ET are mol m-2 (leaf area) s-1
 	// Calculation of transpiration from ET involves the conversion to gr per plant per hour 
-	temperature = (sunlit->Tleaf*sunlitLAI() + shaded->Tleaf*shadedLAI())/LAI;
-	//psi_l = (sunlit->get_psi()*sunlitLAI() + shaded->get_psi()*shadedLAI())/LAI;
+	temperature = (sunlit->Tleaf*sunlitLAI + shaded->Tleaf*shadedLAI)/LAI;
+	//psi_l = (sunlit->get_psi()*sunlitLAI + shaded->get_psi()*shadedLAI)/LAI;
 	this->VPD = sunlit->get_VPD();
 	// photosynthesis_gross is umol CO2 m-2 leaf s-1
 	// in the following we convert to g C plant-1 per hour
 	assimilate = (photosynthesis_gross*CO2_MW/1.0e6)*(60.0*initInfo.timeStep)/initInfo.plantDensity; // grams CO2 per plant per hour
 	photosynthesis_gross=photosynthesis_gross*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
 	photosynthesis_net=  photosynthesis_net*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
-	double temp1=sunlitLAI();
-	double temp2=shadedLAI();
+	double temp1=sunlitLAI;
+	double temp2=shadedLAI;
 	double temp3=sunlit->get_gs();
 	double temp4=shaded->get_gs();
-	if (sunlitLAI()!=0 && shadedLAI() !=0 && LAI !=0)
+	if (sunlitLAI != 0 && shadedLAI !=0 && LAI !=0)
 	{
-		this->conductance=(sunlit->get_gs()*sunlitLAI()+shaded->get_gs()*shadedLAI())/LAI; //average stomatal conductance Yang
+		this->conductance=(sunlit->get_gs()*sunlitLAI+shaded->get_gs()*shadedLAI)/LAI; //average stomatal conductance Yang
 		if (this->conductance<0)
 		{
 			conductance=0;
@@ -599,6 +612,16 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	{
 		this->conductance =0;
 	}
+	sunlit_LAI = sunlitLAI;
+	shaded_LAI = shadedLAI;
+    sunlit_PFD = temp8;
+    shaded_PFD = temp9;
+	sunlit_A_net = sunlit->A_net;
+	shaded_A_net = shaded->A_net;
+	sunlit_A_gross = sunlit->A_gross;
+	shaded_A_gross = shaded->A_gross;
+	sunlit_gs = temp3;
+	shaded_gs = temp4;
 	 delete sunlit;
 	 delete shaded;
 }
@@ -930,7 +953,7 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
       //First set counter to 0 if it is the beginning of the day. 
 	if (abs(weather.time)<0.0001)
 		{// have to rename C2_effect to Light_effect
-			//Zhu et al. Journal of Experimental Botany, Vol. 65, No. 2, pp. 641–653, 2014
+			//Zhu et al. Journal of Experimental Botany, Vol. 65, No. 2, pp. 641ï¿½653, 2014
 			C2_effectTemp=exp(-(SunlitRatio-Xo)/B);
 			C2_effect=__min(1.0,A/(1.0+C2_effectTemp));
 			develop->set_shadeEffect(C2_effect);

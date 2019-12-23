@@ -1,5 +1,5 @@
       subroutine Root_Mover_New()
-      Include 'Public.ins'
+      Include 'public.ins'
       Include 'puplant.ins'
       Double precision A,B,C,P,Sum
       Character InString*132

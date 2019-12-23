@@ -1,7 +1,7 @@
       Subroutine SoilNitrogen()
 C new comment
-      Include 'Public.ins'
-      Include 'NITVAR.ins'
+      Include 'public.ins'
+      Include 'nitvar.ins'
       common /nitrog/ModNum
       Real*8 BCh,BNh, BCl,BNl,BCm,BNm,BNNH4,BNO3,BDENIT
       

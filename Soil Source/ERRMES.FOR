@@ -1,6 +1,6 @@
 c==== Error messages
       Subroutine ErrMes(N,M)
-      Include 'Public.ins'
+      Include 'public.ins'
       If(N.ne.0) then
         Write(4,20) N,M
         Stop

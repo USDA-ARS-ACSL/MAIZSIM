@@ -121,7 +121,7 @@ c
         Do 14 i=1,NumNP
           M=MatNumN(i)
           If(Level.ne.NLevel) then
-            DPom = dt*cWat**2/6./-Ac(i)       !CHECK UNITS
+            DPom = dt*cWat**2/6./(-Ac(i))       !CHECK UNITS
             TcSxx(i)=TcSxx(i)+VxH(i)*VxH(i)*DPom
             TcSzz(i)=TcSzz(i)+VzH(i)*VzH(i)*DPom
           Else

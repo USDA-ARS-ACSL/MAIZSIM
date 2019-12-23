@@ -25,10 +25,10 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="*.ins;h;hpp;hxx;hm;inl;fi;fd">
-		<File RelativePath="NITVAR.INS"/>
+		<File RelativePath="nitvar.ins"/>
 		<File RelativePath="public.ins"/>
-		<File RelativePath="PUPLANT.INS"/>
-		<File RelativePath="PUWEATH.INS"/></Filter>
+		<File RelativePath="puplant.ins"/>
+		<File RelativePath="puweath.ins"/></Filter>
 		<Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
 		<File RelativePath="2DMAIZSIM.FOR"/>

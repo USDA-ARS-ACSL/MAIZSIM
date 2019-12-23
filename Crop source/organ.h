@@ -2,7 +2,7 @@
 #ifndef _ORGAN_H_
 #define _ORGAN_H_
 #include "weather.h"
-#include "ThermalTime.h"
+#include "thermaltime.h"
 #include "initinfo.h"
 #include "development.h"
 #define CO2_MW 44.0098

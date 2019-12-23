@@ -72,9 +72,9 @@ C**  Daily values for radiation will be converted to watts m-2 as
 C**   soon as they are read in. 
 C**                                                                   **
       Subroutine SetSurfaceD()
-      Include 'Public.ins'
-      Include 'Puplant.ins'
-      Include 'Puweath.ins'
+      Include 'public.ins'
+      Include 'puplant.ins'
+      Include 'puweath.ins'
       Parameter (PERIOD =1./24.)
       integer jday, DayofYear,CurYear, ModNum,ThisYear
       Common /weather/ il,im,isol,ModNum

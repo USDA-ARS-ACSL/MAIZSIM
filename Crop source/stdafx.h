@@ -14,11 +14,14 @@
 #define __max(a, b) (((a)>(b))?(a):(b))
 
 #include <cstring>
+#ifdef _WIN32
 #include <minmax.h>
+#endif
 //KY workaround for Windows-only functions
 #ifndef _WIN32
 #define strcpy_s(t, s) strcpy(t, s)
 #define strcat_s(t, s) strcat(t, s)
+#define strtok_s(s, d, c) strtok(s, d)
 #define _itoa_s(i, a, n) snprintf(a, n, "%d", i)
 #endif
 

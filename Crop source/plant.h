@@ -2,9 +2,9 @@
 #ifndef _PLANT_H_
 #define _PLANT_H_
 #include "organ.h"
-#include "nodalUnit.h"
+#include "nodalunit.h"
 #include "development.h"
-#include "roots.h"
+#include "Roots.h"
 #include "ear.h"
 #include "gas_exchange.h"
 #include <iostream>
@@ -109,6 +109,8 @@ public:
 	void calcRed_FRedRatio(const TWeather&);
 	void writeNote(const TWeather &);
     
+	double sunlit_LAI, shaded_LAI, sunlit_PFD, shaded_PFD, sunlit_A_net, shaded_A_net, sunlit_A_gross, shaded_A_gross, sunlit_gs, shaded_gs;
+
 
 private:
 	TInitInfo initInfo;

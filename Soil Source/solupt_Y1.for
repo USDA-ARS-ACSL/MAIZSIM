@@ -7,8 +7,8 @@ c         4  Michaelis-Menton uptake only
 
       subroutine SoluteUptake_New()
       include 'public.ins'
-      IncLude 'Puplant.ins'
-      Include 'Puweath.ins'
+      IncLude 'puplant.ins'
+      Include 'puweath.ins'
       real MMUpN, bi(3),ci(3),PotNitrogen_t
       Character InString*132 ! to read input file
       Common  / SUP /  TotWSink,TotSSink,WincrSink,TotSSINK2
@@ -154,8 +154,8 @@ c       Endif
      
       subroutine massRootflux()
       include 'public.ins'
-      IncLude 'Puplant.ins'
-      Include 'Puweath.ins'
+      IncLude 'puplant.ins'
+      Include 'puweath.ins'
 	real * 8 qsinkC(NumNPD,2),alphaK(NumNPD,2)
 	Real LastCr_M,F_MM(NumNPD,2)
       integer e,Iroot(NumNPD,2)
@@ -205,7 +205,7 @@ c calculate and alternative alphaK depending on demand
 	      If ((VUP(n,j).le.0).OR.(iSink.EQ.3)) Then
 	       GammaB=alphaK(n,j)*RootRadius/(Disp(n,j))
 	       PC=1-0.5*GammaB
-	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius*RootRadius)
+	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius**2)
 	       PC=1.0/(PC+PC2)
 	       PC=amax1(0.0,amin1(1.0,PC))
 	         Else

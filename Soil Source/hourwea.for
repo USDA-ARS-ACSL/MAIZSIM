@@ -74,9 +74,9 @@ C**                                                                   **
 
 c inputs hourly data
       Subroutine SetSurfaceH()
-      Include 'Public.ins'
-      Include 'Puplant.ins'
-      Include 'Puweath.ins'
+      Include 'public.ins'
+      Include 'puplant.ins'
+      Include 'puweath.ins'
       Parameter (PERIOD =1./24.)
       integer jday,m,DayOfYear,CurYear,Modnum, ThisYear
       double precision St,t
