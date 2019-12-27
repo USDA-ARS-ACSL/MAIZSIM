@@ -23,56 +23,64 @@ public:
 	CPlant(const TInitInfo&);
 	~CPlant();
 
-	CNodalUnit* get_nodalUnit() {return nodalUnit;}
-	CEar * get_ear() {return ear;}
-	CRoots * get_roots() {return roots;}
-	CDevelopment * get_develop() {return develop;}
-	CGas_exchange * get_sunlit() {return this->sunlit;}
-	CGas_exchange * get_shaded() {return this->shaded;}  //get access to the pointers that point to the sunlit/shade leaves Yang 8/29/06
+	CNodalUnit* get_nodalUnit() { return nodalUnit; }
+	CEar * get_ear() { return ear; }
+	CRoots * get_roots() { return roots; }
+	CDevelopment * get_develop() { return develop; }
+	CGas_exchange * get_sunlit() { return this->sunlit; }
+	CGas_exchange * get_shaded() { return this->shaded; }  //get access to the pointers that point to the sunlit/shade leaves Yang 8/29/06
 
-	int get_nodeNumber() {return nodeNumber;}
-	int get_finalNodeNumber() {return finalNodeNumber;}
+	int get_nodeNumber() { return nodeNumber; }
+	int get_finalNodeNumber() { return finalNodeNumber; }
 
-	double get_mass() {return mass;}
-	double get_age() {return age;}
-	double get_CH2O() {return CH2O;}
-	double get_N() {return TotalNitrogen;} //Total N in plant mg plant-1
-	double get_Pg() {return photosynthesis_gross;}
-	double get_Pn() {return photosynthesis_net;}
-	double get_assimilate() {return assimilate;}
-	double get_ET() {return transpiration;}
-	double get_ET_Old() {return transpirationOld;}
-	double get_tmpr() {return temperature;}
-	double get_C_pool() {return C_pool;}
-	double get_C_pool_root() {return C_pool_root;}
-	double get_C_reserve() {return C_reserve;}
-	double get_MaintenanceRespiration() {return maintRespiration;}
-	double get_stemMass() {return stemMass;}
-	double get_leafMass() {return leafMass;}
-	double get_earMass() {return earMass;}
-	double get_shootMass() {return shootMass;}
-	double get_rootMass() {return rootMass;}
-	double get_shootPart() {return shootPart;}
-	double get_leafPart()  {return leafPart;}
-	double get_rootPart() {return rootPart;}
-	double get_DroppedLeafMass() {return droppedLeafmass;}
-	double get_activeLeafMass() {return activeLeafMass;}
-	double get_conductance() {return conductance;}
-	double get_VPD() {return VPD;}
-	double get_LeafArea() {return leafArea;}
-	double get_LeafN(){return leaf_N;}
-	double get_LeafNFraction () {return leaf_NFraction;}
-	double get_HourlyNitrogenDemand () {return HourlyNitrogenDemand;}
-	double get_CumulativeNitrogenDemand () {return CumulativeNitrogenDemand;}
-	double get_HourlyNitrogenSoilUptake() {return HourlyNitrogenSoilUptake;}
-	double get_CumulativeNitrogenSoilUptake() {return CumulativeNitrogenSoilUptake;}
-	double get_droppedLfArea() { return currentDroppedLfArea;}
-	double get_ptnLfIncrease() { return potentialLeafAreaIncrease;}
-	double getSunlitLAI() {return SunlitLAI;}
-	double getShadedLAI() {return ShadedLAI;}
-	double getC2_effect() {return C2_effect;}
-	double getSunlitRatio() {return SunlitRatio;}
-	string getNote() {return note;}
+	double get_mass() { return mass; }
+	double get_age() { return age; }
+	double get_CH2O() { return CH2O; }
+	double get_N() { return TotalNitrogen; } //Total N in plant mg plant-1
+	double get_Pg() { return photosynthesis_gross; }
+	double get_Pn() { return photosynthesis_net; }
+	double get_assimilate() { return assimilate; }
+	double get_ET() { return transpiration; }
+	double get_ET_Old() { return transpirationOld; }
+	double get_tmpr() { return temperature; }
+	double get_C_pool() { return C_pool; }
+	double get_C_pool_root() { return C_pool_root; }
+	double get_C_reserve() { return C_reserve; }
+	double get_MaintenanceRespiration() { return maintRespiration; }
+	double get_stemMass() { return stemMass; }
+	double get_leafMass() { return leafMass; }
+	double get_earMass() { return earMass; }
+	double get_shootMass() { return shootMass; }
+	double get_rootMass() { return rootMass; }
+	double get_shootPart() { return shootPart; }
+	double get_leafPart() { return leafPart; }
+	double get_rootPart() { return rootPart; }
+	double get_DroppedLeafMass() { return droppedLeafmass; }
+	double get_activeLeafMass() { return activeLeafMass; }
+	double get_conductance() { return conductance; }
+	double get_VPD() { return VPD; }
+	double get_LeafArea() { return leafArea; }
+	double get_LeafN() { return leaf_N; }
+	double get_LeafNFraction() { return leaf_NFraction; }
+	double get_HourlyNitrogenDemand() { return HourlyNitrogenDemand; }
+	double get_CumulativeNitrogenDemand() { return CumulativeNitrogenDemand; }
+	double get_HourlyNitrogenSoilUptake() { return HourlyNitrogenSoilUptake; }
+	double get_CumulativeNitrogenSoilUptake() { return CumulativeNitrogenSoilUptake; }
+	double get_droppedLfArea() { return currentDroppedLfArea; }
+	double get_ptnLfIncrease() { return potentialLeafAreaIncrease; }
+	double get_sunlit_LAI() { return sunlit_LAI; }
+	double get_shaded_LAI() { return shaded_LAI; }
+	double get_sunlit_PFD() { return sunlit_PFD; }
+	double get_shaded_PFD() { return shaded_PFD; }
+	double get_sunlit_A_net() { return sunlit_A_net; }
+	double get_shaded_A_net() { return shaded_A_net; }
+	double get_sunlit_A_gross() { return sunlit_A_gross; }
+	double get_shaded_A_gross() { return shaded_A_gross; }
+	double get_sunlit_gs() { return sunlit_gs; }
+	double get_shaded_gs() { return shaded_gs; }
+	double getC2_effect() {return C2_effect; }
+	double getSunlitRatio() {return SunlitRatio; }
+	string getNote() { return note; }
 
 	TStage get_stage() {return stage;}
 
@@ -109,8 +117,7 @@ public:
 	void calcRed_FRedRatio(const TWeather&);
 	void writeNote(const TWeather &);
     
-	double sunlit_LAI, shaded_LAI, sunlit_PFD, shaded_PFD, sunlit_A_net, shaded_A_net, sunlit_A_gross, shaded_A_gross, sunlit_gs, shaded_gs;
-
+	
 
 private:
 	TInitInfo initInfo;
@@ -180,7 +187,12 @@ private:
 
 	
 	double emerge_gdd;//records thermal time needed for plant to emergy YY
-	double SunlitLAI, ShadedLAI; // sunlit and shaded LAI values
+	double sunlit_LAI, shaded_LAI; // sunlit and shaded LAI values
+	double sunlit_PFD, shaded_PFD;
+	double 	sunlit_A_net, shaded_A_net,
+		sunlit_A_gross, shaded_A_gross,
+		sunlit_gs, shaded_gs;
+
 	double SunlitRatio;  // daily ratio of sunlit leaf area to use for scaling leaf expansion due to carbon stress
     double C2_effect;
 	TStage stage;

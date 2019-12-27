@@ -53,11 +53,12 @@ CPlant::CPlant(const TInitInfo& info )
 	CumulativeNitrogenDemand=0;
 	HourlyNitrogenDemand=0;
 	CumulativeNitrogenSoilUptake=0;
+	sunlit_LAI =  shaded_LAI = 0.0;
+	sunlit_PFD = shaded_PFD = 0.0;
 
-
-
-    SunlitLAI=0.0;
-	ShadedLAI=0.0;
+	sunlit_A_net = shaded_A_net = 0;
+	sunlit_A_gross = shaded_A_gross = 0;
+	sunlit_gs=shaded_gs=0;
 	sowingDay = 1.0;
 	age = 0.0;
 	initInfo = info;
@@ -72,16 +73,16 @@ CPlant::CPlant(const TInitInfo& info )
        	nodeNumber = i;
 	}
 	finalNodeNumber = info.genericLeafNo;
-	leafArea =greenLeafArea = actualGreenLeafArea = senescentLeafArea = potentialLeafArea = droppedLfArea=0.0;
+	leafArea =greenLeafArea = actualGreenLeafArea = senescentLeafArea = potentialLeafArea = droppedLfArea = 0.0;
 	previousDroppedlfArea = currentDroppedLfArea = droppedLfArea = 0;
 	
 	temperature = develop->get_Tcur();
 	
-	photosynthesis_net =photosynthesis_gross = transpiration = transpirationOld=assimilate =  0.0;
-		VPD=0;
-    conductance=0;
+	photosynthesis_net = photosynthesis_gross = transpiration = transpirationOld = assimilate = 0.0;
+	     VPD = 0;
+	conductance = 0;
 	emerge_gdd = 0;
-	SunlitRatio=0.0;
+	SunlitRatio = 0.0;
 }
 
 CPlant::~CPlant() 
@@ -542,7 +543,6 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	  CGas_exchange * sunlit = new CGas_exchange("Sunlit", this->leaf_N_content);
 	  CGas_exchange * shaded = new CGas_exchange("Shaded", this->leaf_N_content);
 
-//TODO: lightenv.dll needs to be translated to C++. It slows down the execution, 3/16/05, SK
     CSolar *sun = new CSolar();
     CRadTrans *light = new CRadTrans();
     
@@ -553,41 +553,34 @@ void CPlant::calcGasExchange(const TWeather & weather)
     //int jday = 39022 + 1;
     sun->SetVal(weather.jday - jday + 1, weather.time, initInfo.latitude, initInfo.longitude, initInfo.altitude, weather.solRad);
     light->SetVal(*sun, LAI, LAF);
-    double temp5, temp6, temp7,temp8, temp9;
-	temp5=light->LAIsl();
-    temp6=light->LAIsh();
+    double temp7;
     temp7=sun->GetNIRTotal();
-    temp8=light->Qsl();
-    temp9=light->Qsh();
+	sunlit_PFD = light->Qsl();
+	shaded_PFD = light->Qsh();
+    sunlit_LAI = light->LAIsl();
+	shaded_LAI = light->LAIsh();
     
     if (weather.jday == 37356 && weather.time * 24 >= 6) {
         double temp10 = 1;
     }
 	 	
-	  //Calculating transpiration and photosynthesis without stomatal control Y
-	   // sunlit->SetVal_NC(sunlitPFD(), weather.airT, weather.CO2, weather.RH, 
-	       //           weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply); 
-	    // shaded->SetVal_NC(shadedPFD(), weather.airT, weather.CO2, weather.RH, 
-	          //     weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply);
-
 	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential LeafWP Y
-	    sunlit->SetVal_psil(light->Qsl(), weather.airT, weather.CO2, weather.RH,
+	    sunlit->SetVal_psil(sunlit_PFD, weather.airT, weather.CO2, weather.RH,
 	                weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
-	    shaded->SetVal_psil(light->Qsh(), weather.airT, weather.CO2, weather.RH,
+	    shaded->SetVal_psil(shaded_PFD, weather.airT, weather.CO2, weather.RH,
 	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
 
-	double sunlitLAI = light->LAIsl();
-	double shadedLAI = light->LAIsh();
-	photosynthesis_gross = (sunlit->A_gross*sunlitLAI + shaded->A_gross*shadedLAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
-	photosynthesis_net = (sunlit->A_net*sunlitLAI + shaded->A_net*shadedLAI);//
+	
+	photosynthesis_gross = (sunlit->A_gross*sunlit_LAI + shaded->A_gross*shaded_LAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
+	photosynthesis_net = (sunlit->A_net*sunlit_LAI + shaded->A_net*shaded_LAI);//
 	transpirationOld=transpiration;  // when outputting the previous step transpiration is compared to the current step's water uptake
 	transpiration=0;
-	if (sunlitLAI > 0) transpiration=sunlit->ET*sunlitLAI;
-	if (shadedLAI > 0) transpiration+=shaded->ET*shadedLAI;
+	if (sunlit_LAI > 0) transpiration=sunlit->ET*sunlit_LAI;
+	if (shaded_LAI > 0) transpiration+=shaded->ET*shaded_LAI;
 	transpiration=transpiration/(initInfo.plantDensity)*3600.0*18.01;//plantsPerMeterSquare units are grams per plant per hour ;
 	// Units of Transpiration from sunlit->ET are mol m-2 (leaf area) s-1
 	// Calculation of transpiration from ET involves the conversion to gr per plant per hour 
-	temperature = (sunlit->Tleaf*sunlitLAI + shaded->Tleaf*shadedLAI)/LAI;
+	temperature = (sunlit->Tleaf*sunlit_LAI + shaded->Tleaf*shaded_LAI)/LAI;
 	//psi_l = (sunlit->get_psi()*sunlitLAI + shaded->get_psi()*shadedLAI)/LAI;
 	this->VPD = sunlit->get_VPD();
 	// photosynthesis_gross is umol CO2 m-2 leaf s-1
@@ -595,13 +588,10 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	assimilate = (photosynthesis_gross*CO2_MW/1.0e6)*(60.0*initInfo.timeStep)/initInfo.plantDensity; // grams CO2 per plant per hour
 	photosynthesis_gross=photosynthesis_gross*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
 	photosynthesis_net=  photosynthesis_net*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
-	double temp1=sunlitLAI;
-	double temp2=shadedLAI;
-	double temp3=sunlit->get_gs();
-	double temp4=shaded->get_gs();
-	if (sunlitLAI != 0 && shadedLAI !=0 && LAI !=0)
+
+	if (sunlit_LAI != 0 && shaded_LAI !=0 && LAI !=0)
 	{
-		this->conductance=(sunlit->get_gs()*sunlitLAI+shaded->get_gs()*shadedLAI)/LAI; //average stomatal conductance Yang
+		this->conductance=(sunlit->get_gs()*sunlit_LAI+shaded->get_gs()*shaded_LAI)/LAI; //average stomatal conductance Yang
 		if (this->conductance<0)
 		{
 			conductance=0;
@@ -612,18 +602,17 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	{
 		this->conductance =0;
 	}
-	sunlit_LAI = sunlitLAI;
-	shaded_LAI = shadedLAI;
-    sunlit_PFD = temp8;
-    shaded_PFD = temp9;
+    
 	sunlit_A_net = sunlit->A_net;
 	shaded_A_net = shaded->A_net;
 	sunlit_A_gross = sunlit->A_gross;
 	shaded_A_gross = shaded->A_gross;
-	sunlit_gs = temp3;
-	shaded_gs = temp4;
+	sunlit_gs = sunlit->get_gs();
+	shaded_gs = shaded->get_gs();
 	 delete sunlit;
 	 delete shaded;
+	 delete sun;
+	 delete light;
 }
 
 void CPlant::C_allocation(const TWeather & w)
@@ -962,10 +951,10 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
 		}
 	else
 	{
-		if (SunlitLAI/(SunlitLAI+ShadedLAI)>0.05) // calculate from emergence
+		if (sunlit_LAI/(sunlit_LAI+shaded_LAI)>0.05) // calculate from emergence
 		{
 
-			SunlitRatio+=SunlitLAI/(SunlitLAI+ShadedLAI)*dt;
+			SunlitRatio+=sunlit_LAI/(sunlit_LAI+shaded_LAI)*dt;
 	
 		}
 	

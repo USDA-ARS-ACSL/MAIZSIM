@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{05500875-9B63-45CA-B7D6-FD6A5240ED1A}">
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{05500875-9B63-45CA-B7D6-FD6A5240ED1A}" SccProjectName="SAK" SccLocalPath="SAK" SccAuxPath="SAK" SccProvider="SAK">
 	<Platforms>
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnTruncateSource="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" WarnArgMismatch="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/2dsoil.exe" Version="1.14" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies="&quot;Y:\MAIZSIM\Crop Source\debug\crop.lib&quot;"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386 " OutputFile="$(OUTDIR)/2dsoil.exe" Version="1.14" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies="&quot;D:\MAIZSIM07\crop source\Debug\crop.lib&quot;"/>
 				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/2dsoil.tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="CopyToFolder.bat"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
@@ -25,11 +25,12 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="*.ins;h;hpp;hxx;hm;inl;fi;fd">
-		<File RelativePath="nitvar.ins"/>
+		<File RelativePath="NITVAR.INS"/>
 		<File RelativePath="public.ins"/>
-		<File RelativePath="puplant.ins"/>
-		<File RelativePath="puweath.ins"/></Filter>
-		<Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<File RelativePath="PUPLANT.INS"/>
+		<File RelativePath="PUWEATH.INS"/></Filter>
+		<Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		<File RelativePath=".\maizsim.rc"/></Filter>
 		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
 		<File RelativePath="2DMAIZSIM.FOR"/>
 		<File RelativePath=".\AutoIrrigate.for">
@@ -55,9 +56,9 @@
 		<File RelativePath="SETSUR02.FOR"/>
 		<File RelativePath="SETTDB.FOR"/>
 		<File RelativePath="soilnden.for"/>
-		<File RelativePath="solmov.for"/>
+		<File RelativePath=".\solmov.for"/>
 		<File RelativePath=".\solupt_Y1.for"/>
 		<File RelativePath="SYNCHRON.FOR"/>
-		<File RelativePath="wateruptake.FOR"/>
-		<File RelativePath="Watmov.for"/></Filter></Files>
+		<File RelativePath=".\wateruptake.FOR"/>
+		<File RelativePath=".\Watmov.for"/></Filter></Files>
 	<Globals/></VisualStudioProject>
