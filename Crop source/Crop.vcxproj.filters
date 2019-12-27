@@ -37,9 +37,6 @@
     <ClCompile Include="plant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="radiation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="roots.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,6 +50,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="solar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="radtrans.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -121,6 +124,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource1.h" />
+    <ClInclude Include="radtrans.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="solar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
