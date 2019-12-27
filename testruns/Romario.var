@@ -1,0 +1,27 @@
+Corn growth simulation for  Germany FACE data
+Romario
+GDD to      Juvenile   Daylength   staygreen   LA_min     Rmax_LTAR              Rmax_LTIR             Phyllochrons from
+maturity    leaves       Sensitive                   Leaf tip appearance   Leaf tip initiation     Tassle Init
+1600          15           0          3        100       0.53                  0.978                  3
+[SoilRoot]
+*** WATER UPTAKE PARAMETER INFORMATION **************************
+ RRRM       RRRY    RVRL
+ 166.7 31.30 0.73
+ ALPM    ALPY     RTWL    RtMinWtPerUnitArea
+ 0.350  0.04     1.059e-004    2.00000e-004
+[RootDiff]
+ *** ROOT MOVER PARAMETER INFORMATION ***
+EPSI        lUpW             CourMax
+ 1             1             1 
+Diffusivity and geotropic velocity
+ 2.4           2.9           0 
+[SoilNitrogen]
+*** NITROGEN ROOT UPTAKE PARAMETER INFORMATION **************************
+ISINK    Rroot
+  0	 0.017
+ConstI   Constk     Cmin0
+35.0     0.50        .01
+17.2    0.75        .030
+
+
+

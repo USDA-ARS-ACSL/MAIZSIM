@@ -1,0 +1,12 @@
+***Initialization data for Iowa 2008 (corn)
+POPROW  ROWSP  Plant_Density  ROWANG  xSeed  ySeed  CEC   EOMult  Co2
+7.5     75.0   10             0       0      195    0.65  0.5     -1
+Latitude longitude altitude
+41.165   96.476    361.0
+AutoIrrigate
+0
+begin         Sowing       end              Timestep (minutes)
+'04/28/2006'  '05/12/2006' '10/30/2006'     60
+output soils data (g03, g04, g05 and g06 files) 1 if true
+                                   no soil files        output soil files
+                                      0                     1
