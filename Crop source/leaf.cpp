@@ -26,7 +26,6 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	initiated = appeared = growing = mature = aging = dead = dropped = false;
 	phase1Delay = growthDuration=stayGreenDuration = seneDuration = 0.0;
 	ptnLength=ptnWidth = 0.0;
-	elongRate = 0.564;  //0.564 cm dd-1 Fournier and Andrieu 1998 Pg239. This is the "potential" elongation rate with no water stress Yang
 	maxElongRate = 12.0; //max elongation rate (cm per day) at optipmal temperature (Topt: 31C with Tbase = 9.8C using 0.564 cm/dd rate from Fournier 1998 paper above
 	elongAge = 0.0; //physiological age during expansion phase
 	seneAge = 0.0; //age during senscence phase
