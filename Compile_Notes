@@ -1,3 +1,5 @@
+## Windows
+
 We use Visual Studio 2017 and Intel Fortran Composer 2019 to manage and compile the project. 
 The crop model is compiled as a DLL. You must tell the fortran compiler the location of the crop.lib file. In visual studio this is under the properties for the linker in the FORTRAN project. (Linker->input->additional dependencies). Under System, we use Subsystem:Console. This is the command line (for the debug version):
 /OUT:"Debug/2dsoil.exe" /VERSION:1.14 /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTFILE:"Debug\2dsoil.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"Debug/2dsoil.pdb" /SUBSYSTEM:CONSOLE /IMPLIB:"Y:\MAIZSIM\Soil Source\Debug\2dsoil.lib" "Y:\MAIZSIM\Crop Source\debug\crop.lib"
@@ -17,3 +19,11 @@ The crop module is the entry point into the crop model from fortran. The first m
 #endif
 This allows the fortran to call the dll using lower case naming. 
 All Microsoft/Windows specific code has been removed (as far as we know) so the program should compile on Linux/Mac systems
+
+## macOS
+
+Use `MAIZSIM.xcodeproj`. Tested with Xcode 10.3 and Intel Parallel Studio XE 2020. Note that you should use "Legacy Build System" in Project Settings.
+
+## Linux
+
+Use `Makefile` to build with GNU C++/Fortran.
