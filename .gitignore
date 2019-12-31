@@ -20,6 +20,7 @@ tmp/
 *.g05
 *.g06
 *.$$$
+*.dbg
 *.out
 *.ncb
 local.properties

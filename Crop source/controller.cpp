@@ -40,9 +40,10 @@ CController::CController(const char* varFile, const char* outfile, const char* L
 	//get root of debug file from crop file, store in temp at first
 	strcpy_s(temp,cropFile);
 	// get char pointer to "." in the variable temp
+	// and put root of filename into pch
 	pch=strtok_s(temp,".",&next);
-	//copy extension to root for debug file
-	strcat_s(pch,133,ext);
+	//attach extension to root filename for debug file
+	strcat(pch,ext);  // or strcat_s(pch,133,ext) or strncat(pch,ext,133)
 	//add extension to debug file
 	strcpy_s(DebugFile,pch);
 	strcpy_s(LeafFile, LFile);
