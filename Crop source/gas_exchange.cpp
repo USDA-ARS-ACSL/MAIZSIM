@@ -224,7 +224,7 @@ void CGas_exchange::EnergyBalance(double Jw)
 	{
 		Tleaf = Ta + (R_abs-thermal_air-lamda*Jw)/(Cp*ghr);
 	}
-	if (isnan(Tleaf)) badval = true;
+	if (std::isnan(Tleaf)) badval = true;
     double Es_leaf = Es(Tleaf);
 	double temp = Slope(Ta);
 	double temp1 = R_abs-thermal_air;
