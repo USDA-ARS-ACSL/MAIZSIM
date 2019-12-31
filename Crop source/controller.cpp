@@ -24,30 +24,30 @@ using namespace std;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CController::CController(const char* filename, const char* outfile, const char* LFile, TInitInfo iniInfo)
+CController::CController(const char* varFile, const char* outfile, const char* LFile, TInitInfo iniInfo)
 {
 	time			 = NULL;
 	weather 		 = NULL;
 	plant			 = NULL;
 	
-	strcpy_s(varietyFile, filename);
+	strcpy_s(varietyFile, varFile);
     strcpy_s(cropFile, outfile);
 	char *pch=(char*)calloc(133,sizeof(char));
 	char *next=(char*)calloc(133,sizeof(char));
 	char *ext=".dbg";
-	char* temp=(char*)calloc(133,sizeof(char)); 
-	strcpy_s(temp, 133,cropFile);
+	// TODO fix so it does not need a buffer
+	char temp[133]; 
+	//get root of debug file from crop file, store in temp at first
+	strcpy_s(temp,cropFile);
+	// get char pointer to "." in the variable temp
 	pch=strtok_s(temp,".",&next);
-	temp=strcat(pch,ext);
-	strcpy_s(DebugFile,temp);
+	//copy extension to root for debug file
+	strcat_s(pch,133,ext);
+	//add extension to debug file
+	strcpy_s(DebugFile,pch);
 	strcpy_s(LeafFile, LFile);
-	//DebugFile=outfile
-	//strcpy_s(DebugFile,"Debug.out");
 	initInfo = iniInfo;
 	iCur = 0;
-	weatherFormat = ICASA;
-    firstDayOfSim = 0;
-	lastDayOfSim = 365;
     initialize();
 	errorFlag = 0;
 	
