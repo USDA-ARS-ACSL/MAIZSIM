@@ -21,6 +21,7 @@
 #define maxiter 200
 #define epsilon 0.97
 #define sbc 5.6697e-8
+#define Q10 2.0
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -107,7 +108,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
     const int       Ko25 = 450;    //* Michaelis constant of rubisco for O2 (2.5 times C3), mbar */
 	const int		Kp25 = 80;     //* Michaelis constant for PEP caboxylase for CO2 */
     const long      Eac = 59400;  const long       Eao = 36000;   // activation energy values
-	const int	    Vpr = 80; //* PEP regeneration limited Vp, value adopted from vC book */
+	const int	    Vpr25 = 80; //* PEP regeneration limited Vp, value adopted from vC book */
     const double	gbs = 0.003; //* bundle sheath conductance to CO2, mol m-2 s-1 */
     const double    x = 0.4;  //* Partitioning factor of J, yield maximal J at this value */
     const double    alpha = 0.0001; //* fraction of PSII activity in the bundle sheath cell, very low for NADP-ME types  */
@@ -115,7 +116,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
     const double    beta = 0.99; //* smoothing factor */
     const double    gamma1 = 0.193; //* half the reciprocal of rubisco specificity, to account for O2 dependence of CO2 comp point, note that this become the same as that in C3 model when multiplied by [O2] */
 
-	double Kp, Kc, Ko, Km, Ia, I2, Tk, Vpmax, Jmax, Vcmax,  Om, Rm, J, Ac1, Ac2, Ac, Aj1,
+	double Kp, Kc, Ko, Km, Ia, I2, Tk, Vpmax, Vpr, Jmax, Vcmax,  Om, Rm, J, Ac1, Ac2, Ac, Aj1,
 		   Aj2, Aj, Vp1, Vp2, Vp, P,  Ca, Cm, Cm_last, Cm_next,
 		    Os, GammaStar, Gamma;
     int iter;
@@ -131,6 +132,8 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
   Ca = CO2*P; //* conversion to partial pressure */
   Om = O;   //* mesophyle O2 partial pressure */
   Kp = Kp25; // T dependence yet to be determined
+  Kp = Kp25*pow(Q10, (Tleaf - 25.0) / 10.0);
+  Vpr = Vpr25 * pow(Q10, (Tleaf - 25.0) / 10.0);
   Kc = Kc25*exp(Eac*(Tleaf-25)/(298*R*(Tleaf+273)));
   Ko = Ko25*exp(Eao*(Tleaf-25)/(298*R*(Tleaf+273)));
   Km = Kc*(1+Om/Ko); //* effective M-M constant for Kc in the presence of O2 */
@@ -164,7 +167,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
   {
       Cm_last = Cm;
       gs = gsw(pressure);
-      Cm = __min(__max(0.0, Ca - A_net*(1.6/gs + 1.37/gb)*P), 2*Ca);
+      Cm = __min(__max(0.0, Ca - A_net*(1.57/gs + 1.36/gb)*P), 2*Ca);
       Vp1 = (Cm*Vpmax)/(Cm+Kp); //* PEP carboxylation rate, that is the rate of C4 acid generation */
       Vp2 = Vpr;
       Vp = __max(__min(Vp1, Vp2),0);
@@ -239,7 +242,6 @@ double CGas_exchange::gsw(double pressure)  // stomatal conductance for water va
 	double Ds, aa, bb, cc, hs, Cs, Gamma, tmp;
 		
 	double temp = set_leafpEffect(pressure);
-	temp = 1;
 	Gamma = 10.0;
 	//double gbc = gb / 1.37; need to incorporate this later (9/2018) after finishing current project
 	                         //change all instances of gb to gbc
