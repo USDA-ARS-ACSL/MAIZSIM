@@ -211,17 +211,19 @@ void CGas_exchange::EnergyBalance(double Jw)
     gv = gs*gb/(gs+gb); 
     gr = (4*epsilon*sbc*pow(273+Ta,3)/Cp)*2; // radiative conductance, 2 account for both sides
     ghr = gha + gr;
-    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation
+    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation by air (supposedly surroundings i.e. wall, chamber, sky/soil, etc.)
     psc1 = psc*ghr/gv; // apparent psychrometer constant
     this->VPD = Es(Ta)*(1-RH); // vapor pressure deficit
     Ea = Es(Ta)*RH; // ambient vapor pressure
 	// debug dt I commented out the changes that yang made for leaf temperature for a test. I don't think they work
 	if (Jw==0)
 	{
+	  // note that thermal_air rather than thermal_leaf used in the linearized form
 	  Tleaf = Ta + (psc1/(Slope(Ta) + psc1))*((R_abs-thermal_air)/(ghr*Cp)-this->VPD/(psc1*Press)); //eqn 14.6b linearized form using first order approximation of Taylor series
 	}
 	else
 	{
+		//FIXME: needs iterative solving Tleaf (like PhotoSynthesisModule)
 		Tleaf = Ta + (R_abs-thermal_air-lamda*Jw)/(Cp*ghr);
 	}
 	if (std::isnan(Tleaf)) badval = true;
