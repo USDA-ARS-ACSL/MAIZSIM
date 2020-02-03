@@ -205,7 +205,7 @@ void CGas_exchange::EnergyBalance(double Jw)
 { 
     const long Lambda = 44000;  //KJ mole-1 at 25oC
     const double psc = 6.66e-4;
-    const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air (J mol-1 °C-1)
+    const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air (J mol-1 Â°C-1)
 	double gha, gv, gr, ghr, psc1, Ea, thermal_air, Ti, Ta;
 	bool badval=false;
     Ta = Tair;
@@ -214,7 +214,7 @@ void CGas_exchange::EnergyBalance(double Jw)
     gv = gs*gb/(gs+gb); 
     gr = (4*epsilon*sbc*pow(273+Ta,3)/Cp)*2; // radiative conductance, 2 account for both sides
     ghr = gha + gr;
-    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation
+    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation by air (supposedly surroundings i.e. wall, chamber, sky/soil, etc.)
     psc1 = psc*ghr/gv; // apparent psychrometer constant
     this->VPD = Es(Ta)*(1-RH); // vapor pressure deficit
     Ea = Es(Ta)*RH; // ambient vapor pressure

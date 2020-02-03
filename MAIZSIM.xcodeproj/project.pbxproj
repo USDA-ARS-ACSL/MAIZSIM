@@ -91,7 +91,6 @@
 		B5DB2E661B798EB4003A9266 /* gas_exchange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gas_exchange.h; sourceTree = "<group>"; };
 		B5DB2E671B798EB4003A9266 /* initinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = initinfo.cpp; sourceTree = "<group>"; };
 		B5DB2E681B798EB4003A9266 /* initinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = initinfo.h; sourceTree = "<group>"; };
-		B5DB2E6A1B798EB4003A9266 /* jsoncpp.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = jsoncpp.o; sourceTree = "<group>"; };
 		B5DB2E6B1B798EB4003A9266 /* leaf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = leaf.cpp; sourceTree = "<group>"; };
 		B5DB2E6C1B798EB4003A9266 /* leaf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = leaf.h; sourceTree = "<group>"; };
 		B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = "looking at leaf senescense equations.xls"; sourceTree = "<group>"; };
@@ -201,7 +200,6 @@
 				B5DB2E661B798EB4003A9266 /* gas_exchange.h */,
 				B5DB2E671B798EB4003A9266 /* initinfo.cpp */,
 				B5DB2E681B798EB4003A9266 /* initinfo.h */,
-				B5DB2E691B798EB4003A9266 /* jsoncpp */,
 				B5DB2E6B1B798EB4003A9266 /* leaf.cpp */,
 				B5DB2E6C1B798EB4003A9266 /* leaf.h */,
 				B5DB2E711B798EB4003A9266 /* looking at leaf senescense equations.xls */,
@@ -231,14 +229,6 @@
 				B5DB2E871B798EB4003A9266 /* weather.h */,
 			);
 			path = "Crop source";
-			sourceTree = "<group>";
-		};
-		B5DB2E691B798EB4003A9266 /* jsoncpp */ = {
-			isa = PBXGroup;
-			children = (
-				B5DB2E6A1B798EB4003A9266 /* jsoncpp.o */,
-			);
-			path = jsoncpp;
 			sourceTree = "<group>";
 		};
 		B5DB2E9E1B798EC2003A9266 /* Soil Source */ = {
