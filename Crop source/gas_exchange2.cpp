@@ -86,7 +86,6 @@ void CGas_exchange::GasEx_psil(double leafp, double et_supply)
 	
 	while ((fabs(Tleaf_old -Tleaf)>0.01) && (iter < maxiter))
     {
-		gs = gsw(leafp);
       Tleaf_old = Tleaf;
       Photosynthesis(leafp);
       EnergyBalance(et_supply);
@@ -185,6 +184,7 @@ void CGas_exchange::Photosynthesis(double pressure)    //Incident PFD, Air temp 
       A_net = ((Ac+Aj) - sqrt(Square(Ac+Aj)-4*beta*Ac*Aj))/(2*beta); //* smooting the transition between Ac and Aj */
       iter++;
   }
+
 //  Convergence = True;
   iter1 = iter;
   Os = alpha*A_net/(0.047*gbs)+Om; //* Bundle sheath O2 partial pressure, mbar */
@@ -203,9 +203,9 @@ void CGas_exchange::EnergyBalance(double Jw)
 // because Stefan-Boltzman constant is for unit surface area by denifition,
 // all terms including sbc are multilplied by 2 (i.e., gr, thermal radiation)
 { 
-    const long Lambda = 44000;  //KJ mole-1 at 25oC
+    const long lamda = 44000;  //KJ mole-1 at 25oC
     const double psc = 6.66e-4;
-    const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air (J mol-1 Â°C-1)
+    const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air (J mol-1 °C-1)
 	double gha, gv, gr, ghr, psc1, Ea, thermal_air, Ti, Ta;
 	bool badval=false;
     Ta = Tair;
@@ -214,21 +214,19 @@ void CGas_exchange::EnergyBalance(double Jw)
     gv = gs*gb/(gs+gb); 
     gr = (4*epsilon*sbc*pow(273+Ta,3)/Cp)*2; // radiative conductance, 2 account for both sides
     ghr = gha + gr;
-    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation by air (supposedly surroundings i.e. wall, chamber, sky/soil, etc.)
+    thermal_air = epsilon*sbc*pow(Ta+273,4)*2; // emitted thermal radiation
     psc1 = psc*ghr/gv; // apparent psychrometer constant
     this->VPD = Es(Ta)*(1-RH); // vapor pressure deficit
     Ea = Es(Ta)*RH; // ambient vapor pressure
 	// debug dt I commented out the changes that yang made for leaf temperature for a test. I don't think they work
-	//if (Jw==0)
-	//{
+	if (Jw==0)
+	{
 	  Tleaf = Ta + (psc1/(Slope(Ta) + psc1))*((R_abs-thermal_air)/(ghr*Cp)-this->VPD/(psc1*Press)); //eqn 14.6b linearized form using first order approximation of Taylor series
-	  //Tleaf = Ta + (R_abs - thermal_air - Lambda * gv*this->VPD / Press) / (Cp*ghr + Lambda * Slope(Ta)*gv); // eqn 14.6a
-
-	//}
-	//else
-	///{
-	//	Tleaf = Ta + (R_abs-thermal_air-lamda*Jw)/(Cp*ghr);
-	//}
+	}
+	else
+	{
+		Tleaf = Ta + (R_abs-thermal_air-lamda*Jw)/(Cp*ghr);
+	}
 	if (isnan(Tleaf)) badval = true;
     double Es_leaf = Es(Tleaf);
 	double temp = Slope(Ta);
