@@ -7,6 +7,7 @@
 #include "Roots.h"
 #include "ear.h"
 #include "gas_exchange.h"
+//#include "gas_ex_species_param.h"
 #include <iostream>
 #include <string>
 
@@ -20,15 +21,15 @@ public:
 class CPlant
 {
 public:
-	CPlant(const TInitInfo&);
+	CPlant(const TInitInfo&, TGasExSpeciesParam&);
 	~CPlant();
 
 	CNodalUnit* get_nodalUnit() { return nodalUnit; }
 	CEar * get_ear() { return ear; }
 	CRoots * get_roots() { return roots; }
 	CDevelopment * get_develop() { return develop; }
-	CGas_exchange * get_sunlit() { return this->sunlit; }
-	CGas_exchange * get_shaded() { return this->shaded; }  //get access to the pointers that point to the sunlit/shade leaves Yang 8/29/06
+	CGasExchange * get_sunlit() { return this->sunlit; }
+	CGasExchange * get_shaded() { return this->shaded; }  //get access to the pointers that point to the sunlit/shade leaves Yang 8/29/06
 
 	int get_nodeNumber() { return nodeNumber; }
 	int get_finalNodeNumber() { return finalNodeNumber; }
@@ -98,7 +99,7 @@ public:
 	
 
 	void update(const TWeather&);
-	void calcGasExchange(const TWeather & weather);
+	void calcGasExchange(const TWeather & weather, const TGasExSpeciesParam& photoparam);
 	void calcMaintRespiration(const TWeather&);
 
 	double calcLeafArea();
@@ -121,12 +122,13 @@ public:
 
 private:
 	TInitInfo initInfo;
+	TGasExSpeciesParam gasExparam;
 	CNodalUnit * nodalUnit;  //nodal Unit object
 	CEar * ear;      //ear object
 	CRoots * roots;  //root object
 	CDevelopment * develop;  //phenology object
-	CGas_exchange * sunlit;  //sunlit photosynthesis object
-	CGas_exchange * shaded; //declare two pointers that point to a sunlit and a shaded leaf Yang 8/29/06 
+	CGasExchange * sunlit;  //sunlit photosynthesis object
+	CGasExchange * shaded; //declare two pointers that point to a sunlit and a shaded leaf Yang 8/29/06 
 	string note;
 	int finalNodeNumber; //final number of nodes
 	int nodeNumber; // currently initiated number of nodes 

@@ -18,17 +18,17 @@
     <SccProvider>SAK</SccProvider>
     <Keyword>Win32Proj</Keyword>
     <SccAuxPath>SAK</SccAuxPath>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -87,7 +87,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copydll.bat</Command>
+      <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,6 +117,7 @@
     <ClCompile Include="Development.cpp" />
     <ClCompile Include="ear.cpp" />
     <ClCompile Include="gas_exchange.cpp" />
+    <ClCompile Include="Gas_Ex_Species_param.cpp" />
     <ClCompile Include="initinfo.cpp" />
     <ClCompile Include="leaf.cpp" />
     <ClCompile Include="nodalunit.cpp" />
@@ -138,15 +139,13 @@
     <ClInclude Include="development.h" />
     <ClInclude Include="ear.h" />
     <ClInclude Include="gas_exchange.h" />
+    <ClInclude Include="Gas_Ex_Species_param.h" />
     <ClInclude Include="initinfo.h" />
     <ClInclude Include="leaf.h" />
-    <ClInclude Include="lightenv.h" />
     <ClInclude Include="nodalunit.h" />
     <ClInclude Include="organ.h" />
     <ClInclude Include="plant.h" />
-    <ClInclude Include="radiation.h" />
     <ClInclude Include="radtrans.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="resource1.h" />
     <ClInclude Include="Roots.h" />
     <ClInclude Include="sheath.h" />
