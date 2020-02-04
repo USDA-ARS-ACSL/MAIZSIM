@@ -24,31 +24,30 @@ using namespace std;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CController::CController(const char* varFile, const char* outfile, const char* LFile, TInitInfo iniInfo)
+CController::CController(const char* filename, const char* outfile, const char* LFile, TInitInfo iniInfo)
 {
 	time			 = NULL;
 	weather 		 = NULL;
 	plant			 = NULL;
 	
-	strcpy_s(varietyFile, varFile);
+	strcpy_s(varietyFile, filename);
     strcpy_s(cropFile, outfile);
 	char *pch=(char*)calloc(133,sizeof(char));
 	char *next=(char*)calloc(133,sizeof(char));
 	char *ext=".dbg";
-	// TODO fix so it does not need a buffer
-	char temp[133]; 
-	//get root of debug file from crop file, store in temp at first
-	strcpy_s(temp,cropFile);
-	// get char pointer to "." in the variable temp
-	// and put root of filename into pch
+	char* temp=(char*)calloc(133,sizeof(char)); 
+	strcpy_s(temp, 133,cropFile);
 	pch=strtok_s(temp,".",&next);
-	//attach extension to root filename for debug file
-	strcat(pch,ext);  // or strcat_s(pch,133,ext) or strncat(pch,ext,133)
-	//add extension to debug file
-	strcpy_s(DebugFile,pch);
+	temp=strcat(pch,ext);
+	strcpy_s(DebugFile,temp);
 	strcpy_s(LeafFile, LFile);
+	//DebugFile=outfile
+	//strcpy_s(DebugFile,"Debug.out");
 	initInfo = iniInfo;
 	iCur = 0;
+	weatherFormat = ICASA;
+    firstDayOfSim = 0;
+	lastDayOfSim = 365;
     initialize();
 	errorFlag = 0;
 	
@@ -186,7 +185,7 @@ void CController::initialize()
 
 	}
 
-// Read variety file here
+// Read variety file here and fill in data structures
 	try
 	{
 		ifstream cfs(varietyFile, ios::in);
@@ -197,18 +196,74 @@ void CController::initialize()
 		cfs.getline(initInfo.description, sizeof(initInfo.description),'\n');
 		cfs.getline(initInfo.cultivar, sizeof(initInfo.cultivar),'\n') ;
 		
-		cfs.getline(Buffer, 255,'\n');
-		cfs.getline(Buffer, 255,'\n');
+		cfs.getline(Buffer, 256,'\n');
+		cfs.getline(Buffer, 256,'\n');
         cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
 			>>initInfo.stayGreen >>initInfo.LM_min
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
 
-// end reading variety file
+// end reading cultivar specific data from variety file
+// now read species specific data at the end of the file
+// loop until we find the location in the file
+		string location = "[Gas_Exchange Species Parameters]";
+		int result=-1;
+		char strTest[255];
+		string strTest2;
+		do
+		{
+           cfs.getline(Buffer,256,'\n');
+		   strcpy_s(strTest, Buffer); //Actually this is not needed, the assign statement will also take char*
+		   strTest2.assign(strTest);   //I keep it to show another way of using char* and char. but, buffer must be null terminated
+		   result = strTest2.find(location);
+		   
+		} while (result ==-1);
+		cfs.getline(Buffer, 256, '\n'); //get section title
+//		cfs.getline(strTest, strlen(strTest));
+		cfs.getline(Buffer, 256, '\n'); //get var names
+//		cfs.getline(Buffer, 255, '\n');
+		cfs >> GasExParam.EaVp >>
+			GasExParam.EaVc >>
+			GasExParam.Eaj >>
+			GasExParam.Hj >>
+			GasExParam.Sj >>
+			GasExParam.Vpm25 >>
+			GasExParam.Vcm25 >>
+			GasExParam.Jm25 >>
+			GasExParam.Rd25 >>
+			GasExParam.Ear >>
+			GasExParam.g0 >>
+			GasExParam.g1 ;
+		cfs.getline(Buffer, 256, '\n'); // the '>>' operator does not read the carriage return after all the data so we need to read once more
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> GasExParam.f    >>
+		   GasExParam.scatt >>
+		   GasExParam.Kc25 >>
+		   GasExParam.Ko25>>
+		   GasExParam.Kp25 >>
+		   GasExParam.gbs >>
+		   GasExParam.gi >>
+		   GasExParam.gamma1 ; 
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> GasExParam.Gamma_gsw >>
+			GasExParam.sf >>
+			GasExParam.phyf >>
+			GasExParam.stomaRatio >>
+			GasExParam.widthPara >>
+			GasExParam.LfWidth;
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> GasExParam.internalCO2Ratio >>
+			GasExParam.SC_param >>
+			GasExParam.BLC_param;
 
 
 	    dConvert.caldat(initInfo.sowingDay,mm,dd,yy);
 		if (cfs.eof()) cfs.close();
-		cout << "Read variety file: " << varietyFile << endl <<endl;
+		cout << "Done reading variety file: " << varietyFile << endl <<endl;
 		cout << "Simulation information for:" << endl;
 		cout << setiosflags(ios::left)
 			<< setw(20) << "Description: " << initInfo.description << endl <<endl
@@ -245,7 +300,7 @@ void CController::initialize()
 	int dim = (int)(((lastDayOfSim+1)-firstDayOfSim)*(24*60/initInfo.timeStep)); // counting total records of weather data
     weather = new TWeather[dim];
 
-	plant	= new CPlant(initInfo);
+	plant	= new CPlant(initInfo, GasExParam); //todo send gas exch params here?
 }
 
 
@@ -260,7 +315,7 @@ void CController::readWeatherFrom2DSOIL(const TWeather & wthr)
 
 
 
-int CController::run(const TWeather & wthr)
+int CController::run(const TWeather & wthr) //todo pass gas exchange parameters here to plant
 {
 	readWeatherFrom2DSOIL(wthr);
     if (weather[iCur].jday >= initInfo.sowingDay && weather[iCur].jday <= lastDayOfSim)
