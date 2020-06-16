@@ -1,10 +1,14 @@
 cdt this version had code added to calculate rain infiltration as 
 c constant head infiltration for a period. I have to finish it to allow final 
 c flux to just finish up the water.
+c
+c TODO need to check hourly code that the wet bulb temperature is used
+c correctly
+c
 CDT  9/10/2014 Added CO2 as a weather variable and took it out of the 
 CDT   initials file. 
 
-C**  MSW1-  switch to indicate if daily wet bulb temperatures are     **
+C**  MSW1-  switch to indicate if hourl wet bulb temperatures are     **
 C**         available (=1 if YES).                                    **
 C**                                                                   **
 C**  MSW2-  switch to indicate if hourly wind is available (=1 if YES).**
@@ -77,21 +81,27 @@ c inputs hourly data
       Include 'public.ins'
       Include 'puplant.ins'
       Include 'puweath.ins'
+      Include 'puSurface.ins'
+      
       Parameter (PERIOD =1./24.)
-      integer jday,m,DayOfYear,CurYear,Modnum, ThisYear
+      integer jday,m,DayOfYear,CurYear,Modnum, ThisYear,
+     &         isol
       double precision St,t
-      real Interval
+      real Interval, HRAIN,HSR,HTEMP, HTEMPY,HWIND,Rel_Humid,
+     &     BEERS 
       character*10 date
       integer HOUR
       Common /weather/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
-     &     HWIND(24), Rel_Humid(24),AVP(24),isol,Date1,ModNum,
-     &     Interval
+     &     HWIND(24), Rel_Humid(24),isol,Date1,ModNum,
+     &     Interval, TWET(24),TDRY(14), AVP(24), Gamma(24),
+     &     SVPW(24),TMIN, TMAX,BEERS(24)
       
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
      &           SARANG(24),
      &           SOLALT(24),SOLAZI(24),
      &           HTM(24)
       Dimension xS(NumBPD),iS(NumBPD),kS(NumBPD)
+      double precision GAMMA_psy(24)
       Data SDERP/0.3964E-0,0.3631E1,0.3838E-1,0.7659E-1,0.0000E0,
      & -0.2297E2,-0.3885E0,-0.1587E-0,-0.1021E-1/,PI /3.1415926/,
      &  TPI /6.2831852/,DEGRAD/0.017453293/,IPERD/24/
@@ -105,6 +115,8 @@ CYAPEND
       t=Time
       St=0.1D0*Step
       If (lInput.eq.0) goto 11
+      
+      SurWeatherUpdate=0
 C
 C  First and last days
 C
@@ -154,6 +166,8 @@ C
        ISOL=NumSol*Movers(2) ! Movers(2) is the solute mover
        Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
 cdt 10/25/2007 changed from 1-MSW4
+c     if the BC for solute are 0 in the grid file, movers(2) at this point
+c     will also be 0 such that ISOL will be 0
       ISOL=NumSol*(MSW4)*Movers(2)
 cdt  9/10/2014 added CO2 as a weather variable. Made this line consistent
 Cdt   with the same line from the daily weather file 
@@ -170,10 +184,13 @@ CDT  relative humidity, hourly CO2. For now we will only consider one solute in 
 CDT  rainfall, that is Nitrogen. We may have more than one column of concentrations if there is more than one solute
 CDT  but this is not fully implemented yet 
 CDT if MSW6 is 0 then there is no column for RH and it is calculated from minimum temperature - no average is used
-CDT if MSW is one, then RH is not used even if present
+CDT if MSW1 is one, then RH is not used even if present
 CDT daily concentration has been modified to use only nitrogen in rainfall (no gasses).
-
-      NCD=4-MSW2+ISOL-MSW3-MSW7
+C   we can have potentially 3 columns for additional data 
+C  if hourly data are missing
+C    average wind, avg chem conc and average CO2
+C    so, if hourly wind is missing and we use an avg value MSW2 will be 0
+      NCD=(2+isol)-MSW2-MSW7-MSW4*iSol
 C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
@@ -184,25 +201,13 @@ C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
-      IF(MSW2.eq.0) WINDA=CLIMAT(1)
-      IF(MSW3.eq.0) then 
-          IRAV= CLIMAT(2)
-          AutoIrrigAmt=IRAV*BIR   !need to handle case when and if intensities are given per hour
-       EndIf
-C     IF(MSW4.eq.0.AND.NumSol.gt.0) then
-Cdt 02/03/2009 changed from 0-MSW4      
+      IF(MSW2.eq.0) WINDA=CLIMAT(1)     
       IF(MSW4.eq.1.AND.NumSol.gt.0) then
         Do i=1,NumSol
-          CPREC(i)=CLIMAT(2-MSW2-MSW3+i) ! should be 1 or 2 if no irav or winda and one or two solutes
+          CPREC(i)=CLIMAT(MSW2+MSW3+i) ! should be 1 or 2 if no irav or winda and one or two solutes
         Enddo
       Endif
-CDT 1/2016 no gasses for now
-!      If(NumG.ne.0) then
-!        PG=CLIMAT(3-MSW2+ISOL)
-!        Do i=1,NumG
-!          GAIR(i)=CLIMAT(3-MSW2-MSW3+ISOL+i)
-!        Enddo
-!      Endif
+
       IF(MSW7.eq.0) then
          CO2=CLIMAT(NCD)  ! last one is always co2
        Endif
@@ -211,7 +216,7 @@ CDT 1/2016 no gasses for now
 C
 C Total number of weather data
 C     minimum of three columns for radiation, temperature and rainfall (should always be first three) for hourly
-C
+C    2*MSW1=TWET, TDRY; MSW2=wind; number of solutes * MSW4, MSW6=RH, MSW7=CO2  
       NCD=3+2*MSW1+MSW2+ISOL*MSW4+MSW6+MSW7
 C
 C     Nodal numbers of furrow nodes
@@ -313,19 +318,19 @@ C    since the julian day is referenced to a time longer in the past
                                           !coded for hourly now
 
            if (lInput.ne.1) HTEMPY(M)=HTEMP(M)  ! save to yesterday's 
-                                                !temperature
+                                                !temperature for initial step
            HTEMP(M)=(climat(2)-ATEMP)/BTEMP     ! convert to celcius
            HRAIN(M) = CLIMAT(3)*erain         ! convert to cm rain in 
                                               ! this hour
            If (MSW2.gt.0) HWIND(M)=CLIMAT(4)
            If(MSW6.gt.0) then 
-             Rel_Humid(m)=Min(Climat(3+2*MSW1+MSW2+ISOL+MSW6)
+             Rel_Humid(m)=Min(Climat(3+2*MSW1+MSW2+ISOL*MSW4+MSW5+MSW6)
      #              /100.,0.98)
             endif
          enddo
 
        If(MSW7.gt.0) then
-          CO2=Climat(4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)
+          CO2=Climat(3+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)
        EndIf
 
 
@@ -355,12 +360,12 @@ c RI should be total J m-2 -- work in Watts * time = total energy
 1015      CONTINUE
           RAIN = SUM24
         If (MSW1.GT.0) then
-          TWET = (CLIMAT(5+MSW2) - ATEMP)/BTEMP
-          TDRY = (CLIMAT(6+MSW2) - ATEMP)/BTEMP
+          TWET(M) = (CLIMAT(3+MSW1) - ATEMP)/BTEMP
+          TDRY(M) = (CLIMAT(3+MSW1+1) - ATEMP)/BTEMP
         Endif
         If (MSW4.GT.0.AND.NumSol.ne.0) then
           Do i=1,NumSol
-            CPREC(i)=CLIMAT(4+MSW2+2*MSW1+MSW3+i)
+            CPREC(i)=CLIMAT(3+2*MSW1+MSW2+MSW3+i)
           Enddo
         Endif
 
@@ -491,11 +496,11 @@ C  TEMPERATURE IS REACHED
 C    
         tMax=-1e6
         Do 70, m = 1,IPERD
-           TAIR(M) = (HTEMP(M)-ATEMP)/BTEMP
-           if(m.eq.IDUSK) TDUSK=TAIR(m)
+           TAIR(M) = HTEMP(M)
+           if(m.eq.IDUSK) TDUSK=TAIR(M)
            if (TAIR(M).GT.TMAX) then
-             TMAX=TAIR(m)
-             TMAXHR=m
+             TMAX=TAIR(M)
+             TMAXHR=M
             End If
  70   CONTINUE
  
@@ -508,59 +513,64 @@ C  "CONSTANT"
 C
 cdt added msw6 to if statement here
 
-        If (MSW1.NE.1.and.MSW6.eq.0) then
-          Do i=1,iperd
-            AVP(i) = 0.61*EXP((17.27*TMIN)/(TMIN + 237.3))
-           enddo
-          GAMMA = 0.0645
-        Else
+         If (MSW1.NE.1.and.MSW6.eq.0) then
+            Do i=1,iperd
+              AVP(i) = 0.61*EXP((17.27*TMIN)/(TMIN + 237.3))
+              GAMMA(i) = 0.0645
+            enddo
+
+          Else
 cdt
-           if(MSW1.eq.1) then      
+          if(MSW1.eq.1) then
 C
+C TODO this has to be make applicable to hourl values
 C  SINCE DAILY WET BULB TEMPERATURES ARE AVAILABLE CALCULATE
+C TODO look into the need to change this now that we input daily values
 C  SATURATION VAPOR PRESSURE AT THE WET BULB TEMPERATURES
 C    http://www.pmel.org/HandBook/HBpage21.htm see this site for more info
 C    on using Dewpoint to calculate RH
-C
-          SVPW = 0.61*EXP((17.27*TWET)/(TWET + 237.3))
+C     
+               Do i=1, iperd
+                  SVPW(i) = 0.61*EXP((17.27*TWET(i))/(TWET(i) + 237.3))
 C
 C  CALCULATE THE HUMIDITY RATIO, D31, LATENT HEAT OF EVAPORATION,
 C  D32 AND THE PSYCHROMETRIC "CONSTANT"
 C
-          D31 = 0.622*(SVPW/(101.3 - SVPW))
-          D32 = 2500.8 - (2.37*TWET)
-          GAMMA = 0.62*(1.006 + (1.846*D31))
-     &   /((0.622 + D31)*(0.622 + D31)*D32)*101.3
+                  D31 = 0.622*(SVPW(i)/(101.3 - SVPW(i)))
+                  D32 = 2500.8 - (2.37*TWET(i))
+                  GAMMA(i) = 0.62*(1.006 + (1.846*D31))
+     &                /((0.622 + D31)*(0.622 + D31)*D32)*101.3
 C
 C  CALCULATE ACTUAL WATER VAPOR PRESSURE
+C note that Teton's eqn is used for SVPW below
 C
-          Do i=1,iperd
-             AVP(i) = SVPW - (GAMMA*(TDRY - TWET))
-          enddo
-        Endif
+                  AVP(i) = SVPW(i) - (GAMMA(i)*(TDRY(i) - TWET(i)))
+               enddo
+           Endif !MSW1.eq.1
 
 CDT        
-            if(MSW6.eq.1) then
-             Do i=1,iperd                   
+           if(MSW6.eq.1) then
+              Do i=1,iperd
                 TMean=(TMax+TMin)/2.0
-                SVPW= 0.61*EXP((17.27*HTEMP(i))/(HTEMP(i) + 237.3))
-                D31 = 0.622*(SVPW/(101.3 - SVPW))
-                D32 = 2500.8 - (2.37*HTEMP(i))
-                GAMMA = 0.62*(1.006 + (1.846*D31))
-     &          /((0.622 + D31)*(0.622 + D31)*D32)*101.3
-                AVP(i)= Rel_Humid(i)*SVPW
-              enddo
-          endif
-       
-        Endif
+                SVPW(i)= 0.61078*EXP((17.27*Tair(i))/(Tair(i) + 237.3))
+                D31 = 0.622*(SVPW(i)/(101.3 - SVPW(i)))
+                D32 = 2500.8 - (2.37*Tair(i))
+                GAMMA(i) = 0.62*(1.006 + (1.846*D31))
+     &            /((0.622 + D31)*(0.622 + D31)*D32)*101.3
+                AVP(i)= Rel_Humid(i)*SVPW(i)
+               enddo
+            endif  ! end MSW6.eq.1
+
+       Endif !MSW1.NE.1.and.MSW6.eq.0
 CDT
 C
 C  CALCULATE WATER STAURATION VAPOR PRESSURE AT AIR TEMPERATURE
 C  AND THE SLOPE OF THE RELATIONSHIP AT THAT POINT
+C note that Teten's equn is used for SVPA
 C
         Do 80, I = 1,IPERD
           SVPA = 0.61*EXP((17.27*TAIR(I))/(TAIR(I) + 237.3))
-          DEL(I) = (0.61*EXP((17.27*(TAIR(I) + 1.))
+          DEL(I) = (0.61078*EXP((17.27*(TAIR(I) + 1.))
      &   /(TAIR(I) + 1.0 + 237.3))) - SVPA
 C
 C  CALCULATE WATER VAPOR PRESSURE DEFICIT
@@ -658,7 +668,7 @@ C
 C
 C  CALCULATE PROPORTION OF DIfFUSE RADIATION INTERCEPTED BY ROWS
 C  OF PLANTS ASSUMING THEY ARE OPAQUE CYLINDERS
-C  FIRST DIVIDE ROWSPACING INTO 20 EQUAL PARTS AND FIND THE
+C  FIRST DIVIDE ROWSPACING INTO 10 EQUAL PARTS AND FIND THE
 C  MIDPOINTS FROM ROW TO MID ROW
 C
           DIfFIN = 0.0
@@ -701,9 +711,9 @@ C
 C  CALCULATE BEERS LAW CORRECTION FOR RADIATION INTERCEPTION
 C
               If((ELCAI*CEC).LE.88.0) then
-                BEERS = (1 - EXP(-ELCAI*CEC))
+                BEERS(i) = (1 - EXP(-ELCAI*CEC))
               Else
-                BEERS=1.0
+                BEERS(i)=1.0
               Endif
 
 C  CALCULATE PROPORTION OF PHOTOSYNTHETICALLY ACTIVE RADIATION
@@ -712,17 +722,17 @@ C    PAR = 0.43 DIRECT + 0.57 DIFFUSE RADIATION. ***
 
       PARINT(I) = WATTSM(I)*((DIFFIN*0.57*DIFWAT(I))
      &     + (DIRINT(I)*0.43*(1.0 - DIFWAT(I))))
-     &     /PAR(I)*BEERS
+     &     /PAR(I)*BEERS(i)
 C
 C  CALCULATE PROPORTION OF TOTAL RADIATION INTERCEPTED BY THE
 C  CROP CANOPY
 C
               RADINT(I) = ((DIfFIN*DIfWAT(I)) + (DIRINT(I)
-     &         *(1.0 - DIfWAT(I))))*BEERS
+     &         *(1.0 - DIfWAT(I))))*BEERS(i)
             Else If (WATTSM(I).GT.0.0) then
-              BEERS = (1 - EXP(-LCAI*CEC))
-              PARINT(I) = COVER*BEERS
-              RADINT(I) = COVER*BEERS
+              BEERS(i) = (1 - EXP(-LCAI*CEC))
+              PARINT(I) = COVER*BEERS(i)
+              RADINT(I) = COVER*BEERS(i)
             Else
                PARINT(I) = 0.0
                RADINT(I) = 0.0
@@ -738,7 +748,7 @@ c..................End of radiation interception submodel
 C
 c..................Daily calculations for the precipitation
 C
-          Do i=1,24
+          Do i=1,iperd
             RINT(i)=HRain(i)*24.0  ! scale hourly rainfall to a daily rate
           Enddo
 
@@ -758,11 +768,10 @@ C     Further we have hourly calculations
 
 C
 55    If(Abs(Time-tNext(ModNum)).lt.0.001*Step.or.lInput.eq.1) then
+          
+       SurWeatherUpdate=1
+       
        ITIME=Idint(dMOD(t+St,1.D0)/PERIOD+1)
-       if(itime.eq.10) then
-        iii=1;
-        endif
-        
        Do i=1, NumBP
          do j=1, 4
            if (j.lt.4) VarBW(i,j)=0.0
@@ -770,15 +779,13 @@ C
          Enddo
         Enddo
 
-c       Do i=1,NumNP
-c        CodeW(i)=PCodeW(i)
-c         Enddo
-
 C
 C  FOR DAYLIGHT PERIODS:
 C  CALCULATE NET UPWARD LONG-WAVE RADIATION ***
 C
-1000    Continue
+
+cccz this 1000 is for daily weather 
+cccz 1000    Continue
         If (WATTSM(ITIME).GT.0.0) then
           RNLU = (1.6E-3*WATRAT*(100.0 - TAIR(ITIME)))*697.6
         Else
@@ -819,20 +826,23 @@ c
             iS(ic)=i
             kS(ic)=k
           Endif
-        Enddo
+      Enddo
+
+cccz Dennis: your basic assumption is horizontal distance from origin in the input is not sorted
+cccz so if you use KS, then use the surface node index / node index based on KS
         Call SORT03(ic,xS,iS,kS)
 C
+cccz make some initialization is good
+       ESO=0.0D0
+       EPO=0.0D0
         Do 90 i=1,ic
           PSh=FSh(i,xBSTEM,SHADE,xS,ic)
 c
-c  IF THE NODE IS EXPOSED THEN
-c
-          If(PSh.gt.0.) then
 C
 C  CALCULATE THE ALBEDO OF THE EXPOSED SOIL CELLS
 C
 cdt changed 0.5 to 0.1
-              LAMDAS = 0.25 - 0.05*ThNew(iS(i))
+              LAMDAS = 0.30 - 0.5*ThNew(iS(i))
 C
 C  CALCULATE NET RADIATION ON THE EXPOSED SOIL CELLS
 C
@@ -841,20 +851,33 @@ C
 C
 C  CALCULATE POTENTIAL EVAPORATION RATE FROM EXPOSED SOIL CELLS
 C
+C note that Penman's original wind function was F(u)=0.26(1+0.54u)
+C the 0.54 is a function of temperature and pressure
+C  where windspeed was in m s-1 and et mm d-1 cm-2 and e in mb
+C  109.375 = 0.26 * (10000*10)/24/10 (0.26 has probably been truncated)
+C
+C note the original Penman eqn wind function was 0.26*(1+u/160) where
+C windspeed (u) was km/day here we use km/hour so you divide 1/160 by 24 
+C gives you the .149
               D12 = max(1.0,2.0 - (2.0*COVER))
               If (D12.GE.1.0) D12 = 1.0
-              ESO = ((DEL(ITIME)/GAMMA*RNS*3600.0/(2500.8
+              ESO = ((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
      &     - (2.3668*TAIR(ITIME))))
      &     + (VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12))))
-     &      /((DEL(ITIME)/GAMMA) + 1.0)
+     &      /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+            fac1=((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
+     &     - (2.3668*TAIR(ITIME))))) /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+            fac2=(VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12)))
+     &            /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+
+c   IF THE NODE IS EXPOSED THEN
+c
+          If(PSh.gt.0.) then
+
 C
 C   PROPORTIONAL TO THE AREA EXPOSED
-C
-            
-              VarBW(kS(i),2)=PSh*24.*ESO/10000.
-c
+            VarBW(kS(i),2)=PSh*24.*ESO/10000.
 c  ELSE IF THE NODE IS COVERED
-c
           Else
             VarBW(kS(i),2)=0.05*24.*ESO/10000.
           Endif
@@ -907,10 +930,10 @@ C
 C   CALCULATE POTENTIAL TRANSPIRATION RATE (g/m2/hour) FOR CROP ALLOWING FOR
 C   INCOMPLETE GROUND COVER
 C
-        EPO = ((DEL(ITIME)/GAMMA*RNC*3600.0/(2500.8
+        EPO = ((DEL(ITIME)/GAMMA(ITIME)*RNC*3600.0/(2500.8
      &   - (2.3668*TAIR(ITIME))))
      &   + (VPD(ITIME)*109.375*(ROUGH +(0.149*WINDL))))
-     &   /((DEL(ITIME)/GAMMA) + 1.0)
+     &   /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
 C
 C   CODE ADDED TO PREVENT DIVISION BY o
 C
@@ -934,7 +957,7 @@ c................... Precipitation and irrigation
       n=KXB(i)
       k=CodeW(n)
       If(K.eq.4.or.K.eq.-4) then 
-         VarBW_old(i,1)=VarBW(i,1)
+cccz         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
       If(NumSol.ne.0) then
           do j=1,NumSol
@@ -944,6 +967,9 @@ cdt was varbs(n,j)
        Endif
 *  
          VarBW(i,3)=VarBW(i,2)-VarBW(i,1)
+cccz Q here downwards is positive
+cccz we assume the depth of a slab is 1 cm
+cccz then the unit of Q should be slab(cm)*width(cm)*Varbw(cm/day)
          Q(n)=-Width(i)*VarBW(i,3)
          If (Q(n).gt.0.0) then
           CodeW(n)=-4
@@ -956,16 +982,11 @@ C
 C
 CYAP 
 C FCSH is sensible heat flux when the ground is hotter than the air
-       if(rowsp.le.0) then
-         FCSH=4.0E-3+1.39E-3*Wind
-        else
-         FCSH=4.0E-3+1.39E-3*Wind*max(1.0,(2.-(2.*height/rowsp*EOMULT)))
-       endif
-       
-c      FCSH=0.02
-cdt 
-* FELWR is reradiation when soil is warmer than the air.
-      FCSH=FCSH*4.1856*60.0*24.0
+         FCSH=4.0E-3+1.39E-3*Wind*max(1.0,(2.-(2.*COVER)))
+         FCSH=FCSH*4.1856*60.0*24.0
+C FELWR is the coefficient for radiant heat lost when the 
+C soil is warmer than the air.
+    
       FELWR=6.8E-03+9.0E-05*Tair(Itime)
       FELWR=FELWR*4.1856*60.0*24.0
 * units are Joules cm-2 d-1 C-1
@@ -978,12 +999,17 @@ c  MARCH ALONG THE SURFACE TO FIND SOIL-ATMOSPHERE BOUNDARY NODES
 c  AND THEIR LATERAL COORDINATES
 c
       Do 95 i=1,ic
+cccz Dennis need to pay attention to the labelling
+cccz because in most of your examples, n_sur, n, k are identical somehow.
+cccz but error may occur implicitly for more general cases
+cccz Z updated the order here, please check.
         PSh=FSh(i,xBSTEM,SHADE,xS,ic)
-        n=kS(i)
+        n_sur=kS(i)
+        n=KXB(n_sur)
         k=codeT(n)
-        Varbt(kS(i),4)=0.0
-        VarBT(kS(i),3)=0.0
-        VarBT(kS(i),2)=0.0
+        VarBT(n_sur,4)=0.0
+        VarBT(n_sur,3)=0.0
+        VarBT(n_sur,2)=0.0
   
         If (k.eq.-4) then
 C     if node is exposed     
@@ -996,48 +1022,61 @@ C     if node is exposed
 *  40.6 for mississippi 
 c           FELWR=max(0.0,(tmpr(i)-TairN)*FELWR)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
+                VarBT(n_sur,4)=RNS*3600.0*24.0/10000.0
 
 *  calculate convected heat  if soil is warmer than air
 
 * FELWR should be zero when TAirN is warmer than soil
-              if(tmpr(kS(i)).GT.TAirN) then
-                VarBT(kS(i),2)=+FCSH+FELWR
-                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
+cccz !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+cccz if you want TMPR be the temperature in soil, then use KXB results instead of KS
+cccz for the if condition, then use KS(i) results for the VarBT...
+              if(tmpr(n).GT.TAirN) then
+                VarBT(n_sur,2)=+FCSH+FELWR
+                VarBT(n_sur,3)=VarBT(n_sur,2)*TAirN
               endif
-C See if sensible heat transport works here in canopy              
+C See if sensible heat transport works here in canopy  
+cccz ???????????????????????????????????
+cccz this is a new factor that alter the code
+cccz by the way, if necessary, we should have "if nshoot.gt.0.0"?
               TFac=((0.058+1.7e-4*TAirN)+
      !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
-               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
-               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
+
+               VarBT(n_sur,2)=VarBT(n_sur,2)+TFac
+               VarBT(n_sur,3)=VarBT(n_sur,3)+TFac*TairN
 
          else
 
 *  the amount of heat added to the soil
 *     is determined by air temperature.
 *  units are millcal cm-2 sec-1 C-1
-               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
+               VarBT(n_sur,2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
 * the first term is thermal conductivity of the air. 
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
 
-               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
-               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
+               VarBT(n_sur,2)=VarBT(n_sur,2)*0.004184*3600.0*24.0
+               VarBT(n_sur,3)=VarBT(n_sur,2)*TairN
 
-Cdt and a part for radiative transfer               
-               if(tmpr(i).GT.TAirN) then
-                 VarBT(i,2)=VarBT(i,2)+(FCSH+FELWR)
-                 VarBT(i,3)=VarBT(i,3)+(FCSH+FELWR)*TAirN
+Cdt and a part for radiative transfer     
+cccz !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+cccz if you want TMPR be the temperature in soil, then use KXB results instead of KS
+cccz for the if condition, then use KS(i) results for the VarBT...
+               if(tmpr(n).GT.TAirN) then
+                 VarBT(n_sur,2)=VarBT(n_sur,2)+(FCSH+FELWR)
+                 VarBT(n_sur,3)=VarBT(n_sur,3)+(FCSH+FELWR)*TAirN
               endif
-c assume 5% of radiation reaches soil surface through canopy              
-              VarBT(kS(i),4)=amin1(0.0,1.0-BEERS)*RNS*3600.0*24.0/10000.0
+c assume 5% of radiation reaches soil surface through canopy   
+              fact=1.0-BEERS(ITIME)
+              if (fact.LE.0) fact=0
+              if (fact.GT.1.0) fact=1.0
+              VarBT(n_sur,4)=fact*RNS*3600.0*24.0/10000.0
               
 *  units are now J cm-2 d-1
 * end if for crop canopy
           endif
 
-           VarBT(ks(i),1)=TAirN
+           VarBT(n_sur,1)=TAirN
         Endif
 95    Continue
 C ...............End of heat balance

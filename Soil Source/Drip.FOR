@@ -3,6 +3,7 @@
 * Note that the first day  for drip irrigation needs to be at least one day later than the 
 * initial time in the file in the time folder. This allows the program to initialize the soil properties and fluxes
 * test comment
+* here is another comment
 
       Subroutine Drip()
       Include 'public.ins'

@@ -6,35 +6,45 @@
 *       Neumann boundary condition is prescribed or constant flux
 * CDT added a drainage boundary Nov 2007. This is like a seepage face but the nodes always have
 * drainage and it is usually horizontal.
-      subroutine WaterMover_New ()
+      subroutine WaterMover ()
       Include 'public.ins'
       Include 'puplant.ins'
+      Include 'puweath.ins'
+      include 'PuSurface.ins'
+      
       Double precision A,B,C
       Double precision dt,dtOld,t,tOld,PI,DPI,F2
       real ATG,HSP
+cccz move it to "PuSurface.ins" for public use 
+cccz  Double precision CriticalH, CriticalH_R
       Logical Explic,ItCrit,FreeD
       Real  hOld_1(NumNPD)
+      Real Dif(NumNPD)
+      Integer trigger_Runoff, p_Runoff
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
      !    Cap(NumNPD),ListE(NumElD),E(3,3),iLoc(3),Fc(NumNPD),
      !    Sc(NumNPD),B_1(NumNPD),ThOld_1(NumNPD),A_1(MBandD,NumNPD)
       Dimension Bii(3),Cii(3)
-      Common /WaterM/ ThOld(NumNPD),hOld(NumNPD),hTemp(NumNPD),
+      Common /WaterM/ ThOld(NumNPD),hTemp(NumNPD),hOld(NumNPD),
      !                ConAxx(NumElD),ConAzz(NumElD),ConAxz(NumElD),
      !                MaxIt,TolTh,TolH,dt,dtOld,tOld,
      !                thR(NMatD),hSat(NMatD),thSat(NMatD),
-     !                 isat(NumBPD),FreeD, CriticalH
+     !                 isat(NumBPD),FreeD
       If (lInput.eq.0) goto 11  
        FreeD=.true.
        CriticalH=-0.01D0
+       CriticalH_R=0.01D0
        Do i=1,NumNP
           hOld(i) = hNew(i)
           hTemp(i) = hOld(i)
+          RO(i)=0.0
        Enddo
 *
        Do i=1,NumEl
-        ConAxz(i)=0.
-        ConAxx(i)=1.
-        ConAzz(i)=1.
+          ConAxz(i)=0.
+          ConAxx(i)=1.
+          ConAzz(i)=1.
+      
       Enddo
       Explic=.false.
 *
@@ -53,19 +63,20 @@
      !                  hCritA,hCritS,dtMx(1),hTab1,hTabN,EPSI_Heat,
      !                   EPSI_Solute
         close(40) 
-c      hCritS=1.0e9        !needs to be high for ponded infiltration to work
-                        ! need to remove it from the parameter file
-                         ! remove comment later when runoff is implemented
 
+        
       call IADMake(KX,NumNP,NumEl,NumElD,MBandD,IAD,IADN,IADD)
-      
+c  assign bulk density      
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
      !                  BlkDn,hTemp,Explic,ThNew,hTab1,hTabN,
      !                  hSat,ThSat,ThR, ThAvail,ThFull,
      !                  FracOM, FracSind, FracClay,
      !                  TupperLimit, TLowerLimit, SoilFile)
-c  assign bulk density
-       
+c  need to initialize after assigning h values if water ws input
+        Do i=1,NumNP
+          hOld(i) = hNew(i)
+          hTemp(i) = hOld(i)
+       Enddo
              
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                   ConAxx,ConAzz,ConAxz,Vx,Vz)
@@ -81,10 +92,13 @@ c   Calculate Total Available Water in Profile
 C
 C   Routine calculations
 C       
+
 11    continue 
       tOld = Time
       t=Time
       dt=Step
+
+     
 c
 c   Start of iteration loop
 c     
@@ -94,47 +108,13 @@ c
         Fc(i)=0.
         Sc(i)=0.
         ThAvail(i)=0.0
+cccz Let us initialize the RO (runoff array) 
+        RO(i)=0.0
+cccz
       Enddo
 C
 C  Recasting sinks 
 C
-
-cccz zhuangji, delete this part, for the sink is already casted
-cccz based on node
-c         Do n=1,NumEl
-c           NUS=4
-c           if(KX(n,3).eq.KX(n,4)) NUS=3
-c*         Loop on subelements
-c           do k=1,NUS-2
-c             i=KX(n,1)
-c             j=KX(n,k+1)
-c             l=KX(n,k+2)
-c             Ci=x(l)-x(j)
-c             Cj=x(i)-x(l)
-c             Cl=x(j)-x(i)
-c             Bi=y(j)-y(l)
-c             Bj=y(l)-y(i)
-c             Bl=y(i)-y(j)
-c             AE=(Cl*Bj-Cj*Bl)/2.
-c             Fc(i)=Fc(i)+Sink(n)*AE/3.
-c             Fc(j)=Fc(j)+Sink(n)*AE/3.
-c             Fc(l)=Fc(l)+Sink(n)*AE/3.
-c             Sc(i)=Sc(i)+AE/3.
-c             Sc(j)=Sc(j)+AE/3.
-c             Sc(l)=Sc(l)+AE/3.
-c            enddo
-c         enddo
-c*      Do n=1,NumEl
-c*        NUS=4
-c*        If(KX(n,3).eq.KX(n,4)) NUS=3
-c*        Do j=1,NUS
-c*          Fc(KX(n,j))=Fc(KX(n,j))+Sink(n)*Area(n)/NUS
-c*          Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
-c*        Enddo
-c*      Enddo
-c     Do i=1,NumNP
-c        Fc(i)=Fc(i)/Sc(i)
-c      Enddo
 
 cccz directly take the sink and nodearea 
       Do n=1,NumNP
@@ -306,7 +286,6 @@ c
 220   Continue
 
 
-
 c
 c     Complete construction of RHS vector and form effective matrix
 c
@@ -316,6 +295,7 @@ c
         A(j,i)=A(j,i)+F(i)*Cap(i)/dt
         B(i)=F(i)*Cap(i)*hNew(i)/dt-F(i)*(ThNew(i)-ThOld(i))/dt+
      !     Q(i)-B(i)-DS(i)
+
 221   Continue
 c
 c     Modify conditions on seepage faces
@@ -354,8 +334,6 @@ c          iCheck=0
             n=ND(i,j)
             If (CodeW(n).eq.-5) then
               if (hNew(n).ge.0) then
-c                iCheck=1
-c                else 
                  CodeW(n)=5
                  hNew(n)=0.
                 endif
@@ -363,7 +341,6 @@ c                else
                 If (Q(n).ge.0.) then
                   CodeW(n)=-5
                   Q(n)=0
-c                  iCheck=1
               Endif
             Endif
 3110       Continue
@@ -399,9 +376,7 @@ c
             If (abs(Q(n)).gt.abs(-VarBW(i,3)*Width(i))
      &                          .or.Q(n)*(-VarBW(i,3)).le.0) then
               CodeW(n)=-4
-c              if (VarBW(i,3).gt.0) then   ! evaporation case only remove comment later when runoff is implemented
                  Q(n)=-VarBW(i,3)*Width(i)
-c               Endif
             Endif
 
           Goto 3131
@@ -496,11 +471,9 @@ c
 c  Solving of the system of equations   
 c
 
-       if(lOrt) then
-cccz
-c         print*,time,',','Water Diff'
-         call ILU (A,NumNP,MBandD,IAD,IADN,IADD,A1)
-         call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,IADN,IADD,A1,VRV,
+      if(lOrt) then
+        call ILU (A,NumNP,MBandD,IAD,IADN,IADD,A1)
+        call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,IADN,IADD,A1,VRV,
      !                RES,RQI,RQ,QQ,QI,RQIDOT,ECNVRG,RCNVRG,ACNVRG,0,
      !                MNorth,MaxItO)
 	endif
@@ -554,9 +527,6 @@ cdt  conventional solver ends here
 C
 C    Test for convergence
 C
-c       if (time.gt.38064.055) then
-c          viii=0
-c         endif
        ItCrit=.true.
        do 615 i=1,NumNp
             m=MatNumN(i)
@@ -624,21 +594,16 @@ c
       dtOld=dt
       Step=dt
       
-c      CDT adjust for runoff here    
-      Do i=1,NumBP
-          n=KXB(i)
-          If (CodeW(n).eq.-4) then
-               if (hnew(n).ge.CriticalH) then
-                 RO(n)=(hNew(n)-(CriticalH))/dt*Width(i)
-                 hNew(n)=CriticalH
-                 hOld(n)=hNew(n)
-                endif
-             endif
-          Enddo
+
+
+
+
 c
 c   Calculation of velocities
 c
-cdt - moved this here              
+          
+           
+                         
       call Veloc(NumNP,NumEl,NumElD,hNew,x,y,KX,ListNE,Con,
      !                  ConAxx,ConAzz,ConAxz,Vx,Vz)
       call SetMat(lInput,NumNP,hNew,hOld,NMat,MatNumN,Con,Cap,
@@ -652,6 +617,8 @@ cdt - moved this here
 c     
 c     Final assignments
 c
+
+
       Do i=1,NumNP
          hOld_1(i)=hOld(i)  !save h old and th old for runoff calculations
          ThOld_1(i)=ThOld(i)
@@ -667,7 +634,20 @@ c  hNew will always be the same as hOld?
         Endif
       Enddo
       
-cdt - calculate available water content in root zone (cm3 per slab)
+cdt - calculate actual boundary fluxes to see what we have
+      Do 1299 n=1,NumNP
+        If ((CodeW(n).eq.-4).or.(CodeW(n).eq.1)) then
+        QN=B_1(n)+DS(n)+F(n)*(ThNew(n)-ThOld_1(n))/dt 
+           do 1199 j=1,IADN(n)
+              QN=QN+A_1(j,n)*hNew(IAD(j,n))
+1199        continue
+         QAct(n)=QN
+        End if
+  
+1299   Continue
+
+      
+cdt - calculate available water content in root zone
 
       ThetaAvail=0.0
       Do n=1,NumEl
@@ -695,51 +675,35 @@ c*         Loop on subelements
 			 if (rtwt(l).ge.1e-6) Thl=Thavail(l)
 			 ThetaAvail=ThetaAvail+AE*(Thi+Thj+Thl)/3.
 		   Enddo
-	   
+
+		   
 		Enddo
+      
 
 
-cdt - calculate actual boundary fluxes to see what we have
-      Do 1299 n=1,NumNP
-        If (CodeW(n).eq.-4) then
-        QN=B_1(n)+DS(n)+F(n)*(ThNew(n)-ThOld_1(n))/dt 
-           do 1199 j=1,IADN(n)
-              QN=QN+A_1(j,n)*hNew(IAD(j,n))
-1199        continue
-         QAct(n)=QN
-        End if
-  
-1299   Continue
 
-c calculate runoff to look at mass balances. RIght now we don't 
-c   route ponded water to runoff
-c disabled for now (4/12/2011) - need to finish the code       
-c      Do i=1, NumBP
-c        if (codew(i).eq.-4) then
-c           n=KXB(i)
-c           RO(n)=0.0
-c            HSP=0.03 !EMPIRICAL PARAMETER, HSP~=dz/3
-c			PI=3.141592653589793238D0
-c			DPI=1.0d0/PI
-c			ATG=aTAN(hNew(N)/HSP)+PI/2.d0 !Continuous Heaviside step function
-cc Delta is the derivative of the step function x hnew			
-c			Delta=HSP/(HSP*HSP+hNew(n)*hNew(n))*hNew(n) 
-cc F2 is a weighting function			
-c			F2=(ATG+delta)*DPI
-c			F2=Dmin1(F2,1.0D0)
-c			
-c		   IF(HNEW(N).LT.-0.01) F2=1.0D-10
-c          if((hNew(n).gt.(-0.01)).and.(F2.gt.0.98)) then
-c            HNEWS=DMAX1(hNew(N),0.0D0)
-c		      HOLDS=DMAX1(hold_1(N),0.0D0)
-c		      RO(n)= Q(n)-QAct(n) !Width(i)*(-(HNEWS-HOLDS))/step
-c              hNew(n)=-0.01
-c              hOld(n)=hNew(n)
-c        endif
-c          endif
-c       Enddo
+cccz start to calculate the runoff
+cccz this is the water source part, i.e., the exfiltration from soil surface
+       Do n=1,SurNodeIndex
+        k=SurfNodeNodeIndexH(n)
+        i=SurfNodeSurfIndexH(n)
+        if (hnew(k).ge.CriticalH) then
+          RO(k)=max(Q(k)-Qact(k),0.0D0)
+          hNew(k)=CriticalH+h_Stay(n)         ! cccz could be CriticalH_R, but we force it to 
+          hOld(k)=hNew(k)
+        endif
+       Enddo         
+cccz turn this on for Ex_4 plastic mulching
+cccz #ifdef EX_4P
+cccz                 if (k.ge.2.and.k.le.7) then
+cccz                    RO(k)=max(Q(k),0.0D0)
+cccz                    hOld(k)=hNew(k)
+cccz                endif
+cccz #endif
+cccz turn this on for Ex_4 plastic mulching
+
        
-
+c CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       Return
 10    Call errmes(im,il)

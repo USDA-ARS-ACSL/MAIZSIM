@@ -2,13 +2,17 @@
       Include 'public.ins'
       Include 'puweath.ins'
       Include 'puplant.ins'
-	Character*10 Date1, Date2, Date3, Date4
+	Character*10 Sowing, Ending, Date4,Date1  ! date1 is dummy for beginDay until we modify the itnerface
 	Character*255 RootName,T1,T2
+      Character*80 Indates,test
+      integer iapos, Quote_COUNT, begindate
+      
 	Integer CurYear, JulDay
 c    find root of file name in runfile TODO
 c     for writing frequency to output
       Daily=0
       Hourly=0
+      AutoIrrigateF=0
       open(9,file=RunFile,status='old', ERR=10)
 	read(9,'(A132)')WeatherFile
 	read(9,'(A132)')TimeFile
@@ -17,6 +21,7 @@ c     for writing frequency to output
 	read(9,'(A132)')NitrogenFile
 	read(9,'(A132)')SoluteFile
 	read(9,'(A132)')SoilFile
+c      read(9,'(A132)')MulchFile
 	read(9,'(A132)')ManagementFile
       read(9,'(A132)')DripFile
 	read(9,'(A132)')WaterFile
@@ -37,7 +42,7 @@ C35    Continue
       read(9,'(A132)')FluxGraphics
 C45    Continue
       read(9,'(A132)')MassBalanceFileOut
-
+      read(9,'(A132)')MassBalanceRunoffFileOut
 	close(9)
       Open(4,file='2DSOIL03.LOG')
 c   end of temporary block
@@ -57,9 +62,22 @@ c    Open and read initials file
         read(41,*,err=8) LATUDE, Longitude, Altitude
         read(41,*,err=8)  
 cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'        
-        read(41,*,err=8) AutoIrrigateF
+        read(41,*,err=8) AutoIrrAmt
+        if (AutoIrrAmt.GT.0)  AutoIrrigateF=1
         read(41,*,err=8) 
-        read(41,*,err=8) Date1, Date2, Date3, TimeStep
+        read(41,'(A80)',err=8) inDates
+        beginDate=0
+        date1='00/00/0000'
+        write(test, '(A80)') inDates
+        iapos = Quote_Count(inDates)
+        if (iapos.eq.4) then
+           read(test,*,err=8) Sowing, Ending, TimeStep        
+         else if (iapos.eq.6) then
+           read(inDates,*,err=8) Date1, Sowing, Ending, TimeStep 
+         else 
+            goto 8
+          endif
+  
         read(41,*,err=8)
         read(41,*,err=8)
         read(41,*,err=8) OutputSoilNo, OutPutSoilYes
@@ -68,10 +86,10 @@ cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'
            Write(*,*) 'error in soil output flag'
            Goto 11
          endif
-         beginDay=JulDay(Date1)
-         sowingDay=JulDay(Date2)
-         endDay=JulDay(Date3)
-         Year=CurYear(date1)
+         if (date1.ne.'00/00/0000') beginDay=JulDay(date1)
+         sowingDay=JulDay(Sowing)
+         endDay=JulDay(Ending)
+         Year=CurYear(Sowing)
          
          
       Do i=1,NumNPD
@@ -147,3 +165,21 @@ C AD NimG is not used in the entire solution
 10    Write(*,*)'Run.dat file not found'
 11    continue
       End
+      
+      Function Quote_Count(instring)
+      character*80 instring
+      integer n,count, Quote_Count
+      count=0
+      Quote_count=0
+      do n=1, len(instring)
+       if (instring(n:n).eq."'") then
+        count=count+1;
+        endif
+      end do
+      Quote_count=count
+      return
+      end
+      
+      
+       
+        

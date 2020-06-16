@@ -9,7 +9,6 @@ C      seepage faces are usually used in ditches.
       Integer e
       Logical lConst
       Dimension idummy(4)
-      Character*1 InitialWaterType    !w for water h for head
 *
       im=20
       il=0
@@ -23,8 +22,7 @@ C      seepage faces are usually used in ditches.
       Read(40,*,ERR=10)
       im=im+1
       il=il+1
-      Read(40,*,ERR=10) KAT,NumNP,NumEl,NumBP,IJ, NMat, 
-     & InitialWaterType
+      Read(40,*,ERR=10) KAT,NumNP,NumEl,NumBP,IJ, NMat
       im=im+1
       il=il+1
       Read(40,*,ERR=10)

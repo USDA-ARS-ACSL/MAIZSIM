@@ -1,7 +1,7 @@
 
 CDT todo - need to take out weights and other input from the element geometry file.
 C I am inputting dummy variables for the weights, we can 
-      Subroutine Carbon_Partitioning_New()
+      Subroutine Carbon_Partitioning()
       Include 'public.ins'
       Include 'puplant.ins'
       Dimension iLoc(4)
@@ -107,7 +107,7 @@ C
 
 c DT 12/7/2018 removed element file reading     Only need to initialize root weight now
       Do n=1,NumNP
-        RTWT(n)=0
+        RTWT(n)=0         ! dry weight of root for each soil node (area)
       Enddo
       Close(41)
 
@@ -160,8 +160,8 @@ cccz Assume that RTWT is node based root mass (g)
           RDenY(n)=RMassY(n)/RTWL                  ! cccz initialized yong root density for each node cm cm-2
       enddo
       
-      EORSCS=0.0
-      AWUPSS=0.0
+      EORSCS=0.0                                  ! cumulation of EORSCF
+      AWUPSS=0.0                                  ! cumulation of water uptake
       Total_Eor=0.0
       Total_Pcrs=0.0                              ! PCRS actual carbon rate  g day-1
       icount=0
@@ -196,6 +196,7 @@ c      enddo
 
         MECHR = 80.03*abs(psis(n))**0.53
      &     *EXP(-8.08*(1.66 - BlkDn(MatNumN(n))))
+
         IF (MECHR.LE.0.0) MECHR = 0.0
         TPRD(n) = 2.0 + (0.1*PSIS(n) + (0.7*MECHR))
         PSIRD(n) = PSIS(n)
@@ -308,7 +309,7 @@ C
         ELSE IF (Tmpr(n).LE.0.0) THEN
           RGCF2 = 0.0
         ELSE If (Tmpr(n).lt.18.0D0) THEN
-          RGCF2 = (Tmpr(n)/18.0D0) **(1.66D0)
+          RGCF2 = (Tmpr(n)/18.0D0)**(1.66D0)
         ENDIF
 
 C
@@ -316,6 +317,13 @@ C   CALCULATE PROPORTIONIAL REDUCTION OF ROOT GROWTH CAUSED BY
 C   PARTIAL PRESSURE OF SOIL OXYGEN
 C
         RGCF3 = (g(n,2) - 0.02)*7.14
+cccz the distance effects
+        xDist = abs(x(n)-xBSTEM)
+        yDist = abs(y(n)-yBSTEM)
+        RGCF4=max(1.0D0-0.001*xDist,0.0D0)
+     !     *max(1.0D0-0.0001*yDist,0.0D0)
+cccz this effect is turned off in the gas one
+        
 C
 C   CALCULATE PROPORTIONAL REDUCTION OF ROOT GROWTH FROM THE
 C   PHYSICAL CAUSE THAT IS MOST LIMITING
@@ -323,6 +331,7 @@ C
 cccz Zhuangji: AD 
 c        RGCF5=(1.0-AMIN1(1.0,RMassY(n)/0.03))
          RGCF5=(1.0-AMIN1(1.0,(RMassY(n)+RMassM(n))/0.02))
+         RGCF5=1.0D0
 C this one for nitrogen. Use the ratio between actual uptake of N and IMax
     
          dif=amax1(0.0,Conc(n,1)-CMin0(1))
@@ -331,7 +340,7 @@ C this one for nitrogen. Use the ratio between actual uptake of N and IMax
 
 c ccz zhuangji:AD removed the RGCF3 why? DT - O2 was not simulated 
 C dt need to do more testing for RGCF6, add later
-        RGCF(n) = AMIN1(RGCF1, RGCF2, RGCF3, RGCF5)
+        RGCF(n) = AMIN1(RGCF1, RGCF2, RGCF3, RGCF4)
         
         RGCF(n) = AMAX1(RGCF(n),0.0)
         RGCF(n) = AMIN1(RGCF(n),1.0)
@@ -350,7 +359,8 @@ c  dt 03/18/11 testing the incorporation of area
        if ((isEmerged.lt.1).and.(isGerminated.gt.0)) RGCF(n)=1.0
            
 cccz only new root or the total root? Dt - use total root for now
-       PDWR(n)=(RMassY(n)+RMassM(n))*ALPM*RGCF(n)*nodeArea(n)
+        PDWR(n)=(RMassY(n)+RMassM(n))*ALPM*RGCF(n)*nodeArea(n)
+c        PDWR(n)=RMassY(n)*ALPM*RGCF(n)*nodeArea(n)
            
        ENDDO
 C
@@ -465,7 +475,7 @@ c convert MPa into bar, this is how we have 19.26//(LAI*rowsp)
      &         *0.02275*(24.5 + Tmpr(n))
      
               WUPN(n) = (((PSIS(n) - PSILT)*nodeArea(n)
-     &          *RDenY(n))/(SR(n) + RRRY + RVR(n)))
+     &         *RDenY(n))/(SR(n) + RRRY + RVR(n)))
      &         *0.02275*(24.5 + Tmpr(n))
              ELSE
              
@@ -564,7 +574,7 @@ C
       DPSI02 = 2.0/(1.0 - OSMFAC)
       WUP2S = (WUPMS + WUPTS)*(PSIST - PSILZ - DPSI02)/(PSIST - PSILT)
       WUP0S = (WUPMS + WUPTS)*(PSIST - PSILZ)/(PSIST - PSILT)
-      
+cccz??? the usage of WUPTS and WUPRS is confusing.        
 
 C
 C   CALCULATE POTENTIAL TRANSPIRATION RATE ALLOWING FOR NIGHT-TIME
@@ -591,6 +601,7 @@ C   CONDUCTANCE,THE PROPORTION OF TIME FOR WHICH THE SHOOT GROWS,
 C   THE AMOUNT OF CARBON ACTUALLY NEEDED FOR ROOT GROWTH AND THE
 C   AMOUNT OF OSMOREGULATION THAT WILL OCCUR
       D18 = WUPMS + WUPTS                                       ! all water uptake from mature roots and new roots
+cccz??? I suppose this is WUPRS because that is the actural water uptake (in case carbon is not enough)
 C
 C   POTENTIAL TRANSPIRATION RATE IS SUCH THAT THE DEMAND FOR WATER
 C   UPTAKE CAN BE MET WITHOUT SHOOT WATER POTENTIAL FALLING TO THE

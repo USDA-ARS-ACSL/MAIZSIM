@@ -87,7 +87,7 @@ C  irrigation goes into Q values
                If(abs(CodeW(i)).eq.4) then
                 if (Q(i).lt.0) then 
                    CodeW(i)=4
-                   Q(i)=Q(i)+AutoIrrAmt*(Width(i))   ! add to irrigation so we don't lose any rain if needed
+                   Q(i)=Q(i)+AutoIrrAmt*(Width(k))   ! add to irrigation so we don't lose any rain if needed
                    if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
                  End if    !Q(n) <0
                 End if   ! CodeW=4
