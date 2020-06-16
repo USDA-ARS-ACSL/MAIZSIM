@@ -15,7 +15,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	 // the code from SetParms to here.
 
 	dt = info.timeStep / MINUTESPERDAY; //converting minute to day decimal, 1= a day
-	LvsAppeared = LvsExpanded = Anthesis = 0; tasselDone = 0;
+	LvsAppeared = LvsExpanded = progressToAnthesis = 0; progressToTasselEmerg = 0;
 	GerminationRate = EmergenceRate = LvsInitiated = 0;
 	GDDsum = GDDgrain = dGDD = phyllochronsFromTI = 0;
 	GTIsum = dGTI = 0;
@@ -35,6 +35,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	initLeafNo = youngestLeaf = 5;
 	curLeafNo = 1;
 	LvsAtTI = 1;
+	LvsInitiated = initLeafNo;
 
 	LvsToInduce = 0.0;
 	inductionPeriod = 0.0;
@@ -54,7 +55,7 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	T_base = 8.0;
 	T_opt = 32.1; // These Topt and Tceil values from Kim et al. (2007), also see Kim and Reddy (2004), Yan and Hunt (1999), SK
 	T_ceil = 43.7;
-	LvsInitiated = initLeafNo;
+	
 
 	P2 = 0.5;
 	// Save for later
@@ -85,6 +86,10 @@ int CDevelopment::update(const TWeather& wthr)
 		{
 			germination.done = true;
 			germination.daytime = wthr.daytime;
+			// initialize T_grow
+			T_grow = T_cur;
+			T_grow_sum = T_cur;
+
 			cout << "* Germinated: GDDsum " << GDDsum << " time step (min): " << dt*(24 * 60) << endl;
 		}
 	}
@@ -97,7 +102,6 @@ int CDevelopment::update(const TWeather& wthr)
 		if (!emergence.done)
 		{
 			EmergenceRate += beta_fn(T_cur, Rmax_Emergence, T_opt, T_ceil);
-			// corn->LvsAppeared = corn->EmergenceRate;
 			if (EmergenceRate >= 1.0)
 			{
 				emergence.done = true;
@@ -107,11 +111,17 @@ int CDevelopment::update(const TWeather& wthr)
 				GDDsum = 0.0; //reset GDDsum from emergernce, SK
 				emerge_gdd = GDDsum; //gdd at emergence YY 4/2/09
 				//	corn->LvsAppeared = 1.0;
+				//LvsAppeared = 2;
 			}
 		}
-		if (!tasselInitiation.done)
+		if (!tasselInitiation.done &&  emergence.done)
 		{
+			double temp1 = LvsInitiated;
 			LvsInitiated += beta_fn(T_cur, Rmax_LIR, T_opt, T_ceil);
+			if (LvsInitiated < temp1)
+			{
+				int iii = 1;
+			}
 			curLeafNo = (int)LvsInitiated;
 			if (LvsInitiated >= juvLeafNo)
 				// inductive phase begins after juvenile stage and ends with tassel initiation
@@ -154,7 +164,7 @@ int CDevelopment::update(const TWeather& wthr)
 				}
 			}
 		}
-		else
+		else if (tasselInitiation.done)
 		{
 			phyllochronsFromTI += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // to be used for C partitoining time scaling, see Plant.cpp
 		}
@@ -174,18 +184,18 @@ int CDevelopment::update(const TWeather& wthr)
 //			 ||  ((LvsAppeared >= (int) LvsInitiated) && (!silking.done) && DayLengthSensitive))
 		{
 			if (!tasselFull.done)
-				tasselDone += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume full tassel emergence occurs at total tip appeared + 1.5 phyllochrons
+				progressToTasselEmerg += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume full tassel emergence occurs at total tip appeared + 1.5 phyllochrons
 
-			if ((tasselDone >= PhyllochronsToTassel) && (!tasselFull.done)) //was 3
+			if ((progressToTasselEmerg >= PhyllochronsToTassel) && (!tasselFull.done)) //was 3
 			{
 				tasselFull.done = true;
 				tasselFull.daytime = wthr.daytime;
 				cout << "* Tassel fully emerged: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 			}
 			if (!silking.done)
-				Anthesis += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume 75% Silking occurs at total tip appeared + 3 phyllochrons
+				progressToAnthesis += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume 75% Silking occurs at total tip appeared + 3 phyllochrons
 
-			if ((Anthesis >= PhyllochronsToSilk) && !silking.done) //was 3
+			if ((progressToAnthesis >= PhyllochronsToSilk) && !silking.done) //was 3
 			{
 				silking.done = true;
 				silking.daytime = wthr.daytime;
@@ -212,12 +222,12 @@ int CDevelopment::update(const TWeather& wthr)
 		dGDD = calcGDD(T_cur)*dt;
 		GDDsum += dGDD;
 		GTIsum += dGTI;
-		if (GDDsum >= GDD_rating && (!maturity.done))
-		{
-			maturity.done = true;
-			maturity.daytime = wthr.daytime;
-			cout << "* Matured: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
-		}
+//		if (GDDsum >= GDD_rating && (!maturity.done))
+//		{
+//			maturity.done = true;
+//			maturity.daytime = wthr.daytime;
+//			cout << "* Matured: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+//		}
 
 	}
 

@@ -152,7 +152,7 @@ void crop(struct
 				wthr.jday = Weather->JDAY;
 				wthr.time = time_public->Time-Weather->JDAY;
 				wthr.CO2 = Weather->CO2; 
-				if (initInfo.CO2>0) 
+				if (Weather->CO2<=0) 
 				{
 					wthr.CO2=initInfo.CO2;         //Can set CO2 in initials for specific simulations where CO2 is constant
 				}
@@ -273,10 +273,9 @@ void crop(struct
 			int ier = pSC->getErrStatus();
 			if ( ier == 0 ) 
 			{
-				ier = pSC->run(wthr); //Pass both weather and leaf water potential into the "run" function
-				//of the controller pSC YY
-				// need to get rid of other run module (with only wthr) done?
-				// need to add PredawnLWP to wthr structure
+				ier = pSC->run(wthr); //Pass weather  into the "run" function
+				                         //of the controller pSC YY
+				
 			}
 
 

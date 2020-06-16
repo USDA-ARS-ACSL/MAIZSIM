@@ -67,17 +67,21 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	ear = new CEar();
 	develop = new CDevelopment(initInfo);
 	nodalUnit = new CNodalUnit[initInfo.genericLeafNo+10]; // create enough leaf nodes for now, to be replaced by dynamic collection
-	for (int i=0; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile
+	for (int i=1; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile, should start at 1
 	{
 		nodalUnit[i].initialize(i, develop);
 		nodalUnit[i].get_leaf()->set_mass(leafMass/PRIMORDIA); //assing initial mass for each primordium
        	nodeNumber = i;
 	}
+	nodalUnit[0].initialize(0, develop); //TODO nodalUnit[0] stores aggregated information on nodal units
+	                                     // but this is not a good way to do this, need this to be in the 
+	                                     //plant object but requires some rewrite
 	finalNodeNumber = info.genericLeafNo;
 	leafArea =greenLeafArea = actualGreenLeafArea = senescentLeafArea = potentialLeafArea = droppedLfArea = 0.0;
 	previousDroppedlfArea = currentDroppedLfArea = droppedLfArea = 0;
-	
-	temperature = develop->get_Tcur();
+	//  Tcur has not been defined yet
+	// initialize to 15
+	temperature = 15.0;
 	
 	photosynthesis_net = photosynthesis_gross = transpiration = transpirationOld = assimilate = 0.0;
 	     VPD = 0;
@@ -219,7 +223,7 @@ void CPlant::update(const TWeather & weather)
 		}
 		return;
 	}
-	else if(!develop->Dead())
+	else if(!develop->Dead()) //jumps here if emergence is done
 	{
 		emerge_gdd = develop->get_EmergeGdd(); //if the plant emergies, then pass the emerge_gdd value from the develop object into the plant object
 
@@ -647,7 +651,8 @@ void CPlant::C_allocation(const TWeather & w)
    // this is where source/sink (supply/demand) valve can come in to play
    // 0.2 is value for hourly interval, Grant (1989)
 	double scale = 0.0; // see Grant (1989), #of phy elapsed since TI/# of phy between TI and silking
-	scale = develop->get_phyllochronsFromTI()/(develop->get_youngestLeaf() - develop->get_LvsAtTI());
+	scale = develop->get_progressToAnthesis()/(develop->get_phyllochronsToSilk());
+	scale = min(1, scale);
 	//		if (w.time == 0.0) std::cout << scale << endl;
 
     C_supply = 0.0;  // daily mobilization of carbon
@@ -919,11 +924,11 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	const double maintCoeff = 0.018;
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
-	agefn=1.0;
+	//agefn=1.0;
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
 	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
-	maintRespiration = q10fn*maintCoeff*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
+	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 

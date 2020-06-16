@@ -95,11 +95,11 @@
 	 int   MSW1,MSW2,MSW3,MSW4,MSW5,MSW6,MSW7;
 	 float BSOLAR,ETCORR,BTEMP,ATEMP,ERAIN,BWIND,BIR,WINDA, IRAV;
 	 int   JDAY, NCD,JDLAST;
-     float CLDFAC,DEL[24],RINT[24],GAMMA,RNS,RNC,RAIN,IR;
-	 float WIND,CO2,TDUSK,TDUSKY,TWET,TDRY,CPREC[NumSD],TAIR[24],VPD[24],ROUGH,
+     float CLDFAC,DEL[24],RINT[24],RNS,RNC,RAIN,IR;
+	 float WIND,CO2,TDUSK,TDUSKY,CPREC[NumSD],TAIR[24],VPD[24],ROUGH,
            RADINT[24],WATTSM[24],DIFINT[24],ROWINC[24];
 	 float CLOUD, SHADOW[24],DIFWAT[24],DIRINT[24];
-	 float WATACT, WATRAT, WATPOT, RULU;
+	 float WATACT, WATRAT, WATPOT, RNLU;
 	 int   NumF[40],NumFP;
 	 float hFur[40],QF;
 	 int   IFUR;
@@ -143,7 +143,7 @@
                 KXB[NumBPD];
 		   int CodeW[NumNPD],CodeS[NumNPD],CodeT[NumNPD],
 			     CodeG[NumNPD],PCodeW[NumNPD];
-		   float Width[NumBPD], VarBW[3][NumBPD], VarBW_old[3][NumBPD],
+		   float Width[NumBPD], VarBW[3][NumBPD],
 			     VarBS[NumSD][NumBPD],
 				 VarBT[4][NumBPD], VarBG[3][NumGD][NumBPD],EO,Tpot;
  };
@@ -180,7 +180,7 @@
 			   NodeGraphics[132],ElemGraphics[132],NodeGeomFile[132],
 			   GeometryFile[132], SurfaceGraphics[132],
 			   FluxGraphics[132], MasssBalanceFile[132],MassBalanceFileOut[132],
-			   LeafFileIn[132], RunFile[132];
+			   LeafFileIn[132], RunFile[132], MassBalanceRunoffFileOut[132];
  };
 
 

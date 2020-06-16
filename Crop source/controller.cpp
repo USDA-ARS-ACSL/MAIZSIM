@@ -95,8 +95,8 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.1.42 2016                *" << endl
-		<< " *   USDA-ARS, CROP SYSTEMS AND GLOBAL CHANGE LABORATORY   *" << endl
+		<< " *                     VERSION  1.4.0.5 2020                *" << endl
+		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
 		<< endl << endl;
@@ -152,6 +152,7 @@ void CController::initialize()
 			<< setw(8) << "Pg,"
 			<< setw(10) << "Respir,"
 			<< setw(8) << "av_gs,"
+#ifndef _INTERFACE
 			<< setw(12) << "sunlit_LAI,"
 			<< setw(12) << "shaded_LAI,"
 			<< setw(12) << "sunlit_PFD,"
@@ -161,7 +162,8 @@ void CController::initialize()
 			<< setw(12) << "sunlit_Ag,"
 			<< setw(12) << "shaded_Ag,"
 			<< setw(12) << "sunlit_gs,"
-			<< setw(12) << "shaded_gs"
+			<< setw(12) << "shaded_gs,"
+#endif
 			<< setw(9) << "VPD,"
 			<< setw(10) << "Nitr,"
 			<< setw(10) << "N_Dem,"
@@ -194,14 +196,16 @@ void CController::initialize()
 			throw "Variety File not found.";
 		}
 		cfs.getline(initInfo.description, sizeof(initInfo.description),'\n');
-		cfs.getline(initInfo.cultivar, sizeof(initInfo.cultivar),'\n') ;
-		
+		//Pull cultivar name from description
+		//cfs.getline(initInfo.cultivar, sizeof(initInfo.cultivar),'\n') ;
+		string cult = initInfo.description;
+		int res1 = cult.find(":");
 		cfs.getline(Buffer, 256,'\n');
 		cfs.getline(Buffer, 256,'\n');
-        cfs >> initInfo.GDD_rating >> initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
+        cfs >>initInfo.genericLeafNo >> initInfo.DayLengthSensitive 
 			>>initInfo.stayGreen >>initInfo.LM_min
 			 >>initInfo.Rmax_LTAR >> initInfo.Rmax_LIR >> initInfo.PhyllochronsToSilk;
-
+		initInfo.GDD_rating = 1900;
 // end reading cultivar specific data from variety file
 // now read species specific data at the end of the file
 // loop until we find the location in the file
@@ -415,6 +419,7 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(4) << plant->get_Pg() << comma
 				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() << comma //dt 03/2011 added to better calc mass balance g carbon per plant per hour
 				<< setw(8) << setprecision(4) << av_gs << comma  //return average stomatal conductance Yang 10/31/06
+#ifndef _INTERFACE
 				<< setw(12) << setprecision(3) << plant->get_sunlit_LAI() << comma
 				<< setw(12) << setprecision(3) << plant->get_shaded_LAI() << comma
 				<< setw(12) << setprecision(2) << plant->get_sunlit_PFD() << comma
@@ -425,6 +430,7 @@ void CController::outputToCropFile()
 				<< setw(12) << setprecision(4) << plant->get_shaded_A_gross() << comma
 				<< setw(12) << setprecision(4) << plant->get_sunlit_gs() << comma
 				<< setw(12) << setprecision(4) << plant->get_shaded_gs() << comma
+#endif
 			    << setw(9) << setprecision(3) << vpd << comma
 				<< setw(10) << setprecision(4) << plant->get_N() << comma
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma

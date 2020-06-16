@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="weather.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,13 +37,7 @@
     <ClCompile Include="plant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="radtrans.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="roots.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="solar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -56,6 +53,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="weather.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="radtrans.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="solar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gas_Ex_Species_param.cpp">
@@ -81,13 +84,16 @@
     <ClInclude Include="gas_exchange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="initinfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="leaf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lightenv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="nodalunit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="initinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="organ.h">
@@ -96,19 +102,10 @@
     <ClInclude Include="plant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="radtrans.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Roots.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sheath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="solar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -117,13 +114,22 @@
     <ClInclude Include="stem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thermaltime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="weather.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thermaltime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="radtrans.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="solar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Gas_Ex_Species_param.h">
@@ -131,21 +137,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Crop.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
-  </ItemGroup>
-  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3dd8ac1a-a53a-42a9-afe1-b778d657c1a3}</UniqueIdentifier>
+      <Extensions>*.h</Extensions>
+    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{549421a9-22ed-42aa-97f7-1f993c8e0bf1}</UniqueIdentifier>
       <Extensions>*.cpp</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{ea8dbf4b-8ba3-4638-97a5-ea0967d9a4ae}</UniqueIdentifier>
-      <Extensions>*.h</Extensions>
-    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Crop.rc" />
   </ItemGroup>
 </Project>

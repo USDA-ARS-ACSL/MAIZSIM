@@ -126,7 +126,7 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 	N_effect= __max(0.0, (2 / (1 + exp(-2.9*(N_content - 0.25))) - 1));
 	N_effect = __min(1, N_effect);
 	const double psi_threshold_bars = -0.8657; 
-	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
+	double water_effect=dv->LWPeffect(PredawnLWP, psi_threshold_bars);
 	double shade_effect= dv->get_shadeEffect();
 	
  
@@ -188,7 +188,7 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 {
 	// DT added N_effect 3/29/2016
 	double dD = dv->get_initInfo().timeStep/MINUTESPERDAY;
-	double T = dv->get_Tcur();
+	double T = (double)dv->get_Tcur();
 	double T_opt = dv->get_T_Opt();
 	double T_grow = dv->get_Tgrow();
     double N_effect = __max(0.0, (2/(1+exp(-2.9*(N_content-0.25)))-1)); //SK 8/20/10: as in Sinclair and Horie, 1989 Crop sciences, N availability index scaled between 0 and 1 based on 
@@ -196,7 +196,7 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	N_effect = __min(1, N_effect);
 	const double psi_threshold_bars = -4.0; //threshold predawn leaf water potential (in bars) below which water stress triggers senescence, needs to be substantiated with lit or exp evidence, SK
 	// This is the water potential at which considerable reduction in leaf growth takes place in corn, sunflower, and soybean in Boyear (1970)
-	double water_effect=LWPeffect(PredawnLWP, psi_threshold_bars);
+	double water_effect=dv->LWPeffect(PredawnLWP, psi_threshold_bars);
 	double shade_effect = dv->get_shadeEffect();
 	//water_effect = 1;
 	//N_effect = 1;
@@ -213,7 +213,8 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	if (!mature && !aging && !dead)
 	{
 		stayGreenDuration = stayGreen*growthDuration;
-		seneDuration = growthDuration*0.7; // end of growth period, time to maturity. Assume senesence is faster than growth
+		seneDuration = growthDuration*1.2; // end of growth period, time to maturity. Assume senesence is faster than growth
+		                                  // changed this from 0.75 to 1.2 not sure if I will keep it.
 	}
 	else if (mature && !aging && !dead)
 	{
