@@ -27,6 +27,12 @@
           Tinit=Time
           NumMod=0
           RunFlag=1
+C Beginday is when the plant model starts. If the model time start is greater
+C than the sowing day then this will be an error condition.
+          if (time.GT.SowingDay) goto 110
+          if (beginDay.le.0) then 
+            BeginDay=max(int(time),SowingDay-3)
+          endif
           Return
 10        Call errmes(im,im-1)
         Else
@@ -38,9 +44,10 @@
         Do j=1,NumMod
           if(tNext(j).lt.tRigid) tRigid = tNext(j)
         Enddo
-        if (time.gt.51.27) then
-          hhh=1
-          endif
+cccz remove this debugging trick
+cccz        if (time.gt.51.27) then
+cccz          hhh=1
+cccz          endif
         dtMax=dmin1(dtMx(1),dtMx(2),dtMx(3),dtMx(4))
         tFix=dmin1(tRigid,tTDB(1),tTDB(2),tTDB(3),tTDB(4),tFin)
         If(Iter.le.3.and.(tFix-t).ge.dMul1*dtOpt) 
@@ -63,4 +70,6 @@
 *
 100    FORMAT(1x,G12.5)
       Return
+110   Stop 'Sowing date cannot be earlier than the start of the 
+     & soil model'
       End

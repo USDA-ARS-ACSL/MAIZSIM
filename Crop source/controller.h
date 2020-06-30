@@ -11,6 +11,7 @@
 #include "plant.h"
 #include "weather.h"
 #include "initinfo.h"
+#include "gas_ex_species_param.h"
 #ifndef FLOAT_EQ
 #define EPSILON 0.001   // floating point comparison tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
@@ -39,6 +40,7 @@ private:
 	TWeather*			weather;
 	CDevelopment*       develop;
 	InputDataFormat     weatherFormat;
+	TGasExSpeciesParam  GasExParam;
 public:
 	CController(const char*, const char*, const char*, TInitInfo);
     ~CController();
@@ -63,7 +65,7 @@ public:
 	double getSowingDay()    {return SowingDay; }
 	double RootWeightFrom2DSOIL;
 	float MaxRootDepth, AvailableWater;
-
+	// TODO add similar here to get gas exchange parameters
 	TInitInfo getInitInfo() {return initInfo;}
 
 	void initialize();

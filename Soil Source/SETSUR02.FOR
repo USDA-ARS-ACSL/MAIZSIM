@@ -10,7 +10,6 @@ C**         available (=1 if YES).                                    **
 C**                                                                   **
 C**  MSW2-  switch to indicate if hourly wind is available (=1 if YES).**
 C**  MSW3-  Daily rain intensities                                    **
-C** cdt don't think these two variables (above) are needed  for hourly data
 C**  MSW4-  Chemical concentrations in rain water                     **
 C**  MSW5-  1 for furrow irrigation                                   **
 C**  MSW6-  1 if relative humidity is available                       **
@@ -75,11 +74,15 @@ C**                                                                   **
       Include 'public.ins'
       Include 'puplant.ins'
       Include 'puweath.ins'
+      Include 'puSurface.ins'
+      
       Parameter (PERIOD =1./24.)
-      integer jday, DayofYear,CurYear, ModNum,ThisYear
-      Common /weather/ il,im,isol,ModNum
+      integer jday, m, DayofYear,CurYear, ModNum,ThisYear
+      Common /weather/ il,im,isol,ModNum, TMIN, TMAX,Gamma,
+     &   BEERS(24)
       
       double precision St,t
+      real gamma
       character*10 date
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
      &          SARANG(24),
@@ -98,6 +101,9 @@ CYAPEND
                 
       St=0.1D0*Step
       If (lInput.eq.0) goto 11
+      
+      SurWeatherUpdate=0
+      
       NumMod=NumMod+1
       ModNum=NumMod
       tNext(ModNum) = time
@@ -141,8 +147,9 @@ C
       il=il+1
       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
       ISOL=NumSol*Movers(2)
+ 
 c      the four basic variables are Daily wind, rain intensity daily concentration and co2     
-      NCD=4-MSW2-MSW3+ISOL+(NumG+1)*Movers(4)-MSW7
+      NCD=(3+isol)-MSW2-MSW3-MSW7-MSW4*iSol
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -153,16 +160,10 @@ c      the four basic variables are Daily wind, rain intensity daily concentrati
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
       IF(MSW2.eq.0) WINDA=CLIMAT(1)
-      IF(MSW3.eq.0) IRAV =CLIMAT(2-MSW2-MSW3)
+      IF(MSW3.eq.0) IRAV =CLIMAT(MSW2+MSW3)
       IF(MSW4.eq.1.AND.NumSol.gt.0) then
         Do i=1,NumSol
-          CPREC(i)=CLIMAT(2-MSW2-MSW3+i)
-        Enddo
-      Endif
-      If(NumG.ne.0) then
-        PG=CLIMAT(3-MSW2-MSW3+ISOL)
-        Do i=1,NumG
-          GAIR(i)=CLIMAT(3-MSW2-MSW3+ISOL+i)
+          CPREC(i)=CLIMAT(MSW2+MSW3+MSW4*i)
         Enddo
       Endif
       IF(MSW7.eq.0) then
@@ -171,8 +172,10 @@ c      the four basic variables are Daily wind, rain intensity daily concentrati
       close(5)      
 C
 C Total number of weather data
-C
-      NCD=4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7
+C     minimum of three columns for radiation, temperature and rainfall (should always be first three) for hourly
+C    2*MSW1=TWET, TDRY; MSW2=wind; MSW3=rain rate; MSW4= number of solutes * MSW4, 
+C     MSW6=RH, MSW7=CO2  
+      NCD=3+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7
 C
 C     Nodal numbers of furrow nodes
 C
@@ -265,20 +268,6 @@ c
 c   dt have to fix this later as model cannot handle freezing temperatures
         TMIN=max(TMIN,3.0)        
         RAIN = CLIMAT(4)*ERAIN
-
-        
-c        If (rain.gt.0) then
-c         do ii=1,NumBp
-c           n=kxb(ii)
-c           If (abs(codew(ii)).eq.4) then
-c             hnew(n)=-1.0e3/(1+0.04*1.0e3)
-c            EndIf
-c          enddo
-c         Endif
-          
-
-
-
 
         If (MSW2.GT.0) then 
           WIND = CLIMAT(5)*BWIND
@@ -541,7 +530,7 @@ C  CALCULATE ACTUAL WATER VAPOR PRESSURE
 C
           AVP = SVPW - (GAMMA*(TDRY - TWET))
 C _todo   Calculate Relative humidity here if it is not input
-        Endif
+        Endif !if MSW!.eq.1
 
 CDT        
             if(MSW6.eq.1) then
@@ -558,9 +547,9 @@ C Also calculate TMean
                 GAMMA = 0.62*(1.006 + (1.846*D31))
      &          /((0.622 + D31)*(0.622 + D31)*D32)*101.3
                 AVP= Rel_Humid*SVPW
-          endif
+          endif   ! end MSW6.eq.1
        
-        Endif
+        Endif   !MSW1.NE.1.and.MSW6.eq.0
 CDT
 C
 C  CALCULATE WATER STAURATION VAPOR PRESSURE AT AIR TEMPERATURE
@@ -661,7 +650,7 @@ C
 C
 C  CALCULATE PROPORTION OF DIfFUSE RADIATION INTERCEPTED BY ROWS
 C  OF PLANTS ASSUMING THEY ARE OPAQUE CYLINDERS
-C  FIRST DIVIDE ROWSPACING INTO 20 EQUAL PARTS AND FIND THE
+C  FIRST DIVIDE ROWSPACING INTO 10 EQUAL PARTS AND FIND THE
 C  MIDPOINTS FROM ROW TO MID ROW
 C
           DIfFIN = 0.0
@@ -704,9 +693,9 @@ C
 C  CALCULATE BEERS LAW CORRECTION FOR RADIATION INTERCEPTION
 C
               If((ELCAI*CEC).LE.88.0) then
-                BEERS = (1 - EXP(-ELCAI*CEC))
+                BEERS(I) = (1 - EXP(-ELCAI*CEC))
               Else
-                BEERS=1.0
+                BEERS(I)=1.0
               Endif
 
 C  CALCULATE PROPORTION OF PHOTOSYNTHETICALLY ACTIVE RADIATION
@@ -715,17 +704,17 @@ C    PAR = 0.43 DIRECT + 0.57 DIFFUSE RADIATION. ***
 
       PARINT(I) = WATTSM(I)*((DIFFIN*0.57*DIFWAT(I))
      &     + (DIRINT(I)*0.43*(1.0 - DIFWAT(I))))
-     &     /PAR(I)*BEERS
+     &     /PAR(I)*BEERS(I)
 C
 C  CALCULATE PROPORTION OF TOTAL RADIATION INTERCEPTED BY THE
 C  CROP CANOPY
 C
               RADINT(I) = ((DIfFIN*DIfWAT(I)) + (DIRINT(I)
-     &         *(1.0 - DIfWAT(I))))*BEERS
+     &         *(1.0 - DIfWAT(I))))*BEERS(I)
             Else If (WATTSM(I).GT.0.0) then
-              BEERS = (1 - EXP(-LCAI*CEC))
-              PARINT(I) = COVER*BEERS
-              RADINT(I) = COVER*BEERS
+              BEERS(I) = (1 - EXP(-LCAI*CEC))
+              PARINT(I) = COVER*BEERS(I)
+              RADINT(I) = COVER*BEERS(I)
             Else
                PARINT(I) = 0.0
                RADINT(I) = 0.0
@@ -766,6 +755,8 @@ C
 C     Further we have hourly calculations
 C
 55    If(abs(time-tNext(ModNum)).lt.0.001*Step) then
+          
+        SurWeatherUpdate=1
 c 55    If(abs(t-tAtm).gt.St) goto 1001
         ITIME=int(MOD(t+St,1.)/PERIOD+1)
 C
@@ -797,18 +788,13 @@ C  THE TOTAL RADIATION FALLING ON THE SOIL IS ASSUMED TO BE
 C  CONCENTRATED ON THE EXPOSED SOIL CELLS AND AN EQUIVALENT
 C  TOTAL RADIATION IS CALCULATED
 C
-cdt        If (Cover.lt.0.97) then
+         If (Cover.lt.0.97) then
 C
-          D11 = WATTSM(ITIME)
-cdt      in glycim, radint is not used for soil evaportion
-cdt     &   *(1.0 - RADINT(ITIME))*(1.-COVER)
-          
-cdt   original above was correct
-cdt     &   *(1.0 - RADINT(ITIME))/(1.-COVER)
-c
-cdt        Else
-cdt         D11=0.
-cdt        Endif
+             D11 = WATTSM(ITIME)
+
+          Else
+              D11=0.
+          Endif
 c
 c  MARCH ALONG THE SURFACE TO FIND SOIL-ATMOSPHERE BOUNDARY NODES
 c  AND THEIR LATERAL COORDINATES
@@ -824,6 +810,8 @@ c
           Endif
         Enddo
         Call SORT03(ic,xS,iS,kS)
+cccz Dennis: your basic assumption is horizontal distance from origin in the input is not sorted
+cccz so if you use KS, then use the surface node index / node index based on KS
 C
 C initialize boundary values to 0
          Do i=1, NumBP
@@ -834,7 +822,7 @@ C initialize boundary values to 0
         Enddo
         Do 90 i=1,ic
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
-
+cccz this PSh expression is different from the hour.for one, and it has stronger lower boundary
           PSh=max(0.0,FSh(i,xBSTEM,SHADE,xS,ic))
 c
 c  IF THE NODE IS EXPOSED THEN
@@ -843,6 +831,7 @@ c
 C
 C  CALCULATE THE ALBEDO OF THE EXPOSED SOIL CELLS
 C
+cccz parameter difference here, comparing to the hour.for
               LAMDAS = 0.3 - 0.5*ThNew(iS(i))
 C
 C  CALCULATE NET RADIATION ON THE EXPOSED SOIL CELLS
@@ -856,7 +845,10 @@ C note that Penman's original wind function was F(u)=0.26(1+0.54u)
 C the 0.54 is a function of temperature and pressure
 C  where windspeed was in m s-1 and et mm d-1 cm-2 and e in mb
 C  109.375 = 0.26 * (10000*10)/24/10 (0.26 has probably been truncated)
-
+C
+C note the original Penman eqn wind function was 0.26*(1+u/160) where
+C windspeed (u) was km/day here we use km/hour so you divide 1/160 by 24 
+C gives you the .149
 
 C See eqn 5.11 of http://mepas.pnnl.gov/mepas/formulations/source_term/5_0/5_13/5_13.html
               D12 = max(1.0,2.0-(2.0*COVER))
@@ -873,8 +865,8 @@ c
 c  ELSE IF THE NODE IS COVERED
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
 c
-c          Else
-c            VarBW(kS(i),2)=0.
+          Else
+            VarBW(kS(i),2)=0.05*24.*ESO/10000.
           Endif
 c                Endif for the surface nodes
  90     Continue
@@ -950,6 +942,7 @@ c................... Precipitation and irrigation
       n=KXB(i)
       k=CodeW(n)
       If(K.eq.4.or.K.eq.-4) then
+cccz         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
        If(NumSol.ne.0) then
           do j=1,NumSol
@@ -960,8 +953,9 @@ cdt was varbs(n,j)
 *         
          VarBW(i,3)=VarBW(i,2)-VarBW(i,1)
          Q(n)=-Width(i)*VarBW(i,3)        ! positive if rainfall-> going into the soil
-         if (Q(n).gt.0.0) CodeW(n)=-4
-*
+         if (Q(n).gt.0.0)  then
+           CodeW(n)=-4
+          Endif
        Endif
        Enddo
 c................... End of the precipitation and irrigation
@@ -971,26 +965,38 @@ C
 CYAP
 CDT - added FELWR based on changes from temperature paper
 C FCSH is the constant for sensible heat transfer 
-C FELWR is the coefficient for radiant heat lost when the 
-C soil is warmer than the air.
+
       FCSH=(4.0E-3+1.39E-3*Wind*max(1.0,2.0-(2.0*COVER)))
       FCSH=FCSH*4.1856*60.0*24.0
+      
+C FELWR is the coefficient for radiant heat lost when the 
+C soil is warmer than the air.      
       FELWR=6.8E-03+9.0E-05*Tair(Itime)
       FELWR=FELWR*4.1856*60.0*24.0
+* units are Joules cm-2 d-1 C-1
 CYAPEND
 C units are changed from cal cm-2 min-1 C-1 -->J cm-2 d-1 C-1
       cWat=4.1856
       TairN=Tair(Itime)
-c    conversion factor 
-c 8.64 = 3600 * 24 / 10,000 ; J m-2 s-1--> J cm-2 d-1
-      Do i=1,NumBP
-        n=kxb(i)
+c  MARCH ALONG THE SURFACE TO FIND SOIL-ATMOSPHERE BOUNDARY NODES
+c  AND THEIR LATERAL COORDINATES
+c
+
+      
+c  MARCH ALONG THE SURFACE TO FIND SOIL-ATMOSPHERE BOUNDARY NODES
+c  AND THEIR LATERAL COORDINATES
+c
+      Do 95 i=1,ic
+        PSh=FSh(i,xBSTEM,SHADE,xS,ic)
+        n=kS(i)
         k=codeT(n)
-        VarBT(i,3)=0.0
-        VarBT(i,2)=0.0
-         VARBT(i,4)=0
+        Varbt(kS(i),4)=0.0
+        VarBT(kS(i),3)=0.0
+        VarBT(kS(i),2)=0.0
+
         If (k.eq.-4) then
-          If(abs(x(n)-xBSTEM).ge.SHADE.or.NShoot.eq.0) then
+C     if node is exposed         
+          If((PSh.gt.0).or.(NShoot.eq.0)) then
 * If evaporation
 * calc heat flux due to latent heat of evaporation 
 * given evaporation at it's potential rate
@@ -998,56 +1004,52 @@ c 8.64 = 3600 * 24 / 10,000 ; J m-2 s-1--> J cm-2 d-1
 * RNS*3600*24/10000 is total energy going to soil in J day-1 cm-2
 C           FELWR=max(0.0,(tmpr(i)-TairN)*40.6)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(i,4)=RNS*3600.0*24.0/10000.0
+                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
 
-CDT            If (VarBW(i,3).ge.0.0) then
-CDT               VarBT(i,3)=VarBW(i,3)*(2500.8-2.3668*TairN)
-CDT            Endif
-* calculate potential heat input due to precipitation
-cdt heat input due to rain is done now for both shaded and bare together
-* was else if
-*             If (VarBw(i,3).lt.0.0) then
-*                 VarBT(i,3)=VarBT(i,3)-VarBW(i,3)*CWat
-*               Endif
-*  calculate convected heat
-cdt added FELWR from temperature paper results
-cdt 11/2/2016 removed summation for varbt Now is consistent with hourly
-                 VarBT(i,3)=(FCSH+FELWR)*TAirN  
-                 VarBT(i,2)=FCSH+FELWR
+*  calculate convected heat  if soil is warmer than air
+* FELWR should be zero when TAirN is warmer than soil
+              if(tmpr(kS(i)).GT.TAirN) then
+                VarBT(kS(i),2)=+FCSH+FELWR
+                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
+              endif
+C See if sensible heat transport works here in canopy              
+              TFac=((0.058+1.7e-4*TAirN)+
+     !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
+               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
+               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
+
+         else
                     
-          else 
-*  parameters beneath the canopy
 *  the amount of heat added to the soil
 *     is determined by air temperature.
-*  units are millcal m d-1 C-1
-              
-               VarBT(i,2)=((0.058+1.7e-4*TAirN)+
+*  units are millcal cm-2 sec-1 C-1
+               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
-
+* the first term is thermal conductivity of the air. 
+* the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
-cdt changed 3600 to 60 based on temperature paper
-cdt 11/2/2016 check to see if we need the 100.
-               VarBT(i,2)=VarBT(i,2)*4.1856/100.0*3600*24
-* cdt for now use a constant 62.6 cal /sec /cm /C
-* use 3600*4.184 as conversion
-* units are J cm-1 d-1 oC (thermal cond of air)
-*               VarBT(i,2)=2.05
-               VarBT(i,3)=VarBT(i,2)*(TairN)
+
+               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
+               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
+
+Cdt and a part for radiative transfer               
+               if(tmpr(kS(i)).GT.TAirN) then
+                 VarBT(kS(i),2)=VarBT(kS(i),2)+(FCSH+FELWR)
+                 VarBT(kS(i),3)=VarBT(kS(i),3)+(FCSH+FELWR)*TAirN
+                  endif
+c assume 5% of radiation reaches soil surface through canopy              
+              fact=1.0-BEERS(ITIME)
+              if (fact.LE.0) fact=0
+              if (fact.GT.1.0) fact=1.0
+              VarBT(kS(i),4)=fact*RNS*3600.0*24.0/10000.0
+              
 *  units are now J cm-2 d-1
-
-
 * end if for crop canopy
           Endif
-* Endif in or out of canopy
-cdt modified statements after 'then' to add heat content of rain
-*  heat into soil with rain 
-             If(VarBW(i,3).lt.0.0) then          
-                  VarBT(i,3)=VarBT(i,3)+VarBW(i,3)*cWat*TAirN
-                  VarBT(i,2)=VarBT(i,2)+VarBW(i,3)*cWat
-               Endif
-       VarBT(i,1)=TAirN
+ 
+          VarBT(kS(i),1)=TAirN
         Endif
-       Enddo
+95    Continue
 C ...............End of heat balance
 c................... Gas movement
       Do i=1,NumBP
@@ -1087,6 +1089,7 @@ c  this won't work as written
 c................... End of the furrow irrigation
       RETURN
 10    call errmes(im,il)
+       write(*,*) "Error in Weather File"
       END
 C
       Subroutine SORT03(N,ARR1,iARR2,iARR3)

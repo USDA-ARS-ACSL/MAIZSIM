@@ -1,9 +1,8 @@
 //cpmdate.cpp
 #include "stdafx.h"
 #include "cpmdate.h"
-#include <cstdio>
 #include <cmath>
-
+#include <cstdio>
 CPMDate::CPMDate()
 {
 }

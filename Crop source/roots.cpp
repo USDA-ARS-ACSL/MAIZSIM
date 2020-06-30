@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Roots.h"
+#include "roots.h"
 
 CRoots::CRoots(void)
 {

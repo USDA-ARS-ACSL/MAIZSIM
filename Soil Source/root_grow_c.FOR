@@ -1,5 +1,5 @@
 *|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
-      Subroutine Rootgrow_New ()
+      Subroutine Rootgrow()
       Include 'public.ins'
       Include 'puplant.ins'
       Dimension iLoc(4)
@@ -126,16 +126,54 @@ c
 c  Root growth correction by soil matric potential
 c
       bet=0.0028
-      psi_thr=-860.
-      if (PSI.LT.psi_thr) then
-          aux=0.0
+      psi_thr=-500.0D0
+      psi_ths=-150.0D0
+      If (PSI.GT.psi_ths) then
+          aux=1.0D0
+      elseif (PSI.LT.psi_thr) then
+          aux=0.0D0
       else
-          aux=1-exp(bet*(psi_thr-PSI))
-      EndIf
-      f1=aux
+          pi=4.D0*DATAN(1.D0)
+          aux=0.5D0*sin(pi/(psi_ths-psi_thr)
+     !      *(PSI-0.5D0*(psi_ths+psi_thr)))+0.5D0
+      endif
+      f1=min(max(aux,0.0D0),1.0D0)
       Return
       End
 *
 CDT took out functions for f1 and f2 that adjusted  root diffusion coefficients based
 C  on soil properties. This is all done here via carbon allocation
 C AD took out subroutine SORT, and kept it in carbon_partitioning
+cccz add f1 f2 and f3 back for root diffusion coef correction
+      
+      Function f2(TMP)
+c
+c  Root growth correction by soil temperature
+c
+      q=1.0D0
+      p=10000.0D0
+      u=18000.0D0
+      t0=295.0D0
+      t=TMP+273.0D0
+      tlim=290.0D0
+      if (t.gt.t0) then
+          aux=max((1+exp(q-u/t0))*exp(p/t-p/t0)/(1+exp(q-u/t)),1.0D0)
+      elseif (t.lt.tlim) then
+          t=t0+tlim-t
+          aux=max((1+exp(q-u/t0))*exp(p/t-p/t0)/(1+exp(q-u/t)),1.0D0)
+      else
+          aux=1.0D0
+      endif
+      f2=max(min(aux,1.0D0),0.0D0)
+      Return
+      End
+*
+      Function f3(RTD)
+c
+c  Root growth correction by root density
+c
+      Ymax=200.0D0
+      aux=AMAX1(1.-RTD/Ymax,0.0D0)
+      f3=aux
+      Return
+      End

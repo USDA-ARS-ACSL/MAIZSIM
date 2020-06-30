@@ -52,10 +52,16 @@
     <ClCompile Include="timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="solar.cpp">
+    <ClCompile Include="weather.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="radtrans.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="solar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gas_Ex_Species_param.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -96,12 +102,6 @@
     <ClInclude Include="plant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="radiation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Roots.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -123,18 +123,18 @@
     <ClInclude Include="thermaltime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h" />
+    <ClInclude Include="resource1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="radtrans.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="solar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram.cd" />
-    <None Include="ClassDiagram2.cd" />
+    <ClInclude Include="Gas_Ex_Species_param.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -142,9 +142,12 @@
       <Extensions>*.h</Extensions>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{4f11584d-589f-4d8b-a033-a430e4a158fa}</UniqueIdentifier>
+      <UniqueIdentifier>{549421a9-22ed-42aa-97f7-1f993c8e0bf1}</UniqueIdentifier>
       <Extensions>*.cpp</Extensions>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Crop.rc" />

@@ -12,15 +12,20 @@ C dt 7/2014 added Bulk Density and soil texture to soil file. They are
 C  read here
 C 12/ 2015 made TUpperLimit and TLowerLimit arguments so they could be used in the main program
 C 
-      subroutine SetMat(lInput,NumNP,hNew,hOld,NMat,MatNum,Con,Cap,
+      subroutine SetMat(lInput,NumNP,hNew,hOld,NMat,
+     &                   MatNum,Con,Cap,
      &                  BlkDn,hTemp,Explic,Theta,hTab1,hTabN,
      &                  hSat,ThSat,ThR, ThAvail,ThFull,
      &                  FracOM, FracSind, FracClay,
      &                  TupperLimit, TLowerLimit,SoilFile)
       Logical Explic
+ !InitType allows us to input water content(w) or head (m) as an initial condition
       character SoilFile*132
+      ! or character*1 InitType(5)
       Real BldDn
       Parameter (NTabD=100,NPar=13,NMatD=15)
+      character*1, dimension(NMatD)::InitType
+
       Common /HydPar/ Par(NPar,NMatD),
      !                hTab(NTabD),ConTab(NTabD,NMatD),
      !                CapTab(NTabD,NMatD),ConSat(NMatD),
@@ -32,6 +37,18 @@ C
      !           ThFull(NMatD),BlkDn(NMatD),
      !          FracOM(NMatD), FracSind(NMatD), FracClay(NMatD),
      !          TUpperLimit(NMatD),TLowerLimit(NMatD)
+c   parameters:
+c         1  thr
+c         2  ths
+c         3  tha
+c         4  th
+c         5  Alpha
+c         6  n
+c         7  ks
+c         8  kk
+c         9  thk
+c         10  BD
+         
       If(lInput.eq.1) then
         im=60
         il=0
@@ -45,7 +62,7 @@ C
         im=im+1
         Do 11 M=1,NMat
           il=il+1
-          Read (40,*,ERR=10) (Par(i,M),i=1,NPar) 
+          Read (40,*,ERR=10) (Par(i,M),i=1,NPar),InitType(M) 
 11      Continue
         Close(40)
         hTab1=-amin1(abs(hTab1),abs(hTabN))
@@ -58,6 +75,20 @@ c
           hTab(i)=-10**alh
 12      Continue
         hTab(NTabD)=hTabN
+c calculate MP from water content if wc is given as an initial
+        do n=1, numNP
+           if (InitType(MatNum(n)).eq."w") then  ! need to calculate hnew thnew is ok
+             mm=MatNum(n)
+             VG_m=(1-1/(par(6,mm)))*(-1)
+             thetaRel=(hNew(n)-par(1,mm))/(par(2,mm)-par(1,mm))
+             hNew(n)=(ThetaRel**(1/Vg_m))**(1/par(6,mm))-1
+             hNew(n)=hNew(n)/par(5,mm) * (-1)
+           endif
+         enddo
+         Do n=1,NumNP
+            hTemp(n) = hNew(n)  ! need to assign here since we are creating new values of hnew
+            hOld(n)=hTemp(n)
+          Enddo
         Do 14 M=1,NMat
           Hr          =FH(0.0,Par(1,M))
           hSat(M)     =FH(1.0,Par(1,M))
@@ -87,7 +118,7 @@ C     get it by difference
            
 13        Continue
 14      Continue
-      Endif
+      Endif  !lInput=1
       Do 15 i=1,NumNP
         M=MatNum(i)
         hi1=amin1(hSat(M),hTemp(i))
@@ -262,3 +293,5 @@ C calculate available water content
       FH=max(-1./Alfa*(Qee**(-1./m)-1.)**(1./n),-1.d37)
       return
       end
+
+************************************************************************

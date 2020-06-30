@@ -34,7 +34,7 @@ c   will be transferred.
      !          GeometryFile*132,SurfaceGraphics*132,
      !          FluxGraphics*132,MassBalanceFile*132,
      !          MassBalanceFileOut*132,LeafGraphics*132,
-     !          RunFile*132
+     !          RunFile*132, MassBalanceRunoffFileOut*132
       Common /grid_public/  NumNP, NumEl, IJ, KAT, MBand,Nmat,
      !        KX(NumElD,4),x(NumNPD), y(NumNPD), Area(NumElD),
      !        nodeArea(NumNPD)
@@ -51,10 +51,10 @@ c   will be transferred.
       Common /bound_public/ NumBP, NSurf, NVarBW,NVarBS,NVarBT,NVarBG,
      !       NumSurfDat, NSeep, NSP(NSeepD), NP(NSeepD,NumSPD),
      !       NDrain,NDR(NDrainD),ND(NDrainD,NumDR),
-     !       KXB(NumBPD), 
+     !       KXB(NumBPD),
      !       CodeW(NumNPD),CodeS(NumNPD),CodeT(NumNPD),CodeG(NumNPD),
      !       PCodeW(NumNPD),Width(NumBPD),
-     !       VarBW(NumBPD,3),VarBW_Old(NumBPD,3),
+     !       VarBW(NumBPD,3),
      !       VarBS(NumBPD,NumSD),VarBT(NumBPD,4),
      !       VarBG(NumBPD,NumGD,3),EO,Tpot
       Common /time_public/tNext(NumModD),dtMx(4),Time,Step,dtOpt, 
@@ -83,13 +83,13 @@ c   will be transferred.
      !          NodeGraphics,ElemGraphics,NodeGeomFile,
      !          GeometryFile,SurfaceGraphics,
      !          FluxGraphics, MassBalanceFile,MassBalanceFileOut,
-     !          LeafGraphics,RunFile
+     !          LeafGraphics,RunFile, MassBalanceRunoffFileOut
+
      
 c the following blocks are not passed to the crop model
        Common /Nodal_pub_Aux/ ROForInfil(NumBPD)
        
        Common /Materials/BlkDn(NMatD),FracSind(NMatD), FracClay(NMatD),
      !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD)
-     
-      
+             
 	  

@@ -1,5 +1,5 @@
 c|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||c
-      Subroutine WaterUptake_New ()
+      Subroutine WaterUptake()
       Include 'public.ins'
       Include 'puplant.ins'
       Integer n,n1,SW10,SW20,SW30,SW40

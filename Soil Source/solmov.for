@@ -1,4 +1,4 @@
-      subroutine SoluteMover_New ()
+      subroutine SoluteMover()
       Include 'public.ins'
       Include 'puplant.ins'
       Double precision A,B,C,P,Sum,dt1,dt2

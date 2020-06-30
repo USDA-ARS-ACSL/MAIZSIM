@@ -36,6 +36,8 @@ public:
 	int get_totalLeaves() {return (int) totLeafNo;} // removed +1 that was previously here to count only those leaves fully initiated, SK 1-19-12
 	//double get_totalLeaves() {return totLeafNo;} // take the value as double , SK 1-19-12
 	double get_phyllochronsFromTI() {return phyllochronsFromTI;}
+	double get_phyllochronsToSilk() { return PhyllochronsToSilk; }
+	double get_progressToAnthesis() { return progressToAnthesis; }
 	double get_stayGreen() { return stayGreen; }
 	double get_LM_min() { return LM_min; }
 	double get_LvsAtTI() {return LvsAtTI;}
@@ -93,7 +95,8 @@ private:
 	double T_base, T_opt, T_ceil, T_cur, T_avg, T_grow, T_grow_sum, T_ind, T_air; // T_grow: mean temperature of the growing season from day 1 up to now, SK
 	double totLeafNo, LvsToInduce, juvLeafNo, LvsAtTI, phyllochronsFromTI; //number of total, juvenile (genetic coeff) lvs, and lvs appeared at tassel initiation
 	double P2; //photoperiod sensitivity as used in CERES-Maize
-	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded, Anthesis, tasselDone, inductionPeriod;
+	double GerminationRate, EmergenceRate, LvsInitiated, LvsAppeared, LvsExpanded;
+	double progressToAnthesis, progressToTasselEmerg, inductionPeriod;
 	int initLeafNo,  youngestLeaf, curLeafNo, inductions; 
 	double PhyllochronsToSilk; // number of phyllochrons past tassel initiation when silking takes place
 	double PhyllochronsToTassel; // number of phyllochrons past tassel initiation when tassels are fully emerged

@@ -1,3 +1,5 @@
+Note that the dev branch is used to hold recent code. When the code is synced with UW versions it will be merged with the master branch
+
 MAIZSIM is a corn simulation model developed by the USDA-ARS Adaptive Cropping Systems Laboratory and Univ. of Washington School of Environmental and Forest Sciences. 
 
 The developers are 

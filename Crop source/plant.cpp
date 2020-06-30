@@ -17,7 +17,7 @@
 using namespace std;
 
 
-CPlant::CPlant(const TInitInfo& info )
+CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 {
 	nodalUnit = NULL;
 	ear = NULL;
@@ -62,21 +62,26 @@ CPlant::CPlant(const TInitInfo& info )
 	sowingDay = 1.0;
 	age = 0.0;
 	initInfo = info;
+	gasExparam = photoparam;
 	roots = new CRoots();
 	ear = new CEar();
 	develop = new CDevelopment(initInfo);
 	nodalUnit = new CNodalUnit[initInfo.genericLeafNo+10]; // create enough leaf nodes for now, to be replaced by dynamic collection
-	for (int i=0; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile
+	for (int i=1; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile, should start at 1
 	{
 		nodalUnit[i].initialize(i, develop);
 		nodalUnit[i].get_leaf()->set_mass(leafMass/PRIMORDIA); //assing initial mass for each primordium
        	nodeNumber = i;
 	}
+	nodalUnit[0].initialize(0, develop); //TODO nodalUnit[0] stores aggregated information on nodal units
+	                                     // but this is not a good way to do this, need this to be in the 
+	                                     //plant object but requires some rewrite
 	finalNodeNumber = info.genericLeafNo;
 	leafArea =greenLeafArea = actualGreenLeafArea = senescentLeafArea = potentialLeafArea = droppedLfArea = 0.0;
 	previousDroppedlfArea = currentDroppedLfArea = droppedLfArea = 0;
-	
-	temperature = develop->get_Tcur();
+	//  Tcur has not been defined yet
+	// initialize to 15
+	temperature = 15.0;
 	
 	photosynthesis_net = photosynthesis_gross = transpiration = transpirationOld = assimilate = 0.0;
 	     VPD = 0;
@@ -206,7 +211,7 @@ void CPlant::update(const TWeather & weather)
 	        calcPerLeafRelativeAreaIncrease();
 			calcLeafArea();
 			if (develop->Emerged())
-			    calcGasExchange(weather);
+			    calcGasExchange(weather, gasExparam); //TODO add gas exchange parameter structure
 
 			double c_pool1 = C_pool;
 			double c_pool2 = assimilate*CH2O_MW/CO2_MW; // convert from grams CO2 to grams carbohydrate (per hour per plant)
@@ -218,7 +223,7 @@ void CPlant::update(const TWeather & weather)
 		}
 		return;
 	}
-	else if(!develop->Dead())
+	else if(!develop->Dead()) //jumps here if emergence is done
 	{
 		emerge_gdd = develop->get_EmergeGdd(); //if the plant emergies, then pass the emerge_gdd value from the develop object into the plant object
 
@@ -317,7 +322,7 @@ void CPlant::update(const TWeather & weather)
 
 	if (greenLeafArea > 10)
 	    { 
-		     calcGasExchange(weather);
+		     calcGasExchange(weather, gasExparam);
 		}
 		
 		calcMaintRespiration(weather);
@@ -526,7 +531,7 @@ double CPlant::calcPotentialCarbondemand()
 	//PotentialCarbonDemand=carbondemand; //for now only carbon demand for leaf is calculated. 
 	return LeafMassDemand;
 }
-void CPlant::calcGasExchange(const TWeather & weather)
+void CPlant::calcGasExchange(const TWeather & weather, const TGasExSpeciesParam& photoparam)
 {
 	const double tau = 0.50; // atmospheric transmittance, to be implemented as a variable => done
 	const double LAF = 1.37; // leaf angle factor for corn leaves, Campbell and Norman (1998)
@@ -537,11 +542,8 @@ void CPlant::calcGasExchange(const TWeather & weather)
 	double activeLeafRatio = greenLeafArea/leafArea;
 	double LAI = greenLeafArea*initInfo.plantDensity/(100.0*100.0);
 
-	//CGas_exchange * sunlit = new CGas_exchange("Sunlit");
-	//CGas_exchange * shaded = new CGas_exchange("Shaded");
-
-	  CGas_exchange * sunlit = new CGas_exchange("Sunlit", this->leaf_N_content);
-	  CGas_exchange * shaded = new CGas_exchange("Shaded", this->leaf_N_content);
+    CGasExchange * sunlit = new CGasExchange("Sunlit", this->leaf_N_content, photoparam);
+    CGasExchange * shaded = new CGasExchange("Shaded", this->leaf_N_content, photoparam);
 
     CSolar *sun = new CSolar();
     CRadTrans *light = new CRadTrans();
@@ -565,22 +567,21 @@ void CPlant::calcGasExchange(const TWeather & weather)
     }
 	 	
 	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential LeafWP Y
-	    sunlit->SetVal_psil(sunlit_PFD, weather.airT, weather.CO2, weather.RH,
+	    sunlit->SetVal(sunlit_PFD, weather.airT, weather.CO2, weather.RH,
 	                weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
-	    shaded->SetVal_psil(shaded_PFD, weather.airT, weather.CO2, weather.RH,
+	    shaded->SetVal(shaded_PFD, weather.airT, weather.CO2, weather.RH,
 	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
-
 	
-	photosynthesis_gross = (sunlit->A_gross*sunlit_LAI + shaded->A_gross*shaded_LAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
-	photosynthesis_net = (sunlit->A_net*sunlit_LAI + shaded->A_net*shaded_LAI);//
+	photosynthesis_gross = (sunlit->get_AGross()*sunlit_LAI + shaded->get_AGross()*shaded_LAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
+	photosynthesis_net = (sunlit->get_ANet()*sunlit_LAI + shaded->get_ANet()*shaded_LAI);//
 	transpirationOld=transpiration;  // when outputting the previous step transpiration is compared to the current step's water uptake
 	transpiration=0;
-	if (sunlit_LAI > 0) transpiration=sunlit->ET*sunlit_LAI;
-	if (shaded_LAI > 0) transpiration+=shaded->ET*shaded_LAI;
+	if (sunlit_LAI > 0) transpiration=sunlit->get_Transpiration()*sunlit_LAI;
+	if (shaded_LAI > 0) transpiration+=shaded->get_Transpiration()*shaded_LAI;
 	transpiration=transpiration/(initInfo.plantDensity)*3600.0*18.01;//plantsPerMeterSquare units are grams per plant per hour ;
 	// Units of Transpiration from sunlit->ET are mol m-2 (leaf area) s-1
 	// Calculation of transpiration from ET involves the conversion to gr per plant per hour 
-	temperature = (sunlit->Tleaf*sunlit_LAI + shaded->Tleaf*shaded_LAI)/LAI;
+	temperature = (sunlit->get_LeafTemperature()*sunlit_LAI + shaded->get_LeafTemperature()*shaded_LAI)/LAI;
 	//psi_l = (sunlit->get_psi()*sunlitLAI + shaded->get_psi()*shadedLAI)/LAI;
 	this->VPD = sunlit->get_VPD();
 	// photosynthesis_gross is umol CO2 m-2 leaf s-1
@@ -591,7 +592,7 @@ void CPlant::calcGasExchange(const TWeather & weather)
 
 	if (sunlit_LAI != 0 && shaded_LAI !=0 && LAI !=0)
 	{
-		this->conductance=(sunlit->get_gs()*sunlit_LAI+shaded->get_gs()*shaded_LAI)/LAI; //average stomatal conductance Yang
+		this->conductance=(sunlit->get_StomatalConductance()*sunlit_LAI+shaded->get_StomatalConductance()*shaded_LAI)/LAI; //average stomatal conductance Yang
 		if (this->conductance<0)
 		{
 			conductance=0;
@@ -603,12 +604,12 @@ void CPlant::calcGasExchange(const TWeather & weather)
 		this->conductance =0;
 	}
     
-	sunlit_A_net = sunlit->A_net;
-	shaded_A_net = shaded->A_net;
-	sunlit_A_gross = sunlit->A_gross;
-	shaded_A_gross = shaded->A_gross;
-	sunlit_gs = sunlit->get_gs();
-	shaded_gs = shaded->get_gs();
+	sunlit_A_net = sunlit->get_ANet();
+	shaded_A_net = shaded->get_ANet();
+	sunlit_A_gross = sunlit->get_AGross();
+	shaded_A_gross = shaded->get_AGross();
+	sunlit_gs = sunlit->get_StomatalConductance();
+	shaded_gs = shaded->get_StomatalConductance();
 	 delete sunlit;
 	 delete shaded;
 	 delete sun;
@@ -650,7 +651,8 @@ void CPlant::C_allocation(const TWeather & w)
    // this is where source/sink (supply/demand) valve can come in to play
    // 0.2 is value for hourly interval, Grant (1989)
 	double scale = 0.0; // see Grant (1989), #of phy elapsed since TI/# of phy between TI and silking
-	scale = develop->get_phyllochronsFromTI()/(develop->get_youngestLeaf() - develop->get_LvsAtTI());
+	scale = develop->get_progressToAnthesis()/(develop->get_phyllochronsToSilk());
+	scale = min(1, scale);
 	//		if (w.time == 0.0) std::cout << scale << endl;
 
     C_supply = 0.0;  // daily mobilization of carbon
@@ -922,11 +924,11 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	const double maintCoeff = 0.018;
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
-	agefn=1.0;
+	//agefn=1.0;
 	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
 	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
-	maintRespiration = q10fn*maintCoeff*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
+	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 

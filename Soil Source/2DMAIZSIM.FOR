@@ -5,10 +5,12 @@
 *                                                                      *
 *                              Release 1.1.4                              *
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
+
       Include 'public.ins'
       include 'puplant.ins'
 	Include 'puweath.ins'
 	Include 'nitvar.ins'
+      Include 'pusurface.ins'
 	
 	character*132 RunDat
 	integer len, status
@@ -18,7 +20,6 @@
 	  RunFile=RunDat
 	  endif
 	  	
-! dt comment	
       Call Initialize()
       Call Get_Grid_and_Boundary()
 1     Call Synchronizer()
@@ -40,20 +41,28 @@ c      Call Drip()
       Starter=1.0D0
       Call CROP(PCRL,MSW1, NumNP,NumSol,Sink(1),
      !      NumBP,TNext(1),NumMod,Starter)
-      Call Carbon_Partitioning_New()   
-      Call Rootgrow_New()
-      call Root_Mover_New()
-      Call WaterUptake_New()
-      Call SoluteUptake_New()
+      Call Carbon_Partitioning()   
+      Call Rootgrow()
+      call Root_Mover()
+      Call WaterUptake()
+      Call SoluteUptake()
       Call GasUptake()
-     
-      Call WaterMover_New()
-      Call SoluteMover_New()
+      
+c      Call SetBoundary()
+cccz here we start to add surface process
+cccz surface water
+      Call Surface_Water_Balance_Adjustment()
+cccz surface mulch (physical perspective)
+c      Call Surface_Mulch_Process()
+      
+      Call WaterMover()
+      Call SoluteMover()
       Call HeatMover()
       Call GasMover()
       Call SoilNitrogen()
-      Call MacroChem()
-c      Call MassBl() 
+C      Call MacroChem()
+c      Call Water_Mass_Balance() 
+c       Call MassBl() ?
       if (outputSoilYes.gt.0) then 
          Call Output()
         endif
