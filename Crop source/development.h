@@ -38,6 +38,7 @@ public:
 	double get_phyllochronsFromTI() {return phyllochronsFromTI;}
 	double get_phyllochronsToSilk() { return PhyllochronsToSilk; }
 	double get_progressToAnthesis() { return progressToAnthesis; }
+	double get_PhyllochronsToTassel() { return PhyllochronsToTassel; }
 	double get_stayGreen() { return stayGreen; }
 	double get_LM_min() { return LM_min; }
 	double get_LvsAtTI() {return LvsAtTI;}
