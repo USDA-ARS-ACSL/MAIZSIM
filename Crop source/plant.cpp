@@ -222,8 +222,9 @@ void CPlant::update(const TWeather & weather)
 			setMass();
 		}
 		return;
-	}
+	} //end not emerged
 	else if(!develop->Dead()) //jumps here if emergence is done
+		                      //code for above ground lifecycle
 	{
 		emerge_gdd = develop->get_EmergeGdd(); //if the plant emergies, then pass the emerge_gdd value from the develop object into the plant object
 
@@ -327,13 +328,12 @@ void CPlant::update(const TWeather & weather)
 		
 		calcMaintRespiration(weather);
 		C_allocation(weather);
-		//	C_allocation(weather, potentialCarbonDemand); //Calculating carbon allocation with carbon demand known YY
-		if (abs(weather.time)<0.0001)
+		if (abs(weather.time)<0.0001) //midnight activity
 		{
 			C_reserve += __max(0, C_pool);
 			C_pool = 0.0; //reset shorterm C_pool to zero at midnight, needs to be more mechanistic
 		}
-		else
+		else  //all other parts of the day
 		{
             C_pool += assimilate*CH2O_MW/CO2_MW; // convert from grams CO2 to grams carbohydrate (per hour per plant)
 		}
@@ -651,7 +651,12 @@ void CPlant::C_allocation(const TWeather & w)
    // this is where source/sink (supply/demand) valve can come in to play
    // 0.2 is value for hourly interval, Grant (1989)
 	double scale = 0.0; // see Grant (1989), #of phy elapsed since TI/# of phy between TI and silking
-	scale = develop->get_progressToAnthesis()/(develop->get_phyllochronsToSilk());
+	double lfFact = develop->get_youngestLeaf() - develop->get_LvsAtTI();
+	scale = develop->get_phyllochronsFromTI() / (lfFact + develop->get_PhyllochronsToTassel());
+	 //+develop->get_phyllochronsToSilk());
+	//scale = develop->get_phyllochronsFromTI() / (develop->get_youngestLeaf() - develop->get_LvsAtTI());
+	double t1 = develop->get_progressToAnthesis();
+	double t2 = develop->get_phyllochronsFromTI();
 	scale = min(1, scale);
 	//		if (w.time == 0.0) std::cout << scale << endl;
 
@@ -756,11 +761,11 @@ void CPlant::C_allocation(const TWeather & w)
 	   huskPart = 0.0;
 	   cobPart = 0.0;
 	   grainPart = 0.0;
-   }
+   } //end not tasselinitiated
 	
    else if (!develop->GrainFillBegan())
    {
-		//C partitioning
+		//C partitioning - this is already calculated above, should remove as it is repition
 	shootPart = __max(0,Yg*((Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
 	//Everything is partitioned to the shoot after grain filling begins. I removed Fraction from the Equation above
 	rootPart = __max(0,Yg*((1-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
@@ -814,7 +819,7 @@ void CPlant::C_allocation(const TWeather & w)
 			double sum=cobPart+huskPart+leafPart+stalkPart+sheathPart;
 			reservePart=__max(0,shootPart-sum);
 		}
-   }
+   } //end not grainfill begin
    else if (!develop->Dead())//no acutally kernel No. is calculated here ? Yang, 6/22/2003
    {
        // here only grain and root dry matter increases root should be zero but it is small now. 
