@@ -175,6 +175,9 @@ C calculate available water content
       double precision n,m,Ks,Kr,Kk
       real h,Par(12)
       integer PPar
+      
+cccz 
+      double precision wzja,wzjb,wzjc
 
       BPar=.5
       PPar=2.
@@ -201,7 +204,11 @@ C calculate available water content
         FFQ =1.-(1.-Qee**(1./m))**m
         FFQk=1.-(1.-Qeek**(1./m))**m
         if(FFQ.le.0.d0) FFQ=m*Qee**(1./m)
-        Kr=(Qe/Qek)**Bpar*(FFQ/FFQk)**PPar*Kk/Ks
+        wzja=((Qe/Qek)**Bpar)
+        wzjb=(FFQ/FFQk)
+        wzjb=wzjb**PPar
+        wzjc=Kk/Ks
+        Kr=((Qe/Qek)**Bpar)*((FFQ/FFQk)**PPar)*Kk/Ks
         FK=max(Ks*Kr,1.d-37)
         return
       endif

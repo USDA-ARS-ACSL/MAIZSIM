@@ -127,6 +127,7 @@ c
         ModNum=NumMod
         tNext(ModNum)=time
         Interval=1/24.
+        IRAV=3.5 !default for autoirrigate
 
 c
       im=160
@@ -163,21 +164,20 @@ C
       Read (5,*,ERR=10)
       im=im+1
       il=il+1
-       ISOL=NumSol*Movers(2) ! Movers(2) is the solute mover
-       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
-cdt 10/25/2007 changed from 1-MSW4
+      Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
 c     if the BC for solute are 0 in the grid file, movers(2) at this point
-c     will also be 0 such that ISOL will be 0
-      ISOL=NumSol*(MSW4)*Movers(2)
+c     will also be 0 such that ISOL will be 0, removed movers(2)
+      ISOL=NumSol*(MSW4)
+      AutoIrrigAmt=IRAV*BIR
 cdt  9/10/2014 added CO2 as a weather variable. Made this line consistent
 Cdt   with the same line from the daily weather file 
 CDT    TODO this needs to be tested fully
 CDT  1/2016 fix for dew point and co2
 CDT  this line determines what is read from the last line in the climate file - this last line contains averages to be
 CDT  used when daily/hourly values are not available. 
-CDT at the minimum (for hourly) ncd will be three - wind, irav, CO2, because only these three have average values
+CDT at the minimum (for hourly) ncd will be three - wind, CPrec, CO2, because only these three have average values
 CDT to be used in the program.  
-
+CDT and irav is not needed for hourly data
 CDT columns should be ordered as in the msw indices in the climate file
 CDT  hourly bulb, hourly wind, hourl rain intensity, hourly concentration, hourly furrow, hourly
 CDT  relative humidity, hourly CO2. For now we will only consider one solute in the 
@@ -190,7 +190,7 @@ C   we can have potentially 3 columns for additional data
 C  if hourly data are missing
 C    average wind, avg chem conc and average CO2
 C    so, if hourly wind is missing and we use an avg value MSW2 will be 0
-      NCD=(2+isol)-MSW2-MSW7-MSW4*iSol
+       NCD=3-MSW2-MSW7-MSW4*iSol ! no irav for hourly data
 C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
@@ -201,10 +201,12 @@ C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
       im=im+1
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
-      IF(MSW2.eq.0) WINDA=CLIMAT(1)     
-      IF(MSW4.eq.1.AND.NumSol.gt.0) then
+      IF(MSW2.eq.0) WINDA=CLIMAT(1)    
+c if MSW4=0 then we need an average value so have to
+c  read at least one value from the line
+      IF(MSW4.eq.0.AND.NumSol.gt.0) then
         Do i=1,NumSol
-          CPREC(i)=CLIMAT(MSW2+MSW3+i) ! should be 1 or 2 if no irav or winda and one or two solutes
+          CPREC(i)=CLIMAT(3-MSW2-i) ! should be 1 or 2 if no irav or winda and one or two solutes
         Enddo
       Endif
 
@@ -216,7 +218,8 @@ C      NCD=1-MSW2+ISOL+(NumG+1)*Movers(4)
 C
 C Total number of weather data
 C     minimum of three columns for radiation, temperature and rainfall (should always be first three) for hourly
-C    2*MSW1=TWET, TDRY; MSW2=wind; number of solutes * MSW4, MSW6=RH, MSW7=CO2  
+C    2*MSW1=TWET, TDRY; MSW2=wind; number of solutes * MSW4, MSW6=RH, MSW7=CO2 
+c    we don't use MSW3 for hourly data
       NCD=3+2*MSW1+MSW2+ISOL*MSW4+MSW6+MSW7
 C
 C     Nodal numbers of furrow nodes
@@ -265,7 +268,6 @@ C
 1111  il=il+1
       Read (5,*,ERR=10) iDum, date, iDum
       MDAY=julday(date)
-C       MDAY = 38065
 cdt changed from LE to LT since jday was always gt. time
       If (MDAY.LT.JDFRST) GO TO 1111
       backspace(5)
@@ -323,14 +325,21 @@ C    since the julian day is referenced to a time longer in the past
            HRAIN(M) = CLIMAT(3)*erain         ! convert to cm rain in 
                                               ! this hour
            If (MSW2.gt.0) HWIND(M)=CLIMAT(4)
+           
+          If (MSW4.GT.0.AND.NumSol.ne.0) then
+             Do i=1,NumSol
+               CPREC(i)=CLIMAT(3+2*MSW1+MSW2+i)
+             Enddo
+        Endif
            If(MSW6.gt.0) then 
-             Rel_Humid(m)=Min(Climat(3+2*MSW1+MSW2+ISOL*MSW4+MSW5+MSW6)
-     #              /100.,0.98)
+             Rel_Humid(m)=
+     &        Min(Climat(3+2*MSW1+MSW2+ISOL*MSW4+MSW6)
+     &           /100.,0.98)
             endif
          enddo
 
        If(MSW7.gt.0) then
-          CO2=Climat(3+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)
+          CO2=Climat(3+2*MSW1+MSW2+ISOL*MSW4+MSW6+MSW7)
        EndIf
 
 

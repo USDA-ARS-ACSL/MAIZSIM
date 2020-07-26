@@ -71,7 +71,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "USDA-ARS-ACSL"
 #ifdef _DEBUG			
-            VALUE "FileDescription", "MZS with genetic input used in phase 1 of ET DBG"
+            VALUE "FileDescription", "MZS with genetic input with mulch model"
 #else
             VALUE "FileDescription", "MZS with genetic input used in phase 1 of ET RLS"
 #endif			
