@@ -61,9 +61,9 @@ c    Open and read initials file
         read(41,*,err=8)
         read(41,*,err=8) LATUDE, Longitude, Altitude
         read(41,*,err=8)  
+     
 cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'        
-        read(41,*,err=8) AutoIrrAmt
-        if (AutoIrrAmt.GT.0)  AutoIrrigateF=1
+        read(41,*,err=8) AutoIrrigateF
         read(41,*,err=8) 
         read(41,'(A80)',err=8) inDates
         beginDate=0

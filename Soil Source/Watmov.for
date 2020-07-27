@@ -97,6 +97,16 @@ C
       tOld = Time
       t=Time
       dt=Step
+      
+cccz set the auto irrgation part before the iteration
+      do k=1, NumBp
+        i=KXB(k)
+        if(abs(CodeW(i)).eq.4) then
+           Q(i)=Q(i)+Qautoirrig(i)
+           if (Q(i).gt.0.0) CodeW(i)=-4  !cccz make sure bc changes if Qn goes > 0 (infiltration) after adding the autoirrigation
+        endif
+      enddo
+      
 
      
 c

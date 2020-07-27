@@ -146,10 +146,13 @@ C
       im=im+1
       il=il+1
       Read (5,*,ERR=10) BSOLAR,BTEMP,ATEMP,ERAIN,BWIND,BIR
-      ISOL=NumSol*Movers(2)
+c      ISOL is definined in Grid_bnd
+c       assume there is only one solute (NumSol=1)
+      ISOL=NumSol*(MSW4)
  
 c      the four basic variables are Daily wind, rain intensity daily concentration and co2     
-      NCD=(3+isol)-MSW2-MSW3-MSW7-MSW4*iSol
+c      we can have average values for the site for
+      NCD=4-MSW2-MSW3-MSW7-MSW4*iSol
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -160,10 +163,12 @@ c      the four basic variables are Daily wind, rain intensity daily concentrati
       il=il+1
       Read(5,*,ERR=10) (CLIMAT(i),i=1,NCD)
       IF(MSW2.eq.0) WINDA=CLIMAT(1)
-      IF(MSW3.eq.0) IRAV =CLIMAT(MSW2+MSW3)
-      IF(MSW4.eq.1.AND.NumSol.gt.0) then
-        Do i=1,NumSol
-          CPREC(i)=CLIMAT(MSW2+MSW3+MSW4*i)
+      IF(MSW3.eq.0) IRAV =CLIMAT(2-MSW2)
+c if MSW4=0 then we need an average value so have to
+c  read at least one value from the line
+      IF(MSW4.eq.0.AND.NumSol.gt.0) then
+      Do i=1,NumSol
+          CPREC(i)=CLIMAT(4-MSW2-MSW3-i)
         Enddo
       Endif
       IF(MSW7.eq.0) then
@@ -175,7 +180,7 @@ C Total number of weather data
 C     minimum of three columns for radiation, temperature and rainfall (should always be first three) for hourly
 C    2*MSW1=TWET, TDRY; MSW2=wind; MSW3=rain rate; MSW4= number of solutes * MSW4, 
 C     MSW6=RH, MSW7=CO2  
-      NCD=3+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7
+      NCD=4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7
 C
 C     Nodal numbers of furrow nodes
 C
@@ -279,13 +284,13 @@ c   dt have to fix this later as model cannot handle freezing temperatures
           TDRY = (CLIMAT(6+MSW2) - ATEMP)/BTEMP
         Endif
         If (MSW3.GT.0) then
-          IR=CLIMAT(4+MSW2+2*MSW1)*BIR
+          IR=CLIMAT(4+2*MSW1+MSW2+MSW3)*BIR
         Else
           IR=IRAV*BIR
         Endif
         If (MSW4.GT.0.AND.NumSol.ne.0) then
           Do i=1,NumSol
-            CPREC(i)=CLIMAT(4+MSW2+2*MSW1+MSW3+i)
+            CPREC(i)=CLIMAT(4+2*MSW1+MSW2+MSW3+i)
           Enddo
         Endif
         AutoIrrigAmt=IR   ! used in AutoIrrigation if carried out.

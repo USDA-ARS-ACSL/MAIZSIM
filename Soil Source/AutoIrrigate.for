@@ -7,6 +7,7 @@ C it is called once a day, at 5:00 am
        Subroutine AutoIrrigate()
        include 'public.ins'
        include 'puweath.ins'
+       include 'pusurface.ins'
        Parameter (PERIOD =1./24.)
        
        
@@ -14,7 +15,7 @@ C it is called once a day, at 5:00 am
        Real Thi, Thj, Thl, ThFl_i,ThFl_j, ThFl_l
        Real Bii(3),Cii(3), AE, Sum1, Sum2
        Integer i, j, l
-       Common /Auto/ ModNum,AutoIrrAmt
+       Common /Auto/ ModNum
        
        
      
@@ -26,13 +27,23 @@ C
         NumMod=NumMod+1
         ModNum=NumMod
         tNext(ModNum) = time + 1
-        AutoIrrAmt=IR
+cccz initialize to zero
+        do i=1,NumNPD
+          Qautoirrig(i)=0.0D0
+        enddo
+cccz
+        
        End If
 
        if (AutoIrrigateF.eq.0.and.lInput.lt.1)  tNext(ModNum)=1.0e10
        
 11     If(abs(time-tNext(ModNum)).lt.0.001*Step.and.
      & AutoIrrigateF.gt.0) then
+cccz reset to zero every time to prevent "infinite irrigation"         
+        do i=1,NumNPD
+          Qautoirrig(i)=0.0D0
+        enddo 
+cccz
   
         ThetaAvail50=0.0
         ThetaFull50 =0.0
@@ -84,11 +95,12 @@ C  irrigation goes into Q values
           If (AvailWaterRatio.lt.(0.60).and.lInput.lt.1) then
              do k=1, NumBp
                i=KXB(k)
+               Qautoirrig(i)=0.0D0
                If(abs(CodeW(i)).eq.4) then
                 if (Q(i).lt.0) then 
                    CodeW(i)=4
-                   Q(i)=Q(i)+AutoIrrAmt*(Width(k))   ! add to irrigation so we don't lose any rain if needed
-                   if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
+                   Qautoirrig(i)=AutoIrrigAmt*(Width(k))   ! add to irrigation so we don't lose any rain if needed
+c                   if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
                  End if    !Q(n) <0
                 End if   ! CodeW=4
               End Do

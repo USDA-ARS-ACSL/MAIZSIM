@@ -19,20 +19,23 @@ C summary output variables
       Real PotentialSoilEvaporation, WidthT,Period
       Real SeasonRainfall, SeasonPotenTranspiration,
      &     SeasonActualTranspiration, SeasonPotenSoilEvap,
-     &     SeasonActualSoilEvap,SeasonActualInfil
+     &     SeasonActualSoilEvap,SeasonActualInfil,
+     &     SeasonRunoff
       Character*10 date, Stime
       double precision Rain_Flux,Surface_Flux,Bottom_Flux,
      &     Runoff_Flux,Runoff_Terminal_Flux,
-     &     Runoff_Left_Sum,Runoff_Right_Sum,WaterStorage
+     &     Runoff_Left_Sum,Runoff_Right_Sum,WaterStorage,
+     &     NetRunoff 
       Common /Outcom/NumPoint(2000),NodNum(2000,60),
      &     NumCell(1000),NumElPrint(1000,60),ModNum,
      &     Period, ETO, ActualTrans1,ActualSoilEvap,
-     &     pot_ET,pot_ET_EO,bottomFlux, ActualInfil,timer,
+     &     pot_ET,pot_ET_EO,Flux_drain, ActualInfil,timer,
      &     FluxAct,Runoff,PotentialSoilEvaporation,
      &     CumRain,
      &     SeasonRainfall, SeasonPotenTranspiration,
      &     SeasonActualTranspiration, SeasonPotenSoilEvap,
-     &     SeasonActualSoilEvap,SeasonActualInfil,CumulativeFlux
+     &     SeasonActualSoilEvap,SeasonActualInfil,CumulativeFlux,
+     &     SeasonRunoff
       Common /SurfaceWaterBalance/ Rain_Flux,Surface_Flux,Bottom_Flux,
      &     Runoff_Flux,Runoff_Terminal_Flux,
      &     Runoff_Left_Sum,Runoff_Right_Sum
@@ -54,17 +57,27 @@ C*** FROM HourlyOut.for BEGIN
         timer=0
         Flux_drain=0.0
         fluxAct=0.0
-        Runoff=0.0
+        
         ActualSoilEvap=0
         ActualInfil=0
         PotentialSoilEvaporation=0.0
         CumRain=0.0
+cccz the newly defined runoff along the soil surface.
+cccz it records the average runoff along soil inside of the soil domain
+cccz e.g., if the soil surface is a big furrow, the runoff discharge @ edge can be 0, but still some netrunoff can occur
+        NetRunoff=0.0
+cccz this is the old variable       
+        Runoff=0.0
+        
         SeasonRainfall =0.0
         SeasonActualInfil=0.0
         SeasonPotenTranspiration=0.0
         SeasonActualTranspiration=0.0
         SeasonPotenSoilEvap=0.0
         SeasonActualSoilEvap=0.0
+cccz cumulative version for NetRunoff
+        SeasonRunoff=0.0
+cccz
 	  ActualTrans1=0.0
 	  pot_ET=0.0
 	  pot_ET_EO=0.0
@@ -94,9 +107,10 @@ cccz initialize these only for runoff output file
          
       Write(83,20) "Date_time,", "Date,", "PSoilEvap,", 
      &      "ASoilEVap,", "PET_PEN,","PE_T_int,","transp,",
-     &      "CumRain,","infil,","FLuxAct,", "Drainage,", "Runoff,",
+     &      "CumRain,","infil,","FLuxAct,", "Drainage,",
+     &      "NetRunoff",
      &      "cover,","PSIM,", "SeasPSoEv,","SeasASoEv," ,"SeasPTran,",
-     &      "SeasATran,","SeasRain,","SeasInfil" 
+     &      "SeasATran,","SeasRain,","SeasInfil"
 cccz       Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
 cccz     &    "WattSM,", "RNS,","RNC,","WATPOT,","WATACT,",
 cccz     &    "WATRAT,", "UpwardLW,","DifWat,","Cloud,",
@@ -104,9 +118,10 @@ cccz     &     "Shadow,","DIfInt,","Rowinc,", "PARInt,","RADInt",
 cccz     &     "CumuFlux"
        
        Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
-     &   "RNS,","RNC,","WATPOT,","WATACT,","WATRAT,", "UpwardLW,",
+     &   "RNS,", "WATTSM,","RNC,","WATPOT,","WATACT,",
+     &    "WATRAT,", "UpwardLW,",
      &   "DifWat,","Cloud,","Shadow,","DIfInt,","Rowinc,", "PARInt,",
-     &   "RADInt","CumuFlux"
+     &   "RADInt"
        
 cccz initialize for surface runoff
        write(99,'(8A20)') 'time','Date','Rainfall','Inifiltration',
@@ -140,9 +155,9 @@ cccz	           CumRain=CumRain+varBW(i,1)*width(i)*step
             PotentialSoilEvaporation=PotentialSoilEvaporation
      &        +VarBW_Record(i,3)*width(i)*step
           endif
-          if (codeW(n).eq.-4) Then
+cccz          if (codeW(n).eq.-4) Then
             CumRain=CumRain+VarBW_Record(i,1)*width(i)*step
-          endif
+cccz          endif
 	  enddo
 	
 C Actual values
@@ -168,7 +183,13 @@ cccz changed varbw to varbw_record
 c case for rainfall
           if (abs(CodeW(n)).eq.4) then
             ActualInfil=ActualInfil+max(0.0,Q(n))*step
+cccz Dennis, please compare these two and see if the "NetRunoff" is the one you want
+cccz the old one
             Runoff=Runoff+RO(n)*step
+cccz the new one
+            NetRunoff=NetRunoff
+     &       +max(varbw_Record(i,1)*width(i)-Qact(n),0.0D0)*step
+cccz
 c           RO(n)=0.0   ! we will use this to store ponded water for next time period
 c           FluxAct=FluxAct+max(0.0,QAct(n))*step   
             FluxAct=FluxAct+QAct(n)*step
@@ -180,7 +201,7 @@ C*** FROM HourlyOut.for END
 cccz
 cccz Surface runoff calculation
           Surface_Flux=FluxAct
-          Bottom_Flux=bottomFlux
+          Bottom_Flux=Flux_drain
           Runoff_Flux=Runoff
           Rain_Flux=CumRain
 c we consider the runoff from the terminal edge of the soil profile
@@ -229,8 +250,8 @@ C
 * multiplied by width
 
               PotentialSoilEvaporation=PotentialSoilEvaporation
-     &        /EOMult/poprow*100
-              ActualSoilEvap=ActualSoilEvap/EOMult/poprow*100
+     &        /EOMult/poprow*100.0D0
+              ActualSoilEvap=ActualSoilEvap/EOMult/poprow*100.0D0
               !ActualInfil=ActualInfil/EOMult/poprow*100
               !FluxAct=FluxAct/EOMult/poprow*100
               !Runoff=Runoff/EOMult/poprow*100
@@ -238,12 +259,21 @@ C
               !bottomFlux=bottomFlux/EOMult/poprow*100
               !(/RowSP/2) gets us per cm2 now for 10 minute period
               !*6 gives us one hour
-              ActualInfil=ActualInfil/(RowSP/2)*10*24
-              FluxAct=FluxAct/(RowSP/2)*10*24
-              Runoff=Runoff/(RowSP/2)*10*24
-              CumRain=CumRain/(RowSP/2)*10*24
-              bottomFlux=bottomFlux/(RowSP/2)*10*24    !cm/cm2/day
-              CumulativeFlux=CumulativeFlux+bottomFlux
+cccz              ActualInfil=ActualInfil/(RowSP/2)*10*24
+cccz              FluxAct=FluxAct/(RowSP/2)*10*24
+cccz              Runoff=Runoff/(RowSP/2)*10*24
+cccz              CumRain=CumRain/(RowSP/2)*10*24
+cccz              bottomFlux=bottomFlux/(RowSP/2)*10*24    !cm/cm2/day
+
+              ActualInfil=ActualInfil/EOMult/poprow*100.0D0
+              FluxAct=FluxAct/EOMult/poprow*100.0D0
+cccz the two version of runoff
+              Runoff=Runoff/EOMult/poprow*100.0D0
+              NetRunoff=NetRunoff/EOMult/poprow*100.0D0
+cccz
+              CumRain=CumRain/EOMult/poprow*100.0D0
+              Flux_drain=Flux_drain/EOMult/poprow*100.0D0   !cccz unit [water:width(cm)*flux(cm/day)*timestep(day)]/EOMult[0.5 or 1]/[population/distance(cm)]
+              CumulativeFlux=CumulativeFlux+Flux_drain
 
 
 CDT distribute runoff back into Q This makes it uniform. implement this later
@@ -293,6 +323,8 @@ C
      &       PotentialSoilEvaporation
           SeasonActualSoilEvap=SeasonActualSoilEvap+ActualSoilEvap
           
+          SeasonRunoff=SeasonRunoff+NetRunoff
+          
 cccz for runoff water storage calculation
 cccz Calculate the total amount of water stay on soil surface
 cccz because WATERSTORAGE is not a cumulative value, so we just do it once before the print.
@@ -307,7 +339,8 @@ cccz
          Write(83,10) t,Date,PotentialSoilEvaporation, 
      &               ActualSoilEvap,p_ET_EO,
      &              p_ET, CurrentTrans,CumRain,ActualInfil,FLuxAct,
-     &              bottomFlux, Runoff,cover, PSIM, SeasonPotenSoilEvap,
+     &              Flux_drain, NetRunoff,
+     &              cover, PSIM, SeasonPotenSoilEvap,
      &              SeasonActualSoilEvap, SeasonPotenTranspiration,
      &               SeasonActualTranspiration,  SeasonRainfall,  
      &              SeasonActualInfil
@@ -318,7 +351,7 @@ cccz     &     RNS,RNC,WATPOT,WATACT, WATRAT,RNLU,
 cccz     &     Difwat(itime),Cloud,Shadow(itime),Difint(itime),
 cccz     &      RowInc(itime),Parint(itime), Radint(itime)
         
-        Write(84,13) t,date,bottomflux,ActualSoilEvap, Wattsm(itime),
+        Write(84,13) t,date,Flux_drain,ActualSoilEvap, Wattsm(itime),
      &     RNS,RNC,WATPOT,WATACT, WATRAT,RNLU,
      &     Difwat(itime),Cloud,Shadow(itime),Difint(itime),
      &      RowInc(itime),Parint(itime), Radint(itime)
@@ -339,6 +372,7 @@ cccz     &      RowInc(itime),Parint(itime), Radint(itime)
 	  timer=0
 	  FluxAct=0.0
 	  Runoff=0.0
+        NetRunoff=0.0
 	  CumRain=0.0
 	  PotentialSoilEvaporation=0.0
         

@@ -270,6 +270,7 @@ cccz we always use the width, but for soil surface with slopes'
 cccz the rainfall should be based on horizontal "cross-sectional" surface
 cccz Dennis, think if this is necessary!!!
 cccz for very small slope, this can be neglected
+      if(FlatSurface.ne.0) then    
        do n=1,SurNodeIndex
         i=SurfNodeSurfIndexH(n)
         if(n.eq.1) then
@@ -283,6 +284,7 @@ cccz for very small slope, this can be neglected
      &       (slopeCoord(n,1)-slopeCoord(n-1,1))/width(i)
         endif      
        enddo
+      endif
           
 cccz this value will be changed in weather module
 cccz if the weather data is updated

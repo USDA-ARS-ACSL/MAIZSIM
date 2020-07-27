@@ -192,7 +192,7 @@ int CDevelopment::update(const TWeather& wthr)
 				tasselFull.daytime = wthr.daytime;
 				cout << "* Tassel fully emerged: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 			}
-			if (!silking.done)
+			if (!silking.done && tasselFull.done)
 				progressToAnthesis += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume 75% Silking occurs at total tip appeared + 3 phyllochrons
 
 			if ((progressToAnthesis >= PhyllochronsToSilk) && !silking.done) //was 3
