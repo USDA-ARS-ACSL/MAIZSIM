@@ -1,0 +1,11 @@
+*** standard meteorological data ***
+latitude
+33.22
+daily bulb temp, daily wind, rain intensity, daily conc, furrow, relitive humidity, co2
+0    0    0    0    0    1    1
+parameters for changing of units: BSOLAR BTEMP ATEMP ERAIN BWIND BIR
+BSOLAR is 1e6/3600 to go from jm-2h-1 to wm-2
+3600    1    0    0    1    1
+average values for the site
+WINDA    IRAV    Conc    CO2
+3  

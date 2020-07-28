@@ -1,0 +1,7 @@
+*** synchronizer information ***
+initial time    dt    dtmin    dmul1    dmul2    tfin
+'04/01/1961'    0.0001    0.0000001    1.30    0.30    '10/31/1961'
+output variables, 1 if true    Daily    Hourly
+0    1
+weather data, 1 if true    Daily     Hourly
+0    1

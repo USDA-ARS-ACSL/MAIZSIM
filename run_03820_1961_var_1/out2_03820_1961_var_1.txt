@@ -1,0 +1,1 @@
+date,     jday, time,  Lvs_Init,Lvs_Apr, Leaf_#,  area,  mass,     Sen_Area, Pntl_Area,Elong_age,CarbRat, SLA,     dropped, state,   GDDSum   
