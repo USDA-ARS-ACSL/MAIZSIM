@@ -259,5 +259,6 @@ Test_Ver9.1/2dsoil.exe
 *.ncb
 *.suo
 *.dbg
+.vs
 2dsoil.exe
 crop.dll
