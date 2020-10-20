@@ -34,14 +34,14 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	totLeafNo = juvLeafNo = info.genericLeafNo;
 	Rmax_Germination = Rmax_Emergence = 0;
 
-	Q10MR = initInfo.Q10MR;
-	Q10LeafSenescence = initInfo.Q10LeafSenescense;
-	WLRATIO = initInfo.WLRATIO;
-	A_LW = initInfo.A_LW;
-	leafNumberFactor_a1 = initInfo.leafNumberFactor_a1;
-	leafNumberFactor_a2 = initInfo.leafNumberFactor_a2;
-	leafNumberFactor_b1 = initInfo.leafNumberFactor_b1;
-	leafNumberFactor_b2 = initInfo.leafNumberFactor_b2;
+	Q10MR = info.Q10MR;
+	Q10LeafSenescence = info.Q10LeafSenescense;
+	WLRATIO = info.WLRATIO;
+	A_LW = info.A_LW;
+	leafNumberFactor_a1 = info.leafNumberFactor_a1;
+	leafNumberFactor_a2 = info.leafNumberFactor_a2;
+	leafNumberFactor_b1 = info.leafNumberFactor_b1;
+	leafNumberFactor_b2 = info.leafNumberFactor_b2;
 
 
 
@@ -66,10 +66,10 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	Rmax_LTAR = Rmax_LTAR*dt; // Kim et al. (2007); Kim and Reddy (2004), 0.581 from Yan and Hunt (1999), equivalent phyllochron in CERES
 							  //cdt changed from 0.524 to test for colorado data used 0.374
 	Rmax_LIR = Rmax_LIR*dt; // best fit of K and W (1983), Kim and Reddy (2004) originally 0.978 (for colorado tried 0.558
-	T_base = initInfo.T_base;
-	T_opt =  initInfo.T_opt; // These Topt and Tceil values from Kim et al. (2007), also see Kim and Reddy (2004), Yan and Hunt (1999), SK
-	T_ceil = initInfo.T_ceil;
-	T_opt_GDD = initInfo.T_opt_GDD;
+	T_base = info.T_base;
+	T_opt =  info.T_opt; // These Topt and Tceil values from Kim et al. (2007), also see Kim and Reddy (2004), Yan and Hunt (1999), SK
+	T_ceil = info.T_ceil;
+	T_opt_GDD = info.T_opt_GDD;
 	
 
 	P2 = 0.5;
