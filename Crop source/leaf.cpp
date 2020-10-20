@@ -26,16 +26,25 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	initiated = appeared = growing = mature = aging = dead = dropped = false;
 	phase1Delay = growthDuration=stayGreenDuration = seneDuration = 0.0;
 	ptnLength=ptnWidth = 0.0;
-	maxElongRate = 12.0; //max elongation rate (cm per day) at optipmal temperature (Topt: 31C with Tbase = 9.8C using 0.564 cm/dd rate from Fournier 1998 paper above
 	elongAge = 0.0; //physiological age during expansion phase
 	seneAge = 0.0; //age during senscence phase
 	activeAge = 0.0; // age during active phase after fully expansion before senescence
 	old_leaf = 0; //record leaf area in the last time step
+
+				  // parameters
     N_content = 3.0; //no N stress 
-	WLRATIO = 0.106; // leaf lamina width to length ratio
-	A_LW = 0.75; // leaf area coeff with respect to L*W
+	//WLRATIO = 0.106; // leaf lamina width to length ratio
+	//A_LW = 0.75; // leaf area coeff with respect to L*W
 	stayGreen = dv->get_stayGreen();
 	LM_min = dv->get_LM_min();
+	Q10LeafSenescence = dv->get_Q10LeafSenescence();
+	WLRATIO = dv->get_WLRATIO();
+	A_LW = dv->get_A_WL();
+	maxElongRate = 12.0; //max elongation rate (cm per day) at optipmal temperature (Topt: 31C with Tbase = 9.8C using 0.564 cm/dd rate from Fournier 1998 paper above
+	leafNumberFactor_a1 = dv->get_leafNumberFactor_a1();
+	leafNumberFactor_b1 = dv->get_leafNumberFactor_b1();
+	leafNumberFactor_a2 = dv->get_leafNumberFactor_a2();
+	leafNumberFactor_b2 = dv->get_leafNumberFactor_b2();
 	
 	// T_peak is the optimal growth temperature at which the potential leaf size determined in calc_mophology achieved. Similar concept to fig 3 of Fournier and Andreiu (1998) 
 	T_peak = 18.7, Tb_Leaf = 8.0;
@@ -79,19 +88,19 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
   										 L_max is the length of the largest leaf when grown at T_peak. Here we assume LM_min is determined at growing Topt with minmal (generic) leaf no, SK 8/2011
                                          If this routine runs before TI, totalLeaves = genericLeafNo, and needs to be run with each update until TI and total leaves are finalized, SK
 								   */
-	double n_m, a, b;
+	double a, b, rankOfLargestLeaf;
 	int hrank=rank;
-	n_m = 5.93 + 0.33*totalLeaves; // the rank of the largest leaf. YY (need to adjust here for the maximum leaf size as a function of plant pop -DT 8/12/2015)
-	a = -10.61 + 0.25*totalLeaves;
-	b = -5.99 + 0.27*totalLeaves;
-	if (rank > int(n_m))
+	rankOfLargestLeaf = 5.93 + 0.33*totalLeaves; // the rank of the largest leaf. YY (need to adjust here for the maximum leaf size as a function of plant pop -DT 8/12/2015)
+	a = leafNumberFactor_a1 + leafNumberFactor_b1*totalLeaves;
+	b = leafNumberFactor_a2 + leafNumberFactor_b2*totalLeaves;
+	if (rank > int(rankOfLargestLeaf))
 	{
 		hrank = rank - 1;
 	}
     //equation 7 in Fournier and Andrieu (1998). YY
     // Attempt to increase area of leaves above max leaf
 
-	ptnLength = L_max*exp(a/2*pow(hrank/n_m-1,2)+b/2*pow(hrank/n_m-1,3)); //*dv->get_shadeEffect()
+	ptnLength = L_max*exp(a/2*pow(hrank/rankOfLargestLeaf-1,2)+b/2*pow(hrank/rankOfLargestLeaf-1,3)); //*dv->get_shadeEffect()
 	                                                                    //equa 8(b)(Actually eqn 6? - eqn 8 deals with leaf age - DT)
 	                                                                   //in Fournier and Andrieu(1998). YY
 	growthDuration = ptnLength/maxElongRate; // shortest possible linear phase duration in physiological time (days instead of GDD) modeified form of equa 8(a)Fournier and Andrieu(1998)
@@ -101,7 +110,7 @@ void CLeaf::calc_dimensions(CDevelopment *dv)
     double lfno_effect = max(0.5, min(1.0, exp(-1.17+0.047*totalLeaves))); // Fig 4 of Birch et al. (1998) 
 
 	{
-		PotentialArea=lfno_effect*LA_max*exp(a*pow(hrank/n_m-1,2)+b*pow(hrank/n_m-1,3)); //equa 6. Fournier and Andrieu(1998) multiplied by Birch et al. (1998) leaf no effect
+		PotentialArea=lfno_effect*LA_max*exp(a*pow(hrank/rankOfLargestLeaf-1,2)+b*pow(hrank/rankOfLargestLeaf-1,3)); //equa 6. Fournier and Andrieu(1998) multiplied by Birch et al. (1998) leaf no effect
 	                                                               //LA_max the area of the largest leaf
 	}                                                          //PotentialArea potential final area of a leaf with rank "n". YY
 
@@ -202,8 +211,8 @@ void CLeaf::senescence(CDevelopment * dv, double PredawnLWP)
 	//N_effect = 1;
 	double  seneDuration_half; // max. growth rate assumed to be half of growthDuration
 
-	double Q10 = 2.0;
-	double q10fn = pow(Q10,(T - T_opt)/10);
+	
+	double q10fn = pow(Q10LeafSenescence,(T - T_opt)/10);
         // Assumes physiological time for senescence is the same as that for growth though this may be adjusted by stayGreen trait
 		// a peaked fn like beta fn not used here because aging should accelerate with increasing T not slowing down at very high T like growth,
 		// instead a q10 fn normalized to be 1 at T_opt is used, this means above T_opt aging accelerates. 

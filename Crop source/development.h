@@ -28,7 +28,7 @@ public:
 	void set_shadeEffect(double x) {shadeEffect=x;}
 	double beta_fn(double t, double R_max, double t_m, double t_e);
 	double calcGTI(double, bool);
-	double calcGDD(double);
+	double calcGDD(double temperature,double T_opt);
 	int update(const TWeather&); 
 	double LWPeffect(double predawn_psi_bars, double threshold);
 	TInitInfo get_initInfo() {return initInfo;}
@@ -58,8 +58,28 @@ public:
 	double get_Tgrow()  {return T_grow;}
     double get_shadeEffect()  {return shadeEffect;}
 	double get_T_Air() { return T_air; }
+	double get_Q10LeafSenescence() { return Q10LeafSenescence; }
+	double get_Q10MR() { return Q10MR; }
+	double get_WLRATIO() { return WLRATIO; }
+	double get_A_WL() { return A_LW; }
+	double get_leafNumberFactor_a1() { return leafNumberFactor_a1; }
+	double get_leafNumberFactor_a2() { return leafNumberFactor_a2; }
+	double get_leafNumberFactor_b1() { return leafNumberFactor_b1; }
+	double get_leafNumberFactor_b2() { return leafNumberFactor_b2; }
 
-  
+
+
+	//don't think we need the set functions
+	void set_Q10LeafSenescence(double x) { Q10LeafSenescence = x; }
+	void set_Q10MR(double x) { Q10MR = x; }
+	void set_WLRATIO(double x) { WLRATIO = x; }
+	void set_A_LW(double x) { A_LW = x; }
+	void set_leafNumberFactor_a1(double x) {leafNumberFactor_a1 = x; }
+	void set_leafNumberFactor_a2(double x) { leafNumberFactor_a2 = x; }
+	void set_leafNumberFactor_b1(double x) { leafNumberFactor_b1 = x; }
+	void set_leafNumberFactor_b2(double x) { leafNumberFactor_b2 = x; }
+
+
 	bool Germinated() {return germination.done;}
 	bool Emerged() {return emergence.done;}
 	bool TasselInitiated() {return tasselInitiation.done;}
@@ -85,6 +105,7 @@ private:
 	CDevelopment(const CDevelopment&); // supressing shallow copy constructor
 	int GDD_rating;
 	double dGDD; // delta GDD
+	double T_opt_GDD; //optimum temperature for GDD calcs
 	double dt, steps; // timestep, step counter, SK
 	double GDDsum; // cumulative GDD from sowing with Tbase= 8.0 and Topt = 34 as in CERES
 	double emerge_gdd; //thermal time need for a corn plant to emerge YY 4/2/09
@@ -102,6 +123,13 @@ private:
 	double PhyllochronsToSilk; // number of phyllochrons past tassel initiation when silking takes place
 	double PhyllochronsToTassel; // number of phyllochrons past tassel initiation when tassels are fully emerged
 	double shadeEffect; //effect of shade with respect to R/FR, see JXB (2014) Zhu, 8-13-2015, SK
+	double Q10LeafSenescence, Q10MR; //Q10 for respiration and leaf sensecense
+    double WLRATIO; // leaf lamina width to length ratio
+	double A_LW; // leaf area coeff with respect to L*W
+	// coefficients in equation to calculate area of leaf based on largest leaf from Birch et al.,
+	double leafNumberFactor_a1, leafNumberFactor_a2, leafNumberFactor_b1, leafNumberFactor_b2;
+
+
 	string note;
 	TInitInfo initInfo;
 	

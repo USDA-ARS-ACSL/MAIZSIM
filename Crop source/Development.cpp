@@ -14,6 +14,8 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	 // removed SetParms method since it duplicated a much of what is done in the constructor. I moved
 	 // the code from SetParms to here.
 
+	/*note that info.timestep should have been updated - it seems to be pulling the 
+		default value */
 	dt = info.timeStep / MINUTESPERDAY; //converting minute to day decimal, 1= a day
 	LvsAppeared = LvsExpanded = progressToAnthesis = 0; progressToTasselEmerg = 0;
 	GerminationRate = EmergenceRate = LvsInitiated = 0;
@@ -31,6 +33,18 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	GDD_rating = info.GDD_rating;
 	totLeafNo = juvLeafNo = info.genericLeafNo;
 	Rmax_Germination = Rmax_Emergence = 0;
+
+	Q10MR = initInfo.Q10MR;
+	Q10LeafSenescence = initInfo.Q10LeafSenescense;
+	WLRATIO = initInfo.WLRATIO;
+	A_LW = initInfo.A_LW;
+	leafNumberFactor_a1 = initInfo.leafNumberFactor_a1;
+	leafNumberFactor_a2 = initInfo.leafNumberFactor_a2;
+	leafNumberFactor_b1 = initInfo.leafNumberFactor_b1;
+	leafNumberFactor_b2 = initInfo.leafNumberFactor_b2;
+
+
+
 
 	initLeafNo = youngestLeaf = 5;
 	curLeafNo = 1;
@@ -52,9 +66,10 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	Rmax_LTAR = Rmax_LTAR*dt; // Kim et al. (2007); Kim and Reddy (2004), 0.581 from Yan and Hunt (1999), equivalent phyllochron in CERES
 							  //cdt changed from 0.524 to test for colorado data used 0.374
 	Rmax_LIR = Rmax_LIR*dt; // best fit of K and W (1983), Kim and Reddy (2004) originally 0.978 (for colorado tried 0.558
-	T_base = 8.0;
-	T_opt = 32.1; // These Topt and Tceil values from Kim et al. (2007), also see Kim and Reddy (2004), Yan and Hunt (1999), SK
-	T_ceil = 43.7;
+	T_base = initInfo.T_base;
+	T_opt =  initInfo.T_opt; // These Topt and Tceil values from Kim et al. (2007), also see Kim and Reddy (2004), Yan and Hunt (1999), SK
+	T_ceil = initInfo.T_ceil;
+	T_opt_GDD = initInfo.T_opt_GDD;
 	
 
 	P2 = 0.5;
@@ -204,7 +219,7 @@ int CDevelopment::update(const TWeather& wthr)
 		}
 		if (silking.done)
 		{
-			GDDgrain += calcGDD(T_cur)*dt;
+			GDDgrain += calcGDD(T_cur, T_opt_GDD)*dt;
 			if (GDDgrain >= 170 && (!beginGrainFill.done)) // where is this number '170' from? SK
 				//Todo: GTI was found more accurate for grain filling stage, See Thijs phenolog paper (2014)
 			{
@@ -219,7 +234,7 @@ int CDevelopment::update(const TWeather& wthr)
 	//	if (!maturity.done)
 	{
 		dGTI = (calcGTI(T_cur, silking.done)*dt);
-		dGDD = calcGDD(T_cur)*dt;
+		dGDD = calcGDD(T_cur, T_opt_GDD)*dt;
 		GDDsum += dGDD;
 		GTIsum += dGTI;
 //		if (GDDsum >= GDD_rating && (!maturity.done))
@@ -264,12 +279,12 @@ double CDevelopment::calcGTI(double T_avg, bool Silked)
 	return 5.358 + 0.011178*T_avg*T_avg;
 }
 
-double CDevelopment::calcGDD(double T_avg)
+double CDevelopment::calcGDD(double T_avg, double T_opt)
 // GDD model with base 8. See Birch et al. (2003) Eu J Agron
 {
 	//double const T_base = 8.0;
 	double const T_base = 8.0;
-	double const T_opt = 34.0;
+	//double const T_opt = 34.0;
 	//double const T_opt = 30.0;
 	return min(T_avg, T_opt) - T_base;
 	//	if (Silked = false)  return b1*T_avg*T_avg*(1-0.6667*T_avg/T_opt);

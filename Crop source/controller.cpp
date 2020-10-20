@@ -45,7 +45,6 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	//strcpy_s(DebugFile,"Debug.out");
 	initInfo = iniInfo;
 	iCur = 0;
-	weatherFormat = ICASA;
     firstDayOfSim = 0;
 	lastDayOfSim = 365;
     initialize();
@@ -95,8 +94,8 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.4.1.0 2020               *" << endl
-		<< " *                 2DSOIL version 1.6.2.9 2020             *" << endl
+		<< " *                     VERSION  1.4.2.0 2020               *" << endl
+		<< " *                 2DSOIL version 1.6.3.0 2020             *" << endl
 		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
@@ -214,6 +213,8 @@ void CController::initialize()
 		int result=-1;
 		char strTest[255];
 		string strTest2;
+		double dInput1; //temporary value to hold input (double) before passing to method
+		double dInput2, dInput3, dInput4;
 		do
 		{
            cfs.getline(Buffer,256,'\n');
@@ -264,7 +265,26 @@ void CController::initialize()
 		cfs >> GasExParam.internalCO2Ratio >>
 			GasExParam.SC_param >>
 			GasExParam.BLC_param;
-
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> initInfo.Q10MR >>initInfo.Q10LeafSenescense;
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> initInfo.leafNumberFactor_a1 >>initInfo.leafNumberFactor_b1
+			>> initInfo.leafNumberFactor_a2 >> initInfo.leafNumberFactor_b2;
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> initInfo.LAF >> initInfo.WLRATIO >> initInfo.A_LW;
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs.getline(Buffer, 256, '\n');
+		cfs >> initInfo.T_base >> initInfo.T_opt >> initInfo.T_ceil
+			 >> initInfo.T_opt_GDD;
+		
+			
 
 	    dConvert.caldat(initInfo.sowingDay,mm,dd,yy);
 		if (cfs.eof()) cfs.close();
@@ -302,7 +322,7 @@ void CController::initialize()
 	//not sure if we need this class
     time = new Timer(dd, mm, yy,initInfo.timeStep/60.0); // Timer class gets stepsize in hours
 	//dt modified this after modifying code to use julian day 
-	int dim = (int)(((lastDayOfSim+1)-firstDayOfSim)*(24*60/initInfo.timeStep)); // counting total records of weather data
+	int dim = (int)(((lastDayOfSim+1)-firstDayOfSim)*(24.0*60.0/initInfo.timeStep)); // counting total records of weather data
     weather = new TWeather[dim];
 
 	plant	= new CPlant(initInfo, GasExParam); //todo send gas exch params here?
@@ -510,9 +530,9 @@ void CController::outputToDebug()
 	// needed for saving information on carbon allocation and assimilation
 	// Can be modified for other variables. 
 	// only called if _DEBUG_FILE is defined.
-	CNodalUnit*  nU;
+	//CNodalUnit*  nU; 
 	CDevelopment* myDevelop=plant->get_develop();
-	int mm,id,iyyy,i;
+	int mm,id,iyyy;
 	string DateForOutput;
 	time->caldat(weather[iCur].jday, mm, id,iyyy);
 #if 0
