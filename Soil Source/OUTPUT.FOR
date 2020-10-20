@@ -119,15 +119,11 @@ cccz initialize these only for runoff output file
          
       Write(83,20) "Date_time,", "Date,", "PSoilEvap,", 
      &      "ASoilEVap,", "PET_PEN,","PE_T_int,","transp,",
-     &      "CumRain,","infil,","FLuxAct,", "Drainage,","Runoff",
+     &      "CumRain,","infil,","FLuxAct,", "Drainage,","Runoff,",
      &      "cover,","PSIM,", "SeasPSoEv,","SeasASoEv," ,"SeasPTran,",
-     &      "SeasATran,","SeasRain,","SeasInfil,",
-     &      "Runoff_02,", "Runoff_03"
-cccz       Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
-cccz     &    "WattSM,", "RNS,","RNC,","WATPOT,","WATACT,",
-cccz     &    "WATRAT,", "UpwardLW,","DifWat,","Cloud,",
-cccz     &     "Shadow,","DIfInt,","Rowinc,", "PARInt,","RADInt",
-cccz     &     "CumuFlux"
+     &      "SeasATran,","SeasRain,",    
+     &      "SeasInfil,", "Runoff_02,", "Runoff_03"
+
        
        Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
      &   "RNS,", "WATTSM,","RNC,","WATPOT,","WATACT,",
@@ -357,7 +353,7 @@ C
 C    Accumulate seasonal amounts       
 C 
           SeasonRainfall =SeasonRainfall+CumRain
-          SeasonActualInfil=SeasonActualInfil+ActualInfil
+          SeasonActualInfil=SeasonActualInfil+ActualInfil_03
           SeasonPotenTranspiration=SeasonPotenTranspiration+
      &       p_ET
           SeasonActualTranspiration=SeasonActualTranspiration+
@@ -367,17 +363,15 @@ C
           SeasonActualSoilEvap=SeasonActualSoilEvap+ActualSoilEvap
           
           
-          
-          
          Write(83,10) t,Date,PotentialSoilEvaporation, 
      &               ActualSoilEvap,p_ET_EO,
-     &              p_ET, CurrentTrans,CumRain,ActualInfil,FLuxAct,
+     &              p_ET, CurrentTrans,CumRain,ActualInfil_03,FLuxAct,
      &              Flux_drain, Runoff,                               ! cccz: Dennis, think about the runoff you like to print here.
      &              cover, PSIM, SeasonPotenSoilEvap,
      &              SeasonActualSoilEvap, SeasonPotenTranspiration,
      &               SeasonActualTranspiration,  SeasonRainfall,  
      &              SeasonActualInfil, Runoff_02, Runoff_03
-        
+       
 cccz        Write(84,13) t,date,bottomflux,ActualSoilEvap,
 cccz     &     CumulativeWattsm(itime),
 cccz     &     RNS,RNC,WATPOT,WATACT, WATRAT,RNLU,
