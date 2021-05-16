@@ -99,10 +99,11 @@ c calculate MP from water content if wc is given as an initial
           
 CDT FracSind is sand + silt. Since we don't input silt, we 
 C     get it by difference
+C was an error - was using fracsind as 1-(sand+silt) which was wrong 
           BlkDn(M)=  Par(10,M)
           FracOM(M)   =Par(11,M)
-          FracSind(M) =1.0-(Par(12,M)+Par(13,M))
-          FracClay(M) =Par(13,M)
+          FracSind(M) =(Par(12,M)+Par(13,M))
+          FracClay(M) =1.0-FracSind(M)
           TUpperLimit(M)=FQ(-100.0,Par(1,M))
           TLowerLimit(M)=FQ(-150000.0,Par(1,M))
           ThFull(M)=TUpperLimit(M)-TLowerLimit(M)
@@ -175,9 +176,6 @@ C calculate available water content
       double precision n,m,Ks,Kr,Kk
       real h,Par(12)
       integer PPar
-      
-cccz 
-      double precision wzja,wzjb,wzjc
 
       BPar=.5
       PPar=2.
@@ -204,11 +202,7 @@ cccz
         FFQ =1.-(1.-Qee**(1./m))**m
         FFQk=1.-(1.-Qeek**(1./m))**m
         if(FFQ.le.0.d0) FFQ=m*Qee**(1./m)
-        wzja=((Qe/Qek)**Bpar)
-        wzjb=(FFQ/FFQk)
-        wzjb=wzjb**PPar
-        wzjc=Kk/Ks
-        Kr=((Qe/Qek)**Bpar)*((FFQ/FFQk)**PPar)*Kk/Ks
+        Kr=(Qe/Qek)**Bpar*(FFQ/FFQk)**PPar*Kk/Ks
         FK=max(Ks*Kr,1.d-37)
         return
       endif
