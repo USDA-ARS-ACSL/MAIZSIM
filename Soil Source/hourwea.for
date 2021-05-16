@@ -1121,7 +1121,7 @@ c
 c................... End of the furrow irrigation
    
 c................... This is the end of hourly calculations
-
+      Wind=HWIND(Itime) ! save hourly value of wind to pass to crop model
       tNext(ModNum)=Time+period
       Endif      ! hourly loop
 c      
