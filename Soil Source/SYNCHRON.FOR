@@ -6,6 +6,10 @@
       character line*40
       Character*10 SDate,FDate
       double precision tFix,tRigid,dt,t,dtmax
+      real*4 progress, Prev_progress,Clock_start
+      integer*4 ProgressFlag
+      Common /Sychron/ProgressFlag, Prev_progress, 
+     !  Clock_start
 *
       If (lInput.eq.1) then
         If (NumMod.eq.-1) then
@@ -27,6 +31,9 @@
           Tinit=Time
           NumMod=0
           RunFlag=1
+          Prev_progress=0.0 ! write progress the first time
+          Progress=0.0
+          Call CPU_TIME(ClockStart)
 C Beginday is when the plant model starts. If the model time start is greater
 C than the sowing day then this will be an error condition.
           if (time.GT.SowingDay) goto 110
@@ -67,8 +74,19 @@ cccz          endif
 *       CALL COUP@(LINE,5,1,24)
 *      write(*,*) Time
       Time = Time + Step
-*
+      
+      progress=(Time-Tinit)/(Tfin-Tinit)*100.0
+      progress=int(progress)
+      temp=Mod(progress,4.0)
+      if ((Mod(progress,4.0).eq.0).and.progress.gt.0) then 
+         if(abs(progress-Prev_progress).ge.4) then
+           write(*,105) 'Progress=',Int(progress)
+           Prev_progress=progress
+          endif
+      endif
+            
 100    FORMAT(1x,G12.5)
+105    FORMAT(A10,I4)
       Return
 110   Stop 'Sowing date cannot be earlier than the start of the 
      & soil model'
