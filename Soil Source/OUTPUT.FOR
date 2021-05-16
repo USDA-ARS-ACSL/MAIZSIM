@@ -240,7 +240,7 @@ cccz calculation is done, just do an assignment
      !                   ThNew,vz,vx,Q,Conc(1,1),Tmpr,g(1,1))
         iitime=int(time)
         diff=abs(time-int(time))
-        If((NShoot.ne.0).and.(abs((time-int(time))).gt.(0.99))) 
+        If((NShoot.ne.0).and.(diff.ge.0.999.or.diff.le.0.001))
      !       then
              Call ArrRootOut (Date,x,y,t, NumNP,RMassM,RMassY,
      !            RDenM, RDenY, Sink,
