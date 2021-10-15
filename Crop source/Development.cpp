@@ -105,7 +105,7 @@ int CDevelopment::update(const TWeather& wthr)
 			T_grow = T_cur;
 			T_grow_sum = T_cur;
 
-			cout << " Germinated: GDDsum " << GDDsum << " time step (min): " << dt*(24 * 60) << endl;
+			cout << "* Germinated: GDDsum " << GDDsum << " time step (min): " << dt*(24 * 60) << endl;
 		}
 	}
 	else // if (germination.done)
@@ -122,7 +122,7 @@ int CDevelopment::update(const TWeather& wthr)
 				emergence.done = true;
 				emergence.daytime = wthr.daytime;
 				
-				cout << " Emergence: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				cout << "* Emergence: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 				GDDsum = 0.0; //reset GDDsum from emergernce, SK
 				emerge_gdd = GDDsum; //gdd at emergence YY 4/2/09
 				//	corn->LvsAppeared = 1.0;
@@ -165,7 +165,7 @@ int CDevelopment::update(const TWeather& wthr)
 				//	totLeafNo = juvLeafNo + addedLvs/inductionPeriod; //get a mean value over this period
 				//	LvsAtTI = LvsInitiated; //Should be LvsInitiated. Already confirmed with Soo. 7/27/2006
 					// uncomment the following for debugging
-				 //   cout << " Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
+				 //   cout << "* Inductive phase: " << LvsInitiated << " " << totLeafNo << " " << juvLeafNo << " " << addedLvs/inductionPeriod << endl;
 				double actualAddedLvs = LvsInitiated - juvLeafNo;
 				if (actualAddedLvs >= LvsToInduce)
 				{
@@ -175,7 +175,7 @@ int CDevelopment::update(const TWeather& wthr)
 					tasselInitiation.daytime = wthr.daytime;
 					LvsInitiated = youngestLeaf;
 					LvsAtTI = LvsAppeared;
-					cout << " Tassel initiation: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+					cout << "* Tassel initiation: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 				}
 			}
 		}
@@ -205,7 +205,7 @@ int CDevelopment::update(const TWeather& wthr)
 			{
 				tasselFull.done = true;
 				tasselFull.daytime = wthr.daytime;
-				cout << " Tassel fully emerged: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				cout << "* Tassel fully emerged: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 			}
 			if (!silking.done && tasselFull.done)
 				progressToAnthesis += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume 75% Silking occurs at total tip appeared + 3 phyllochrons
@@ -214,7 +214,7 @@ int CDevelopment::update(const TWeather& wthr)
 			{
 				silking.done = true;
 				silking.daytime = wthr.daytime;
-				cout << " Silking: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				cout << "* Silking: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 			}
 		}
 		if (silking.done)
@@ -225,7 +225,7 @@ int CDevelopment::update(const TWeather& wthr)
 			{
 				beginGrainFill.done = true;
 				beginGrainFill.daytime = wthr.daytime;
-				cout << " Grain filling begins: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+				cout << "* Grain filling begins: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 			}
 		}
 
@@ -241,7 +241,7 @@ int CDevelopment::update(const TWeather& wthr)
 //		{
 //			maturity.done = true;
 //			maturity.daytime = wthr.daytime;
-//			cout << " Matured: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
+//			cout << "* Matured: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 //		}
 
 	}
@@ -308,13 +308,4 @@ double CDevelopment::LWPeffect(double predawn_psi_bars, double threshold)
 	if (effect >1) effect = 1;
 	return effect;
 }
-double CDevelopment::LeafN_effect(double CriticalN)
-{
-	// calculate N effect on leaf growth
-	double N_effect;
-	N_effect = __max(0.0, (2 / (1 + exp(-2.9 * (CriticalN - 0.25))) - 1));
-	N_effect = __min(1, N_effect);
-	return N_effect;
-}
-
 

@@ -63,12 +63,11 @@ void CLeaf::initialize (CDevelopment * dv)
 		initiated = true;
 	//	growing=true; // DT
 		first=true;
-		//growthDuration is calculated in calc-dimensions
 		stayGreenDuration = stayGreen*growthDuration;
 		seneDuration = growthDuration; 
 	// uncomment for debugging
 	#if _DEBUG
-			  std::cout << " GDDaydbg " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
+			  std::cout << " GDDay " << dv->get_GDDsum()  << " leaf " << dv->get_LvsInitiated() << " " << rank << " totalLeaves " << dv->get_totalLeaves() 
 				  <<  " potential area " << PotentialArea << std::endl;
 	#endif
 }
@@ -131,9 +130,11 @@ void CLeaf::expand(CDevelopment * dv, double PredawnLWP)
 //leaf expansion rate based on a determinate sigmoid function by Yin et al. (2003)
 
 {
-	CriticalNitrogen = max(N_content, 0.25); // use this->N_content? see leaf.cpp in wa version
-	const double psi_threshold_bars = -0.8657;
-	N_effect = dv->LeafN_effect(CriticalNitrogen); 
+    double CriticalNitrogen;
+	CriticalNitrogen= __max(0.25,this->N_content);
+	N_effect= __max(0.0, (2 / (1 + exp(-2.9*(N_content - 0.25))) - 1));
+	N_effect = __min(1, N_effect);
+	const double psi_threshold_bars = -0.8657; 
 	double water_effect=dv->LWPeffect(PredawnLWP, psi_threshold_bars);
 	double shade_effect= dv->get_shadeEffect();
 	
@@ -285,4 +286,5 @@ double CLeaf::LWPeffect(double predawn_psi_bars, double threshold)
 	if (effect >1 ) effect=1;
 	return effect;
 }
+
 

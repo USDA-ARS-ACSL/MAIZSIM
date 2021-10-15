@@ -1,0 +1,11 @@
+***STANDARD METEOROLOGICAL DATA  Header fle for Iowa
+Latitude Longitude
+ 41.66         91.5 
+^Daily Bulb T(1) ^ Daily Wind(2) ^RainIntensity(3) ^Daily Conc^(4) ,Furrow(5) ^Rel_humid(6) ^CO2(7)
+ 0             1             0             0             0             0             1 
+Parameters for changing of units: BSOLAR BTEMP ATEMP ERAIN BWIND BIR 
+ BSOLAR is 1e6/3600 to go from j m-2 h-1 to wm-2
+ 1000000       1             0             0.1           1             1 
+Average values for the site
+irav    ChemConc   
+               3                           0            

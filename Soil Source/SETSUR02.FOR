@@ -419,15 +419,6 @@ C
 C          1.389E-4 = 1/2)/3600
            WATTSM(IDUSK) = WATTSM(IDAWN)
         ENDIf
-c DT 10/12/2021 sometimes due to DST issues and weather station clocks,
-c  radiation between dawn and dusk  can be 0 so need to adjust WATTSM for this
-       Do I = 1, IPERD
-        if (I.ge.IDAWN.and.I.le.IDUSK) then
-          if (WATTSM(I).le.0.0) then
-           WATTSM(I)=WATTSM(I)+0.1
-           endif
-        endif
-       enddo
 c..................... Temperature and vapour pressure submodel
 C
 C  READ NEXT DAY'S DATA FROM WEATHER FILE ***
@@ -958,18 +949,6 @@ c................... Precipitation and irrigation
       If(K.eq.4.or.K.eq.-4) then
 cccz         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
-         
-cccz         
-c        if(x(n).eq.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*4.77D0   ! turn this on when do RFRH "compact soil mulch example"
-c              VarBW(i,1)=VarBW(i,1)*14.0D0   ! turn this on when do RFRH "plastic film mulch example"
-c        endif
-c        if(x(n).lt.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*0.73D0   ! turn this on when do RFRH "compact soil mulch example"
-c        endif
-        
-cccz 
-         
        If(NumSol.ne.0) then
           do j=1,NumSol
 cdt was varbs(n,j)
@@ -1014,12 +993,11 @@ c  AND THEIR LATERAL COORDINATES
 c
       Do 95 i=1,ic
         PSh=FSh(i,xBSTEM,SHADE,xS,ic)
-        n_sur=kS(i)
-        n=KXB(n_sur)
+        n=kS(i)
         k=codeT(n)
-        Varbt(n_sur,4)=0.0
-        VarBT(n_sur,3)=0.0
-        VarBT(n_sur,2)=0.0
+        Varbt(kS(i),4)=0.0
+        VarBT(kS(i),3)=0.0
+        VarBT(kS(i),2)=0.0
 
         If (k.eq.-4) then
 C     if node is exposed         
@@ -1031,50 +1009,50 @@ C     if node is exposed
 * RNS*3600*24/10000 is total energy going to soil in J day-1 cm-2
 C           FELWR=max(0.0,(tmpr(i)-TairN)*40.6)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(n_sur,4)=RNS*3600.0*24.0/10000.0
+                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
 
 *  calculate convected heat  if soil is warmer than air
 * FELWR should be zero when TAirN is warmer than soil
-              if(tmpr(n).GT.TAirN) then
-                VarBT(n_sur,2)=+FCSH+FELWR
-                VarBT(n_sur,3)=VarBT(n_sur,2)*TAirN
+              if(tmpr(kS(i)).GT.TAirN) then
+                VarBT(kS(i),2)=+FCSH+FELWR
+                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
               endif
 C See if sensible heat transport works here in canopy              
               TFac=((0.058+1.7e-4*TAirN)+
      !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
-               VarBT(n_sur,2)=VarBT(n_sur,2)+TFac
-               VarBT(n_sur,3)=VarBT(n_sur,3)+TFac*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
+               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
 
          else
                     
 *  the amount of heat added to the soil
 *     is determined by air temperature.
 *  units are millcal cm-2 sec-1 C-1
-               VarBT(n_sur,2)=((0.058+1.7e-4*TAirN)+
+               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
 * the first term is thermal conductivity of the air. 
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
 
-               VarBT(n_sur,2)=VarBT(n_sur,2)*0.004184*3600.0*24.0
-               VarBT(n_sur,3)=VarBT(n_sur,2)*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
+               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
 
 Cdt and a part for radiative transfer               
-               if(tmpr(n).GT.TAirN) then
-                 VarBT(n_sur,2)=VarBT(n_sur,2)+(FCSH+FELWR)
-                 VarBT(n_sur,3)=VarBT(n_sur,3)+(FCSH+FELWR)*TAirN
+               if(tmpr(kS(i)).GT.TAirN) then
+                 VarBT(kS(i),2)=VarBT(kS(i),2)+(FCSH+FELWR)
+                 VarBT(kS(i),3)=VarBT(kS(i),3)+(FCSH+FELWR)*TAirN
                   endif
 c assume 5% of radiation reaches soil surface through canopy              
               fact=1.0-BEERS(ITIME)
               if (fact.LE.0) fact=0
               if (fact.GT.1.0) fact=1.0
-              VarBT(n_sur,4)=fact*RNS*3600.0*24.0/10000.0
+              VarBT(kS(i),4)=fact*RNS*3600.0*24.0/10000.0
               
 *  units are now J cm-2 d-1
 * end if for crop canopy
           Endif
  
-          VarBT(n_sur,1)=TAirN
+          VarBT(kS(i),1)=TAirN
         Endif
 95    Continue
 C ...............End of heat balance

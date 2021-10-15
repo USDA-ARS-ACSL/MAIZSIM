@@ -494,15 +494,7 @@ cd   HSR is watts
            WATTSM(IDAWN) = HSR(IDAWN)
            WATTSM(IDUSK) = HSR(IDUSK)
         ENDIf
-c DT 10/12/2021 sometimes due to dst issues and weather station clocks,
-c  radiation between dawn and dusk  can be 0 so need to adjust WATTSM for this
-       Do I = 1, IPERD
-        if (I.ge.IDAWN.and.I.le.IDUSK) then
-          if (WATTSM(I).le.0.0) then
-           WATTSM(I)=WATTSM(I)+0.1
-           endif
-        endif
-       enddo
+
 c..................... Temperature and vapour pressure submodel
 
 
@@ -599,7 +591,7 @@ C
  
 c....................Light interception submodel
 
-        If(NShoot.ne.0.and.LAI.gt.0.0) then
+        If(NShoot.ne.0) then
 C
 C  CALCULATE SOLAR ALTITUDE AND SOLAR AZIMUTH FOR EACH TIME
 C

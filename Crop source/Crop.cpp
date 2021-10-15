@@ -301,7 +301,21 @@ void crop(struct
 					SHOOTR->InitialRootCarbo=pSC->getPlant()->get_rootMass()*PopSlab; // get initial root mass to distribute over initial nodes
 				}
 
-				
+				//double pool=pSC->getPlant()->get_C_pool_root(); //This holds any carbon not used for root growth in the previous time step
+				//if ((pSC->getPlant()->get_C_pool_root()>0) && (pSC->getPlant()->get_rootPart()<0.00001))
+				// TODO: need to put in a method since we repeat it in several places
+				//{ 
+					
+				//	SHOOTR->PCRL=(pSC->getPlant()->get_rootPart()+pool)*24*PopSlab;
+		    	//	pSC->getPlant()->set_C_pool_root(0.0);
+				//}
+
+				//else
+				//{
+				//	SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
+					
+				//}
+
 			}
 			if (pSC->getPlant()->get_develop()->Emerged())
 				// pass appropriate data to 2DSOIL file structures 
@@ -326,10 +340,11 @@ void crop(struct
 					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
 					
 				}
-				bool gf = pSC->getPlant()->get_develop()->GrainFillBegan();
-							
+				bool gf=pSC->getPlant()->get_develop()->GrainFillBegan();
+				
+                
 				SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (pSC->getPlant()->get_shootPart()))*24*PopSlab;
-                  if (gf)
+                  if (gf) 
 				  {
                       SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart())*24*PopSlab +
 						  (0.75*pSC->getPlant()->get_shootPart())*24*PopSlab;

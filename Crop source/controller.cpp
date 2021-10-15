@@ -29,37 +29,20 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	time			 = NULL;
 	weather 		 = NULL;
 	plant			 = NULL;
-	// copy input names into variety file an crop file names
-	// this is a carryover from previous code. I think we need to copy
-	//because filename is const char* and is available to the class
+	
 	strcpy_s(varietyFile, filename);
     strcpy_s(cropFile, outfile);
-	// declare temporary variables to hold strings 
-	// this is to determine the path and create output file names 
-	// for the debug and summary files
-
-	char* temp =       (char*)calloc(133, sizeof(char));
-	char* pathSymbol = (char*)calloc(133, sizeof(char));
-	char *ext_dbg="dbg";
-	char* ext_summ = "sum";
-	pathSymbol = "/\\"; //for both Linux and Windows
-	std::string basePath;
-	std::size_t found;
-	std::string cropFileAsString = cropFile;
-// find last path separator and break path from file name	
-	found=cropFileAsString.find_last_of(pathSymbol);
-	basePath = cropFileAsString.substr(0, found);
-// now get filename to use as a root
-	std::string fileName = cropFileAsString.substr(found + 1);
-	std::string root = fileName.substr(0,fileName.length() - 3);
-// create summFile and debug file  names
-// first have to determine if we are linux or windows
-	SummFile = basePath.append("/"+ root +  ext_summ);
-	DebugFile = basePath.append("/" + root + ext_dbg);
-
-// make filename for the leaf file
+	char *pch=(char*)calloc(133,sizeof(char));
+	char *next=(char*)calloc(133,sizeof(char));
+	char *ext=".dbg";
+	char* temp=(char*)calloc(133,sizeof(char)); 
+	strcpy_s(temp, 133,cropFile);
+	pch=strtok_s(temp,".",&next);
+	temp=strcat(pch,ext);
+	strcpy_s(DebugFile,temp);
 	strcpy_s(LeafFile, LFile);
-
+	//DebugFile=outfile
+	//strcpy_s(DebugFile,"Debug.out");
 	initInfo = iniInfo;
 	iCur = 0;
     firstDayOfSim = 0;
@@ -203,20 +186,7 @@ void CController::initialize()
 		    << endl;
 
 	}
-	{
-		// this is the header for the summary output file
-		ofstream SummOut(SummFile, ios::out);
-		SummOut << setiosflags(ios::left)
-			<< setiosflags(ios::fixed)
-			<< setw(9) << "date,"
-			<< setw(6) << "jday,"
-			<< setw(8) << "time,"
-			<< setw(9) << "waterstress,"
-			<< setw(8) << "N_stress,"
-			<< setw(8) << "Shade_Stress,"
-			<< setw(8) << "PotentialArea"
-			<< endl;
-	}
+
 // Read variety file here and fill in data structures
 	try
 	{
@@ -387,7 +357,6 @@ int CController::run(const TWeather & wthr) //todo pass gas exchange parameters 
 			outputToCropFile();
 //			if (plant->get_develop()->Germinated())
 				outputToLeafFile();
-				outputToSummary();
 #ifndef _DEBUG_FILE
 				if (plant->get_develop()->Germinated()) outputToDebug();
 #endif
@@ -527,7 +496,6 @@ void CController::outputToLeafFile()
 	ofstream ostr(LeafFile, ios::app);
 	ostr << setiosflags(ios::right) 
 		<< setiosflags(ios::fixed);
-	// starts from 1, 0 is the base node
 	for (int i = 1; i <= myDevelop->get_LvsInitiated(); i++)
 	{ 
 		nU=&plant->get_nodalUnit()[i]; // note the use of "&" I needed to call a function
@@ -598,84 +566,3 @@ void CController::outputToDebug()
 	DebugOut.close();
     
 }
-
-void CController::outputToSummary()
-{
-	// This function outputs summary information on stresses and 
-	//  crop progress.
-	// variables output include water stress (LeafEffect), N stress on leaf (leafN_effect)
-	// carbon stress due to crowding
-	// ratio of actual to potential leaf area
-
-	int mm, id, iyyy;
-	int outputAlready = 0; // flag to see if maturity info has already been written
-	// declare required objects
-	double MeanN = 0;
-	double actualArea = 0, potentialArea = 0;
-	double  leafAreaRatio = 0;
-
-	CNodalUnit* nU;
-	nU = &plant->get_nodalUnit()[0]; // see note in leaf output as to why I used "&"
-	// move this to header?
-	CDevelopment* myDevelop = plant->get_develop();
-
-	string DateForOutput;
-	time->caldat(weather[iCur].jday, mm, id, iyyy);
-
-	// at this point, all leaves have the same N content. Later we will implement separate for all leaves
-	// thus we need to cycle through the leaves to get the mean N content
-	// also get ration of actual to potential leaf area of growing leaves
-
-	for (int i = 1; i <= myDevelop->get_LvsInitiated(); i++)
-	{
-		nU = &plant->get_nodalUnit()[i];
-		MeanN = MeanN + nU->get_leaf()->get_N_content(); //probably need to scale by area or use plant N
-		if ((nU->get_leaf()->isMature()) && (!nU->get_leaf()->isDropped()))
-		{
-			actualArea += nU->get_leaf()->get_greenArea();
-			potentialArea += nU->get_leaf()->get_potentialArea();
-
-
-		}
-
-	}
-	MeanN = MeanN / myDevelop->get_LvsInitiated();
-	if (potentialArea > 0)
-	{
-		leafAreaRatio = max(0, actualArea / potentialArea);
-
-	}
-
-	// calculate water stress using function in develop
-	double LeafEffect = myDevelop->LWPeffect(weather[iCur].LeafWP, nU->get_leaf()->get_psi_threshold_bars());
-	double shadeEffect = myDevelop->get_shadeEffect();
-	double criticalN = max(MeanN, 0.25);
-	double leafN_effect = myDevelop->LeafN_effect(criticalN);
-#if 0
-	DateForOutput.Format("%.2d/%.2d/%4i", mm, id, iyyy);
-#else
-	char DateForOutputBuff[16];
-	sprintf(DateForOutputBuff, "%.2d/%.2d/%4i", mm, id, iyyy);
-	DateForOutput = DateForOutputBuff;
-#endif
-	ofstream SummOut(SummFile, ios::app);
-	SummOut << setiosflags(ios::right)
-		<< setiosflags(ios::fixed);
-	SummOut
-		<< setw(9) << DateForOutput << comma
-		<< setw(6) << weather[iCur].jday << comma
-		<< setw(8) << setprecision(0) << weather[iCur].time * 24.0 << comma
-		<< setw(8) << setprecision(3) << max(0.0, 1.0-LeafEffect) << comma
-		<< setw(8) << setprecision(3) << max(0.0,1.0-leafN_effect) << comma
-		<< setw(8) << setprecision(3) << max(0.0,1.0-shadeEffect) << comma
-		<< setw(8) << setprecision(3) << leafAreaRatio << comma
-		<< endl;
-
-	myDevelop = NULL;
-	nU = NULL;
-	SummOut.close();
-
-
-
-}
-
