@@ -1,7 +1,0 @@
-*** script for chemical application module ***
-number of fertilizer applications (max=25) mappl is in total mg N applied to grid (1 kg/ha = 1 mg/m2/width of application) application divided by width of grid in cm is kg/ha
-2
-appl_time(i)    appl_mg(i)    num_nodes(i)    (repeat following 3 lines for each N application)
-'04/15/1961'    100  5   0    0    
-'05/15/1961'    100  5    0    0    
-

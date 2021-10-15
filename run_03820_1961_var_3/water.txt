@@ -1,3 +1,0 @@
- *** WATER MOVER PARAMETERINFORMATION ***************************
- MaxIt   TolTh TolH    hCritA       hCritS      DtMx  htab1   htabN  EPSI.Heat  EPSI.Solute
-   20     0.01  0.05  -1.00000E+005 5.000000E+010 0.02 0.001   1000   0.5         0.5

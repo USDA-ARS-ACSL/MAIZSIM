@@ -108,8 +108,8 @@
     </Link>
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
-echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
-</Command>
+        echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
+     </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dennis_Dbg|Win32'">
