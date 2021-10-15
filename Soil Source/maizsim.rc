@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,2,7
- PRODUCTVERSION 1,6,2,7
+ FILEVERSION 1,6,3,0
+ PRODUCTVERSION 1,6,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -71,11 +71,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "USDA-ARS-ACSL"
 #ifdef _DEBUG			
-            VALUE "FileDescription", "MZS with genetic input with mulch model"
+            VALUE "FileDescription", "MZS with genetic input used in phase 2 of ET DBG"
 #else
-            VALUE "FileDescription", "MZS with genetic input used in phase 1 of ET RLS"
+            VALUE "FileDescription", "MZS with genetic input used in phase 2 of ET RLS"
 #endif			
-            VALUE "FileVersion", "1.6.2.7"
+            VALUE "FileVersion", "1.6.3.0"
 #ifdef _DEBUG
             VALUE "InternalName", "2DSOIL_DEBUG"
 #else
@@ -88,7 +88,7 @@ BEGIN
 #else
             VALUE "ProductName", "MAIZSIM RELEASE"
 #endif
-            VALUE "ProductVersion", "1.6.2.7"
+            VALUE "ProductVersion", "1.6.3.0"
         END
     END
     BLOCK "VarFileInfo"

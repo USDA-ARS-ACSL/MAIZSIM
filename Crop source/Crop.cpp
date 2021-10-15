@@ -81,6 +81,7 @@ void crop(struct
 		initInfo.beginDay=time_public->beginDay;
 		initInfo.endDay=time_public->endDay;
 		initInfo.timeStep=time_public->TimeStep;
+		initInfo.CO2 = Weather->CO2;
     	time_public->iTime=1;
 		SHOOTR->LCAI=0.0;
 		SHOOTR->LAREAT=0.0;

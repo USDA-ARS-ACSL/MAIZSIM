@@ -325,7 +325,7 @@ c calculate mature root mass, total root mass and rool lengths
 c set up for next step     
       Do i=1,NumNPD 
         RMean=(RMassY(i)+RMassOld(i))/2.0d0
-        
+        RTWT(i)=(RMassM(i)+RMassY(i))
         RMassM(i)=RMassM(i)+ALPY*RMassY(i)*Step
         RMassY(i)=RMassY(i)*(1.0-ALPY*Step)
         RDenM(i)=RMassM(i)/RTWL

@@ -321,7 +321,8 @@ C    since the julian day is referenced to a time longer in the past
 
            if (lInput.ne.1) HTEMPY(M)=HTEMP(M)  ! save to yesterday's 
                                                 !temperature for initial step
-           HTEMP(M)=(climat(2)-ATEMP)/BTEMP     ! convert to celcius
+c model cannot handle freezing temperatures yet
+           HTEMP(M)=max((climat(2)-ATEMP)/BTEMP,2.0)     ! convert to celcius
            HRAIN(M) = CLIMAT(3)*erain         ! convert to cm rain in 
                                               ! this hour
            If (MSW2.gt.0) HWIND(M)=CLIMAT(4)
@@ -362,9 +363,9 @@ c RI should be total J m-2 -- work in Watts * time = total energy
                TMIN = HTEMP(M)
              ENDIF
              IF(MSW2 .GT. 0) THEN
-               WIND = HWIND(M) * BWIND
+               HWIND(M) = HWIND(M) * BWIND
              Else 
-               WIND=WINDA*BWIND
+               HWIND(M)=WINDA*BWIND
              ENDIF
 1015      CONTINUE
           RAIN = SUM24
@@ -872,11 +873,11 @@ C gives you the .149
               If (D12.GE.1.0) D12 = 1.0
               ESO = ((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
      &     - (2.3668*TAIR(ITIME))))
-     &     + (VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12))))
+     &     + (VPD(ITIME)*109.375*(1.0 + (0.149*HWIND(ITIME)*D12))))
      &      /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
             fac1=((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
      &     - (2.3668*TAIR(ITIME))))) /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
-            fac2=(VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12)))
+            fac2=(VPD(ITIME)*109.375*(1.0 + (0.149*HWIND(ITIME)*D12)))
      &            /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
 
 c   IF THE NODE IS EXPOSED THEN
@@ -909,7 +910,7 @@ C
 C   ON STILL HOT DAYS, CONVECTION CURRENTS AT CROP LEVEL ASSURE
 C   SOME AIR MOVEMENT
 C
-        WINDL = WIND
+        WINDL = HWIND(ITIME)
         If (TAIR(ITIME).GT.25.0.AND.WINDL.LE.0.36) WINDL = 0.36
 C
 C   CALCULATE POTENTIAL TRANSPIRATION RATE FOR THE CROP
@@ -991,7 +992,7 @@ C
 C
 CYAP 
 C FCSH is sensible heat flux when the ground is hotter than the air
-         FCSH=4.0E-3+1.39E-3*Wind*max(1.0,(2.-(2.*COVER)))
+         FCSH=4.0E-3+1.39E-3*HWind(ITIME)*max(1.0,(2.-(2.*COVER)))
          FCSH=FCSH*4.1856*60.0*24.0
 C FELWR is the coefficient for radiant heat lost when the 
 C soil is warmer than the air.
@@ -1120,7 +1121,7 @@ c
 c................... End of the furrow irrigation
    
 c................... This is the end of hourly calculations
-
+      Wind=HWIND(Itime) ! save hourly value of wind to pass to crop model
       tNext(ModNum)=Time+period
       Endif      ! hourly loop
 c      

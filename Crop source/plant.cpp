@@ -23,6 +23,9 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	ear = NULL;
 	roots = NULL;
 	develop = NULL;
+
+	 // create enough leaf nodes for now, to be replaced by dynamic collection
+
 	seedMass = mass =  CH2O = 0.275; // seed weight g/seed
 	C_content = 0.40; // 40% C, See Kim et al. (2007) EEB
 	C_pool = 0.0;  //mass*C_content;
@@ -33,6 +36,9 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	maintRespiration = 0.0;
 	C2_effect=1.0;
 	SunlitRatio=0.0;
+	Q10MR =info.Q10MR ; // typical Q10 value for respiration is 2, Loomis and Amthor (1999) Crop Sci 39:1584-1596 - could try 1.8
+	LAF = info.LAF;
+	
 
 	// initialize plant part sizes //
 	shootPart = 0.60;
@@ -61,12 +67,12 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	sunlit_gs=shaded_gs=0;
 	sowingDay = 1.0;
 	age = 0.0;
-	initInfo = info;
+	initInfo = info; // make a local copy to pass to other classes
 	gasExparam = photoparam;
 	roots = new CRoots();
 	ear = new CEar();
 	develop = new CDevelopment(initInfo);
-	nodalUnit = new CNodalUnit[initInfo.genericLeafNo+10]; // create enough leaf nodes for now, to be replaced by dynamic collection
+	nodalUnit = new CNodalUnit[initInfo.genericLeafNo + 10];
 	for (int i=1; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile, should start at 1
 	{
 		nodalUnit[i].initialize(i, develop);
@@ -134,7 +140,7 @@ void CPlant::update(const TWeather & weather)
 			leaf_NFraction = 0;//fraction of leaf n in total shoot n can't be smaller than zero. YY
 		}
 		leaf_N = leaf_NFraction*this->get_N(); //calculate total nitrogen amount in the leaves YY units are grams N in all the leaves
-		leaf_N_content = leaf_N/(this->greenLeafArea/10000); //SK 8/22/10: set avg greenleaf N content before update in g/m2; 
+		leaf_N_content = leaf_N/(this->greenLeafArea/10000+0.01); //SK 8/22/10: set avg greenleaf N content before update in g/m2; 
 		PlantNitrogenContent=this->get_N();
 		percentN=this->get_N()/shootMass;
 		double Ratio=0;
@@ -534,7 +540,6 @@ double CPlant::calcPotentialCarbondemand()
 void CPlant::calcGasExchange(const TWeather & weather, const TGasExSpeciesParam& photoparam)
 {
 	const double tau = 0.50; // atmospheric transmittance, to be implemented as a variable => done
-	const double LAF = 1.37; // leaf angle factor for corn leaves, Campbell and Norman (1998)
 	//Make leaf width a function of growing leaves as average width will increase as the plant grows
 	// add it as a 
 	const double leafwidth = 5.0; //to be calculated when implemented for individal leaves
@@ -923,14 +928,13 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 // based on McCree's paradigm, See McCree(1988), Amthor (2000), Goudriaan and van Laar (1994)
 // units very important here, be explicit whether dealing with gC, gCH2O, or gCO2
   {
-	const double Q10 = 2.0; // typical Q10 value for respiration, Loomis and Amthor (1999) Crop Sci 39:1584-1596 - could try 1.8
-	double dt = initInfo.timeStep/(24*60);
+    double dt = initInfo.timeStep/(24*60);
 //	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
-	const double maintCoeff = 0.018;
+	const double maintCoeff = 0.018;// too high?
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
 	//agefn=1.0;
-	double q10fn = pow(Q10,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
+	double q10fn = pow(Q10MR,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
 	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
 	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.

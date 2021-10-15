@@ -34,6 +34,9 @@ public:
 	double get_droppedArea () {return droppedArea;}
 	double get_GDD2mature() {return GDD2mature;}
 	double get_Elongation_Age() { return elongAge; }
+	
+	
+
 	int    get_TotalGrowingLeaves() {return TotalGrowingLeaves;}
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
 	int    get_TotalMatureLeaves() { return TotalMatureLeaves; }
@@ -48,6 +51,7 @@ public:
 	void set_TotalGrowingLeaves(int x) {TotalGrowingLeaves=x;}
 	void set_TotalDroppedLeaves(int x) {TotalDroppedLeaves=x;}
 	void  set_TotalMatureLeaves(int x) {TotalMatureLeaves=x; }
+	
 
 	double GTI(double);
 	void set_RelativeAreaIncrease(double x) {RelativeAreaIncrease=x;}
@@ -90,6 +94,10 @@ private:
 	double N_effect;
 	double WLRATIO, A_LW;
 	double T_peak, Tb_Leaf;
+	double Q10LeafSenescence;
+	double leafNumberFactor_a1, leafNumberFactor_a2,
+		   leafNumberFactor_b1, leafNumberFactor_b2;
+
 
 	/*
 	SK 8/22/10: Leaf N content in mg/m2

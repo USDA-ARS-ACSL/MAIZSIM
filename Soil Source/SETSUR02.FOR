@@ -829,10 +829,6 @@ C initialize boundary values to 0
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
 cccz this PSh expression is different from the hour.for one, and it has stronger lower boundary
           PSh=max(0.0,FSh(i,xBSTEM,SHADE,xS,ic))
-c
-c  IF THE NODE IS EXPOSED THEN
-c
-          If(PSh.gt.0.) then
 C
 C  CALCULATE THE ALBEDO OF THE EXPOSED SOIL CELLS
 C
@@ -864,6 +860,10 @@ C See eqn 5.11 of http://mepas.pnnl.gov/mepas/formulations/source_term/5_0/5_13/
      &      /((DEL(ITIME)/GAMMA) + 1.0)
 C
 C   PROPORTIONAL TO THE AREA EXPOSED
+c
+c  IF THE NODE IS EXPOSED THEN
+c
+          If(PSh.gt.0.) then
 C
               VarBW(kS(i),2)=PSh*24.*ESO/10000.
 c

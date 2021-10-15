@@ -87,9 +87,6 @@
     <ClInclude Include="leaf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lightenv.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="nodalunit.h">
       <Filter>Header Files</Filter>
     </ClInclude>

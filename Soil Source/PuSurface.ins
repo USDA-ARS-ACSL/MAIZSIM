@@ -24,33 +24,3 @@ cccz Zhuangji Wang
      !        RunoffLeft_Efflux,RunoffRight_Efflux
 
 
-cccz the following blocks are used for surface modules
-cccz use "SurWeatherUpdate" as data transfer indicator
-cccz Zhuangji Wang
-      Double precision rho_mulch,ParMulch(13,1),
-     !        MulchNodeTmpr(550),MulchEleTmpr(11,50),
-     !        MulchNodehNew(550),MulchElehNew(11,50),
-     !        MulchNodeThNew(550),MulchEleThNew(11,50),
-     !        RelaHumid_mulch(11,50),VaporSat_mulch(11,50),
-     !        VaporAct_mulch(11,50),
-     !        mulchThick,f_mulch_pore,widthPerMulchUnit(50),
-     !        MulchNodeMarkerArea(550),MulchEleMarkerArea(550),
-     !        LayerHeight(11),thickPerLayer(10),mulchNodeCoord(550,2),
-     !        Mulch_Decompose,Mulch_Decompose_C,Mulch_Decompose_N,
-     !        Frac_Decomp(11),RDM_mass(11,50),HCE_mass(11,50),
-     !        CEL_mass(11,50),LIG_mass(11,50)
-      Integer Van_Camp_mulch,mulchLayer,
-     !        MulchNodeMarker(550,2),MulchNodeMatrix(11,50),
-     !        MulchEleMatrix(11,50),MulchEleMarker(550,6)
-      Common /SurfaceProcess_Para/ Van_Camp_mulch,
-     !        MulchNodeTmpr,MulchEleTmpr,
-     !        MulchNodehNew,MulchElehNew,
-     !        MulchNodeThNew,MulchEleThNew,
-     !        RelaHumid_mulch,VaporSat_mulch,VaporAct_mulch,
-     !        MulchNodeMarker,
-     !        MulchNodeMatrix,MulchEleMatrix,MulchEleMarker,
-     !        mulchThick,f_mulch_pore,widthPerMulchUnit,
-     !        MulchNodeMarkerArea,MulchEleMarkerArea,
-     !        LayerHeight,thickPerLayer,mulchNodeCoord,
-     !        Frac_Decomp,RDM_mass,HCE_mass,CEL_mass,LIG_mass,
-     !        mulchLayer,rho_mulch,ParMulch

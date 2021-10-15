@@ -3,7 +3,7 @@
 *     2DSOIL  - Numerical model of two-dimensional soil environment    *
 *                           for field crops                            *
 *                                                                      *
-*                              Release 1.1.4                              *
+*                              Release 1.6.3                              *
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
 
       Include 'public.ins'

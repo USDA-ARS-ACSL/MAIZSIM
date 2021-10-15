@@ -2494,7 +2494,11 @@ cccz for regular grid, the program can be ended here, after some arrangement
          VarBW(i,1)=VarBW(i,1)+(h_Stay(n)-h_Stay_temp(n))/step
          Q(k)=Q(k)+(h_Stay(n)-h_Stay_temp(n))/step*width(i)
          h_Stay(n)=h_Stay_temp(n)
-         FurtherCheck_h_Stay(n)=1
+         if(h_Stay(n).gt.CriticalH_R) then
+          FurtherCheck_h_Stay(n)=1
+         else
+          FurtherCheck_h_Stay(n)=0
+         endif
         else
          FurtherCheck_h_Stay(n)=0                 
         endif

@@ -88,6 +88,7 @@ public:
 	void setMass();
 	void set_age(double x) {age=x;}
 	void set_CH2O();
+	void set_Q10MR(double x) { Q10MR = x; }
 	void set_N(double x) {TotalNitrogen= x;} // Units are grams. Was scaled from mg in crop.cpp
 	void set_HourlyNitrogenDemand (double x) {HourlyNitrogenDemand=x;}
 	void set_CumulativeNitrogenDemand (double x) {CumulativeNitrogenDemand=x;}
@@ -151,6 +152,7 @@ private:
 	double CH2O; // carbohydrate, also dry matter, g
 	double N; //Need to delete this - replaced by TotalNitrogen
 	double N_pool; //SK 8/20/10: Short-term N pool for remobilization, this should come mostly from senescing leaves and can be purged daily to active leaves, not implemented at the moment
+	double Q10MR; //Q10 for maintenance respiration
 	
 	double leafArea, droppedLfArea;
 	double currentDroppedLfArea;
@@ -167,6 +169,8 @@ private:
 	double transpiration, transpirationOld; //current and previous values of transpiration - g per plant per hr
 	double VPD;
 	double conductance;
+	double LAF; // leaf angle factor for corn leaves, Campbell and Norman (1998)
+
 
 	double temperature;
 	double shootPart; //g per plant Carbohydrate partitioined to shoot
