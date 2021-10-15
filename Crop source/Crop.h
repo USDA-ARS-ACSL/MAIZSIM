@@ -139,7 +139,7 @@
  struct  BoundaryCommon{
 	       int  NumBP, NSurf, NVarBW,NVarBS,NVarBT,NVarBG,
                 NumSurfDat, NSeep, NSP[NSeepD], NP[NumSPD][NSeepD],
-				NDrain,NDR[NDrainD],NDNumDR[NDrainD],
+				NDrain,NDR[NDrainD],ND[NumDR][NDrainD],
                 KXB[NumBPD];
 		   int CodeW[NumNPD],CodeS[NumNPD],CodeT[NumNPD],
 			     CodeG[NumNPD],PCodeW[NumNPD];

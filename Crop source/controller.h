@@ -29,7 +29,8 @@ private:
 	// strcpy in vs 2008 so I changed to strcpy_s but apparently it requires enough space for the null
 	// terminatino character in the destination string
 	char varietyFile[133], outputFile[133], cropFile[133], logFile[133],LeafFile[133];
-	char DebugFile[133];
+	//char DebugFile[133], SummFile[133];
+	std::string DebugFile, SummFile;
 	int iCur, // current record number
 		errorFlag;
 
@@ -73,5 +74,6 @@ public:
 	double ET_supply;   //actual supply of water to plant mol m-2 (leaf) s-1
 
 
+	void outputToSummary();
 };
 #endif

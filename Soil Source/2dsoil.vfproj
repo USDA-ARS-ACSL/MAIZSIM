@@ -11,7 +11,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;Y:\MAIZSIM\AgMIPET2&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Kansas&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Crown&quot;"/>
+				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
@@ -32,6 +32,16 @@
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\AgMIPET2&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Kansas&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Crown&quot;"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Kernel_dbg|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnTruncateSource="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" WarnArgMismatch="true"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386 " Version="1.14" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies="&quot;D:\MAIZSIMWA\crop source_kernel\Debug\crop.lib&quot;"/>
+				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/2dsoil.tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\AgMIPET2&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Kansas&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;D:\MAIZSIM07\Crown&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="*.ins;h;hpp;hxx;hm;inl;fi;fd">
@@ -46,6 +56,8 @@
 		<File RelativePath="2DMAIZSIM.FOR"/>
 		<File RelativePath=".\AutoIrrigate.for">
 			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration>
+			<FileConfiguration Name="Kernel_dbg|Win32">
 				<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration>
 			<FileConfiguration Name="Dennis_Dbg|Win32">
 				<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration></File>

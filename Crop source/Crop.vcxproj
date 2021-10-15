@@ -108,7 +108,6 @@
     </Link>
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
-echo f | xcopy /y "$(TargetPath)" "Y:\Maizsim\AgmipET2"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

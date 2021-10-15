@@ -31,6 +31,7 @@ public:
 	double calcGDD(double temperature,double T_opt);
 	int update(const TWeather&); 
 	double LWPeffect(double predawn_psi_bars, double threshold);
+	double LeafN_effect(double CriticalN);
 	TInitInfo get_initInfo() {return initInfo;}
 	int get_youngestLeaf() {return youngestLeaf;}
 	int get_totalLeaves() {return (int) totLeafNo;} // removed +1 that was previously here to count only those leaves fully initiated, SK 1-19-12
