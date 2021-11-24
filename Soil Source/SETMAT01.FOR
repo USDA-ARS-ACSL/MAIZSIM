@@ -141,6 +141,7 @@ C was an error - was using fracsind as 1-(sand+silt) which was wrong
         If(Explic) hi2=hi1
         If(hi2.ge.hSat(M)) then
           Ci=0
+          Ci=FC(hSat(M),PAR)
           Ti=thSat(M)
         Else if(hi2.ge.(hTab(NTabD)+.04).and.hi2.le.hTab(1)) then
           iT=int((alog10(-hi2)-alh1)/dlh)+1

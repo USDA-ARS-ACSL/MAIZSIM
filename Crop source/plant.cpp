@@ -321,7 +321,7 @@ void CPlant::update(const TWeather & weather)
 			develop->maturity.daytime = weather.daytime;
 			develop->death.done = true;
 			develop->death.daytime = weather.daytime;
-			cout << "* Physiological maturity " << develop->get_GDDsum() << " T growth: " << develop->get_Tgrow() 
+			cout << " Physiological maturity " << develop->get_GDDsum() << " T growth: " << develop->get_Tgrow() 
 				<< " green leaf %: " << greenLeafArea/leafArea*100 << endl;
 		}
 

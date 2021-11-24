@@ -28,15 +28,14 @@ public:
 	double get_SLA() {return SLA;}
 	double get_N_content() {return N_content;}
 	double get_N_Effect() { return N_effect; }
+	double get_CriticalN() { return CriticalNitrogen; }
 	double get_potentialAreaIncrease () {return PotentialAreaIncrease;}
 	double get_RelativeAreaIncrease() {return RelativeAreaIncrease;}
 	double get_actualgreenArea() {return actualgreenArea;}
 	double get_droppedArea () {return droppedArea;}
 	double get_GDD2mature() {return GDD2mature;}
 	double get_Elongation_Age() { return elongAge; }
-	
-	
-
+	double get_psi_threshold_bars() { return psi_threshold_bars; }
 	int    get_TotalGrowingLeaves() {return TotalGrowingLeaves;}
 	int    get_TotalDroppedLeaves() {return TotalDroppedLeaves;}
 	int    get_TotalMatureLeaves() { return TotalMatureLeaves; }
@@ -51,14 +50,14 @@ public:
 	void set_TotalGrowingLeaves(int x) {TotalGrowingLeaves=x;}
 	void set_TotalDroppedLeaves(int x) {TotalDroppedLeaves=x;}
 	void  set_TotalMatureLeaves(int x) {TotalMatureLeaves=x; }
+
+	
 	
 
 	double GTI(double);
 	void set_RelativeAreaIncrease(double x) {RelativeAreaIncrease=x;}
 	void update(CDevelopment *, double pdlwp);
-	//void elongate(CDevelopment *, double pdlwp);
 	void expand(CDevelopment *, double pdlwp);
-//	void senescence(CDevelopment *);
 	void senescence(CDevelopment *, double pdlwp);
 	void set_N_content(double x) {N_content=x;}
 	void set_GDD2mature(double x) {GDD2mature=x;}
@@ -98,6 +97,8 @@ private:
 	double leafNumberFactor_a1, leafNumberFactor_a2,
 		   leafNumberFactor_b1, leafNumberFactor_b2;
 
+	const double psi_threshold_bars = -0.8657;
+	double CriticalNitrogen = __max(0.25,this->N_content);
 
 	/*
 	SK 8/22/10: Leaf N content in mg/m2
