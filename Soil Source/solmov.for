@@ -110,44 +110,6 @@ C GR
 C
 C  Recasting sinks 
 C
-cccz zhuangji convert this section to node based
-c         Do n=1,NumEl
-c           NUS=4
-c           if(KX(n,3).eq.KX(n,4)) NUS=3
-*         Loop on subelements
-c           do k=1,NUS-2
-c             i=KX(n,1)
-c             j=KX(n,k+1)
-c             l=KX(n,k+2)
-c             Ci(1)=x(l)-x(j)
-c             Ci(2)=x(i)-x(l)
-c             Ci(3)=x(j)-x(i)
-c             Bi(1)=y(j)-y(l)
-c             Bi(2)=y(l)-y(i)
-c             Bi(3)=y(i)-y(j)
-c             AE=(Ci(3)*Bi(2)-Ci(2)*Bi(3))/2.
-c             CTotal=Conc(i,1)+Conc(j,1)+Conc(l,1)
-c             if (CTotal.gt.0) then
-c                Gc(i)=gc(i)+cSink(n,jjj)*AE*Conc(i,1)/CTotal
-c                Gc(j)=gc(j)+cSink(n,jjj)*AE*Conc(j,1)/CTotal
-c                Gc(l)=gc(l)+cSink(n,jjj)*AE*Conc(l,1)/CTotal
-c             Endif
-c             Sc(i)=Sc(i)+AE/3.
-c             Sc(j)=Sc(j)+AE/3.
-c             Sc(l)=Sc(l)+AE/3.
-c            enddo
-c         enddo
-c*        Do n=1,NumEl
-c*         NUS=4
-c*          If(KX(n,3).eq.KX(n,4)) NUS=3
-c*         Do j=1,NUS
-c*            Gc(KX(n,j))=Gc(KX(n,j))+cSink(n,jjj)*Area(n)/NUS
-c*            Sc(KX(n,j))=Sc(KX(n,j))+Area(n)/NUS
-c*          Enddo
-c*        Enddo
-c        Do i=1,NumNP
-c          Gc(i)=Gc(i)/Sc(i)
-c        Enddo
 cccz
 cccz zhuangji adopt node based expression
 cccz zhuangji: the previous sink recast use a concentration-based weight for "sink average"

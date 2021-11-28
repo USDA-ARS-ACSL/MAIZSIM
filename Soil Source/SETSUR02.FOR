@@ -74,7 +74,7 @@ C**                                                                   **
       Include 'public.ins'
       Include 'puplant.ins'
       Include 'puweath.ins'
-      Include 'puSurface.ins'
+      Include 'pusurface.ins'
       
       Parameter (PERIOD =1./24.)
       integer jday, m, DayofYear,CurYear, ModNum,ThisYear
@@ -956,20 +956,7 @@ c................... Precipitation and irrigation
       n=KXB(i)
       k=CodeW(n)
       If(K.eq.4.or.K.eq.-4) then
-cccz         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
-         
-cccz         
-c        if(x(n).eq.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*4.77D0   ! turn this on when do RFRH "compact soil mulch example"
-c              VarBW(i,1)=VarBW(i,1)*14.0D0   ! turn this on when do RFRH "plastic film mulch example"
-c        endif
-c        if(x(n).lt.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*0.73D0   ! turn this on when do RFRH "compact soil mulch example"
-c        endif
-        
-cccz 
-         
        If(NumSol.ne.0) then
           do j=1,NumSol
 cdt was varbs(n,j)
