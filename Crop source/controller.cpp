@@ -14,7 +14,7 @@
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #endif
 #define comma ","
-#define MINUTESPERDAY (24*60);
+#define MINUTESPERDAY (24.0*60.0);
 
 // const a = 17.27; b = 237.7; //constant in deg C
 inline double E_sat(double T){return 0.6105*exp(17.27*T/(237.7+T));}
@@ -191,6 +191,10 @@ void CController::initialize()
 		    << setw(8) << "totalDM,"
 			<< setw(8) << "shootDM,"
 			<< setw(8) << "earDM,"
+#ifndef _INTERFACE
+			<< setw(8) << "sheathDM,"
+			<< setw(8) << "cobDM,"
+#endif
 			<< setw(10) << "TotleafDM,"
 			<< setw(10) << "DrpLfDM,"
 			<< setw(8) << "stemDM,"
@@ -493,6 +497,10 @@ void CController::outputToCropFile()
 				<< setw(8) << setprecision(3) << plant->get_mass() << comma
 				<< setw(8) << setprecision(3) << plant->get_shootMass() << comma  //masses are grams per plant
 				<< setw(8) << setprecision(2) << plant->get_earMass() << comma
+#ifndef _INTERFACE
+				<< setw(8) << setprecision(2) << plant->get_sheathMass() << comma
+				<< setw(8) << setprecision(2) << plant->get_cobMass() << comma
+#endif
 				<< setw(8) << setprecision(2) << plant->get_leafMass() << comma
 				<< setw(8) << setprecision(2) << plant->get_DroppedLeafMass() << comma
 				<< setw(8) << setprecision(2) << plant->get_stemMass() << comma
