@@ -31,7 +31,6 @@ CDevelopment::CDevelopment(const TInitInfo& info)
 	PhyllochronsToTassel = info.PhyllochronsToTassel;
 	totLeafNo = juvLeafNo = info.genericLeafNo;
 	GDD_rating = info.GDD_rating;
-	totLeafNo = juvLeafNo = info.genericLeafNo;
 	Rmax_Germination = Rmax_Emergence = 0;
 
 	Q10MR = info.Q10MR;
