@@ -93,7 +93,7 @@ void crop(struct
 		SHOOTR->PCRS = 0.0;
 		SHOOTR->ET_demand = 0.0;
 		SHOOTR->HourlyCarboUsed=0;  //it is also zero'd upon initialization in 2dsoil
-		Period=time_public->TimeStep/60/24; // period should be in days, input in minutes
+		Period=time_public->TimeStep/60.0/24.0; // period should be in days, input in minutes
 		PopSlab=SHOOTR->PopRow/100.0*SHOOTR->EOMult;
 		SHOOTR->isEmerged=SHOOTR->isEmerged=0;
 		/*These two lines show the relationships among some of the space variables.
@@ -237,7 +237,7 @@ void crop(struct
 					to get area inhabited by the plant. This provides a per plant estimate from area.
 					*/
 					  //debug
-					  ET_diff=wthr.ET_supply*24-SHOOTR->ET_demand;
+					  ET_diff=wthr.ET_supply*24.0-SHOOTR->ET_demand;
 
 				}
 			}
@@ -317,43 +317,43 @@ void crop(struct
 																										// since we have to add leftover carbo from pcrq to the shoot
 				{ 
 					
-					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart()+pool)*24*PopSlab;
+					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart()+pool)*24.0*PopSlab;
 		    		pSC->getPlant()->set_C_pool_root(0.0);
 				}
 
 				else
 				{
-					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24*PopSlab;
+					SHOOTR->PCRL=(pSC->getPlant()->get_rootPart())*24.0*PopSlab;
 					
 				}
 				bool gf = pSC->getPlant()->get_develop()->GrainFillBegan();
 							
-				SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (pSC->getPlant()->get_shootPart()))*24*PopSlab;
+				SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart()+ (pSC->getPlant()->get_shootPart()))*24.0*PopSlab;
                   if (gf)
 				  {
-                      SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart())*24*PopSlab +
-						  (0.75*pSC->getPlant()->get_shootPart())*24*PopSlab;
+                      SHOOTR->PCRQ=(pSC->getPlant()->get_rootPart())*24.0*PopSlab +
+						  (0.75*pSC->getPlant()->get_shootPart())*24.0*PopSlab;
 				  }
                 //DT 09/19/14 under strong water stress mid season too much carbon is allocated to the roots, we
 				// try to limit it here.
 				//SHOOTR->PCRQ=SHOOTR->PCRL; //for debugging now remove later
 			//dt 03/2011 added these two for debugging now - need to calculate mass balcance of carbo sent to root
 				//can drop them later
-				wthr.pcrl=  SHOOTR->PCRL/PopSlab/24;
-				wthr.pcrq=  SHOOTR->PCRQ/PopSlab/24;
+				wthr.pcrl=  SHOOTR->PCRL/PopSlab/24.0;
+				wthr.pcrq=  SHOOTR->PCRQ/PopSlab/24.0;
 
 				
-				SHOOTR->LCAI =pSC->getPlant()-> calcGreenLeafArea()* pSC->getInitInfo().plantDensity/(100*100);
+				SHOOTR->LCAI =pSC->getPlant()-> calcGreenLeafArea()* pSC->getInitInfo().plantDensity/(100.0*100.0);
 				SHOOTR->Cover= 1.0 - exp (-0.79*SHOOTR->LCAI);
 				SHOOTR->Shade=(float)SHOOTR->Cover*SHOOTR->RowSp*SHOOTR->EOMult;
 				SHOOTR->Height=min(SHOOTR->Shade,SHOOTR->RowSp);
-				SHOOTR->ET_demand = (pSC->getPlant()->get_ET()*24);//pass ET demand from shoot to root. Yang
+				SHOOTR->ET_demand = (pSC->getPlant()->get_ET()*24.0);//pass ET demand from shoot to root. Yang
 				/*In GasExchange, the unit of ET is mmol m-2(leaf) sec-1
 				
 				need to convert to grams plant-1
 				Here, multiplying ET by 0.018 and 3600*24 converts it to g m-2(ground) day-1
 				dividing it by plantdensity converts it to g plant-1 day-1 */
-				SHOOTR->LAI=(float)pSC->getPlant()->calcGreenLeafArea()*(float)pSC->getInitInfo().plantDensity/(100*100);
+				SHOOTR->LAI=(float)pSC->getPlant()->calcGreenLeafArea()*(float)pSC->getInitInfo().plantDensity/(100.0*100.0);
 				//Pass LAI from maizesim into 2dsoil
                 
 				shoot_weightPerM2 = pSC->getPlant()->get_shootMass()*pSC->getInitInfo().plantDensity; //Calculate total shoot mass per meter aquared YY
@@ -384,29 +384,29 @@ void crop(struct
 				}
                 pSC->getPlant()->set_NitrogenRatio(NitrogenRatio/10.0);
 			  //	double d=075;  //d: shape coefficient in the logistic function to simulate cumulative N uptake (Equation 9 in Lindquist et al. 2007)
-				U_N = 0.359*d/4; //U_N maximum observed N uptake rate (g N m-2 ground d-1) (Lindquist et al, 2007) YY
+				U_N = 0.359*d/4.0; //U_N maximum observed N uptake rate (g N m-2 ground d-1) (Lindquist et al, 2007) YY
 			    //The unit of U_N is g N m-2 ground d-1
 
-				U_M = q_n*massIncrease*24; //U_M maximum uptake rate as limited by maximum N fraction per unit (Equation 2 in Lindquist et al., 2007)
+				U_M = q_n*massIncrease*24.0; //U_M maximum uptake rate as limited by maximum N fraction per unit (Equation 2 in Lindquist et al., 2007)
 				//	double q_n = 0.032; //q_n the maximum ratio of daily N uptake to measured daily growth rate (g N g-1) (Lindquist et al., 2007)
                 //unit of U_M is also g N m-2 ground d-1; however, the unit of massIncrease is g m-2/step (here one hour). 
 				//Here in the simulation, the default length of one step is an hour; so, we have to scale it up to one
 				//day by multiplying it by 24
 
-				if (shoot_weightPerM2<100) //if shoot weight<100 (g m-2) then U_P is calculated this way 
+				if (shoot_weightPerM2<100.0) //if shoot weight<100 (g m-2) then U_P is calculated this way 
 				{
 			
-					U_P = (N_min/100.0)*massIncrease*24; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
+					U_P = (N_min/100.0)*massIncrease*24.0; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
 				}
 				else //otherwise, it is calculated like this (Equation 6, Lindquist et al., 2007) YY
 				{
-					U_P = ((1.0-N_shape)*N_min*10.0/100.0)*pow(shoot_weightPerM2,-N_shape)*massIncrease*24;
+					U_P = ((1.0-N_shape)*N_min*10.0/100.0)*pow(shoot_weightPerM2,-N_shape)*massIncrease*24.0;
 				}
                 //unit of U_P is also g N m-2 ground d-1; however, the unit of massIncrease is g/step. Here
 				//in the simulation, the default length of one step is an hour; so, we have to scale it up to one
 				//day by multiplying it by 24
 
-				U_D = N_min*10/100*pow(shoot_weightPerM2,-N_shape)-pSC->getPlant()->get_N()*(pSC->getInitInfo().plantDensity/(100*100));
+				U_D = N_min*10/100*pow(shoot_weightPerM2,-N_shape)-pSC->getPlant()->get_N()*(pSC->getInitInfo().plantDensity/(100.0*100.0));
 				//U_D U uptake rate (g N m-2 d-1) as limited by the difference between potential and actual amount of N 
 				//in existing biomass, equation 3 in Lindquist et al. 2007)
 				//the returned value from get_N() is in g N/plant. It has to be converted to g/m-2 ground
@@ -427,7 +427,7 @@ void crop(struct
 
 				double OldNDemand;
 				OldNDemand=SHOOTR->nitroDemand/PopSlab/1e6/24;
-				SHOOTR->nitroDemand = (float)HourlyNitrogenDemand*(float)PopSlab*1e6*24; //Pass the nitrogen demand into 2dsoil YY
+				SHOOTR->nitroDemand = (float)HourlyNitrogenDemand*(float)PopSlab*1.0e6*24.0; //Pass the nitrogen demand into 2dsoil YY
 				                                                               //Units are ug slab-1
 				old_shoot_weightPerM2 = shoot_weightPerM2; //Save the value of the above_ground biomass of this time-step
 				NitrogenUptakeOld=NitrogenUptake; // save the cumulative N uptake from this time step;
@@ -441,7 +441,7 @@ void crop(struct
 			{
 				cout << "Completing crop simulation..." <<endl;
 				module_public->NShoot=0; //tell 2dsoil that crops harvested
-				time_public->tNext[ModNum-1]=1e12; // set the next time so the model
+				time_public->tNext[ModNum-1]=1.0e12; // set the next time so the model
 				pSC = NULL; // if matured points to nothing
 				delete pSC;
 				time_public->RunFlag=0;
