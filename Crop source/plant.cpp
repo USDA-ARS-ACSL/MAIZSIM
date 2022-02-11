@@ -43,9 +43,7 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	// initialize plant part sizes //
 	shootPart = 0.60;
 	rootPart = 0.40;
-	earMass=droppedLeafmass=rootMass=0.0;
-	//rootMass = rootPart*seedMass; This will be implemented later when roots grow from germination
-	;
+	earMass=droppedLeafmass=rootMass=cobMass=sheathMass=0.0;
 	shootMass=seedMass*(1.0-rootPart);
 	rootMass=seedMass-shootMass;  // need to distribute this in a few seed elements. at about 1.059e-4 wt/L =780 cm
 	leafMass = activeLeafMass=0.90*shootMass;
@@ -71,7 +69,7 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	gasExparam = photoparam;
 	roots = new CRoots();
 	ear = new CEar();
-	develop = new CDevelopment(initInfo);
+	develop = new CDevelopment(initInfo); //TODO need to check if this is passing same information as 'info' is below
 	nodalUnit = new CNodalUnit[initInfo.genericLeafNo + 10];
 	for (int i=1; i <= PRIMORDIA; i++) // leaf[0] is a coleoptile, should start at 1
 	{
@@ -232,7 +230,7 @@ void CPlant::update(const TWeather & weather)
 	else if(!develop->Dead()) //jumps here if emergence is done
 		                      //code for above ground lifecycle
 	{
-		emerge_gdd = develop->get_EmergeGdd(); //if the plant emergies, then pass the emerge_gdd value from the develop object into the plant object
+		emerge_gdd = develop->get_EmergeGdd(); //if the plant emerges, then pass the emerge_gdd value from the develop object into the plant object
 
 		for (int i = 1; i <= develop->get_LvsInitiated(); i++)
 		{
@@ -382,6 +380,8 @@ double agefn=1;
 	// C_reserve is added to stem here to represent soluble TNC, SK
     stemMass = this->get_nodalUnit()->get_stem()->get_mass() + C_reserve;
     earMass = this->get_ear()->get_mass();
+	sheathMass= this->get_ear()->get_sheathMass();
+	cobMass= this->get_ear()->get_cobMass();
    // need to iterate here to set leaf mass
 	leafMass=calcTotalLeafMass();
 	leafMass = this->get_leafMass();
@@ -577,13 +577,13 @@ void CPlant::calcGasExchange(const TWeather & weather, const TGasExSpeciesParam&
 	    shaded->SetVal(shaded_PFD, weather.airT, weather.CO2, weather.RH,
 	          weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI);
 	
-	photosynthesis_gross = (sunlit->get_AGross()*sunlit_LAI + shaded->get_AGross()*shaded_LAI);//plantsPerMeterSquare units are umol CO2 m-2 ground s-1 ;
+	photosynthesis_gross = (sunlit->get_AGross()*sunlit_LAI + shaded->get_AGross()*shaded_LAI);//units are umol CO2 m-2 ground s-1;
 	photosynthesis_net = (sunlit->get_ANet()*sunlit_LAI + shaded->get_ANet()*shaded_LAI);//
 	transpirationOld=transpiration;  // when outputting the previous step transpiration is compared to the current step's water uptake
 	transpiration=0;
 	if (sunlit_LAI > 0) transpiration=sunlit->get_Transpiration()*sunlit_LAI;
 	if (shaded_LAI > 0) transpiration+=shaded->get_Transpiration()*shaded_LAI;
-	transpiration=transpiration/(initInfo.plantDensity)*3600.0*18.01;//plantsPerMeterSquare units are grams per plant per hour ;
+	transpiration=transpiration/(initInfo.plantDensity)*3600.0*18.01;//units are grams per plant per hour ;
 	// Units of Transpiration from sunlit->ET are mol m-2 (leaf area) s-1
 	// Calculation of transpiration from ET involves the conversion to gr per plant per hour 
 	temperature = (sunlit->get_LeafTemperature()*sunlit_LAI + shaded->get_LeafTemperature()*shaded_LAI)/LAI;
@@ -638,7 +638,7 @@ void CPlant::C_allocation(const TWeather & w)
    double shootPart_real = 0.0;
    double rootPart_real = 0.0;
    //double leafPart = 0.0; made class variable for now to transfer, may have to do this for all
-   double sheathPart = 0.0;
+   double sheathPart = 0.0; //TODO make all the 'parts' class variables
    double stalkPart = 0.0;
    double reservePart = 0.0;
    double huskPart = 0.0;
@@ -828,11 +828,13 @@ void CPlant::C_allocation(const TWeather & w)
    else if (!develop->Dead())//no acutally kernel No. is calculated here ? Yang, 6/22/2003
    {
        // here only grain and root dry matter increases root should be zero but it is small now. 
-	   const int maxKernelNo = 800; // assumed maximum kerner number per ear
-	   double maxKernelFillRate = 0.012*(initInfo.timeStep/(24*60)); // 
+	   const int maxKernelNo = 800.; // assumed maximum kerner number per ear
+	   double maxKernelFillRate = 0.012*(initInfo.timeStep/(24.*60.)); // 
 	                                                                  //max kernel filling rate = 0.012g Kernel-1 day-1, Grant (1989)
 	   C_demand = maxKernelNo*maxKernelFillRate*tmprEffect*C_content; //dt added c_content
 	   shootPart = __max(0,Yg*(C_supply-maintRespiration)); // gCH2O partitioned to shoot
+	   //Because limit for partitioning is 0.925 there is always some c sent to roots. During grainfill we want to zero that
+	   shootPart += rootPart;
 	   rootPart=0.0; // no more partitioning to root during grain fill
 
       
@@ -916,6 +918,11 @@ void CPlant::C_allocation(const TWeather & w)
    // before emergence root weight has been initialized. Just dump this carbon for now.
    if (develop->Emerged()) this->get_roots()->import_CH2O(rootPart_real);
    this->get_ear()->import_CH2O(earPart);
+   this->get_ear()->import_cobWeight(cobPart);
+   this->get_ear()->import_sheathWeight(sheathPart);
+   this->get_ear()->import_grainWeight(grainPart);
+
+
 
    double partSum = stemPart + earPart + leafPart; // checking the balance if sums up to shootPart
 //   if (w.time == 0.5) std::cout << "adding CH2O: " << grainPart << " to grain " << endl;
@@ -928,16 +935,16 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 // based on McCree's paradigm, See McCree(1988), Amthor (2000), Goudriaan and van Laar (1994)
 // units very important here, be explicit whether dealing with gC, gCH2O, or gCO2
   {
-    double dt = initInfo.timeStep/(24*60);
+    double dt = initInfo.timeStep/(24.0*60.0);
 //	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
 	const double maintCoeff = 0.018;// too high?
 	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
 	//no maint cost for dead materials but needs to be more mechanistic, SK
 	//agefn=1.0;
-	double q10fn = pow(Q10MR,(w.airT - 20.0)/10); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
+	double q10fn = pow(Q10MR,(w.airT - 20.0)/10.0); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
 	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
-	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
+	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass-stem_coef*stemMass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 
@@ -948,7 +955,7 @@ void CPlant::calcRed_FRedRatio(const TWeather &weather)
 	//double Xo=0.6, B=0.13, A=2.0; original
 	//double Xo=0.9, B=0.43, A=2.0;
 	double Xo=0.85, B=0.65, A=2.0;
-	double dt=initInfo.timeStep/(24.0*60);
+	double dt=initInfo.timeStep/(24.0*60.0);
 	double C2_effectTemp;
       //First set counter to 0 if it is the beginning of the day. 
 	if (abs(weather.time)<0.0001)

@@ -64,7 +64,8 @@ public:
 	virtual void set_growthDuration(double x) {growthDuration=x;}
 	virtual void initialize();
 	virtual void update();
-
+    double C_conc, N; //nitrogen content, mg	
+	
 private:
 	COrgan(const COrgan&);
 	TInitInfo initInfo;
@@ -73,8 +74,8 @@ private:
 	double age; // chronological age of an organ, days
 	double physAge; // physiological age accouting for temperature effect (in reference to endGrowth and lifeSpan, days)
 	double mass; // biomass, g
-	double CH2O; //glucose, MW = 180.18 / 6 = 30.03 g
-	double C_conc, N; //nitrogen content, mg
+    double CH2O; //glucose, MW = 180.18 / 6 = 30.03 g
+	
 	double temperature; // organ temperature, C
 	double longevity; // life expectancy of an organ in days at optimal temperature (fastest growing temp), days
 	double growthDuration; // physiological days to reach the end of growth (both cell division and expansion) at optimal temperature, days
