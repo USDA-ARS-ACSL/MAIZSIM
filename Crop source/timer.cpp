@@ -76,13 +76,15 @@ int Timer::julday(const int mm, const int id, const int iyyy)
 		--jy;
 		jm=mm+13;
 	}
-	jul = int(floor(365.25*jy)+floor(30.6001*jm)+id+1720995);
+	jul = int(floor(365.0*jy)+ floor(0.25 * jy + 2000.0)+ floor(30.6001*jm)+id+ 1718995);
+	 //julday = 365 * jy +         int(0.25d0 * jy + 2000.d0) + int(30.6001d0 * jm) + id + 1718995
 	if (id+31*(mm+12*iyyy) >= IGREG) {
 		ja=int(0.01*jy);
 		jul += 2-ja+int(0.25*ja);
+		jul=jul-2415019;    // 1/1/1900 JD zero
+	    //jul=jul-2415079;   // on 3/1/1900 jday = 1
 	}
-	//jul=jul-2415019;    // 1/1/1900 JD zero
-	jul=jul-2415079;   // on 3/1/1900 jday = 1
+	
 	return jul;
 }
 void Timer::caldat(int julian, int &mm, int &id, int &iyyy)
