@@ -51,8 +51,6 @@ public:
 	double get_stemMass() { return stemMass; }
 	double get_leafMass() { return leafMass; }
 	double get_earMass() { return earMass; }
-	double get_cobMass() { return cobMass; }
-	double get_sheathMass() { return sheathMass; }
 	double get_shootMass() { return shootMass; }
 	double get_rootMass() { return rootMass; }
 	double get_shootPart() { return shootPart; }
@@ -147,7 +145,7 @@ private:
 	double C_demand;
 	double C_supply;
 	double C_ReserveLeaf;  //holds extra C in leaf - allows SLA to change
-	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass, cobMass, sheathMass; // this is redundant, but for convenience of access
+	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass; // this is redundant, but for convenience of access
 	double maintRespiration;
 	double sowingDay;
 	double age;
