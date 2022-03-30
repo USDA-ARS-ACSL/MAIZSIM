@@ -171,16 +171,17 @@
 
  struct FileCommon{
 	           double starter;
-	           char WeatherFile[132], TimeFile[132], BiologyFile[132],
-               ClimateFile[132], NitrogenFile[132], SoluteFile[132],
-               SoilFile[132], 
-               ManagementFile[132], DripFile[132],
-               WaterFile[132], WaterBoundaryFile[132], 
-               GraphicsFile[132], InitialsFile[132],VarietyFile[132],
-			   NodeGraphics[132],ElemGraphics[132],NodeGeomFile[132],
-			   GeometryFile[132], SurfaceGraphics[132],
-			   FluxGraphics[132], MasssBalanceFile[132],MassBalanceFileOut[132],
-			   LeafFileIn[132], RunFile[132], MassBalanceRunoffFileOut[132];
+	           char WeatherFile[256], TimeFile[256], BiologyFile[256],
+               ClimateFile[256], NitrogenFile[256], SoluteFile[256],
+               SoilFile[256], 
+               ManagementFile[256], DripFile[256],
+               WaterFile[256], WaterBoundaryFile[256], 
+               GraphicsFile[256], InitialsFile[256],VarietyFile[256],
+			   NodeGraphics[256],ElemGraphics[256],NodeGeomFile[256],
+			   GeometryFile[256], SurfaceGraphics[256],
+			   FluxGraphics[256], MasssBalanceFile[256],MassBalanceFileOut[256],
+			   LeafFileIn[256], OrganicMatterGraphics[256],RunFile[256], 
+			   MassBalanceRunoffFileOut[256];
  };
 
 
