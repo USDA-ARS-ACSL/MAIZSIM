@@ -16,13 +16,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E8E56F99-943A-4226-A0C8-24FF6419EAED}</ProjectGuid>
-    <RootNamespace>Crop</RootNamespace>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccProvider>SAK</SccProvider>
+    <RootNamespace>Crop</RootNamespace> 
     <Keyword>Win32Proj</Keyword>
-    <SccAuxPath>SAK</SccAuxPath>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Maizsim</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -95,10 +92,9 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)Crop.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
-      <ProgramDatabaseFile>$(SolutionDir)\soil source\$(OutDir)Crop.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
       <SubSystem>Console</SubSystem>
@@ -108,8 +104,10 @@
     </Link>
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
-echo f | xcopy /y "$(TargetPath)" "Y:\Maizsim\AgmipET2"
-</Command>
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "D:\Maizsim07\AgmipET2"
+echo f | xcopy /y "$(TargetPath)" "D:\Maizsim07\Kansas"
+echo f | xcopy /y "$(TargetPath)" "D:\Maizsim07\Crown"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dennis_Dbg|Win32'">
@@ -156,19 +154,19 @@ echo f | xcopy /y "$(TargetPath)" "D:\Maizsim07\Crown"</Command>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)Crop.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
-      <ImportLibrary>$(OutDir)Crop.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Release\$(TargetFileName)"
-echo f | xcopy /y "$(TargetPath)" "X:\Modeling\MAIZSIMInterface\Interface programs and files\2DSOIL FIles"
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Release\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\MAIZSIM Files"
 echo f | xcopy /y "$(TargetPath)" "C:\Users\dennis.timlin\Documents\crop_int"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

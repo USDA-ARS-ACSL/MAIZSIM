@@ -35,15 +35,7 @@ C  No Plant = No Root Activity
       If(NShoot.eq.0.or.isGerminated.eq.0) Return
 C
 
-cccz zhuangji: comment this because it has been calculated in carbon_partitioning 
-C calculate potential growth in root length (DT- May not need this loop - look into this)
-c      DO 30, e=1,NumEl
-c        e1=iFavRoot(e)
-c        PDRL = PDWR(e1)/RTWL ! potential rate of change in root length cm d-1
-c        DRL(e1) = (PDRL + PPDRL(e1))*Step/2.0  ! average here
-c        PPDRL(e1) = PDRL  ! value at previous calculation time
 
-c30    CONTINUE
 
 C   Taken from ACTGRO of GLYCIM
 C   THIS PART GROWS ROOTS IN THE MOST FAVORABLE CELLS UNTIL 

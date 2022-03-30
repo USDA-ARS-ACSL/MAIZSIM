@@ -28,7 +28,7 @@ public:
 //	void set_internode(CInternode * x) {internode=x;}
 	void update(CDevelopment *, double PredawnLWP);
 	void initialize(int, CDevelopment * dv);
-	double get_leafLength(int rank);
+//	double get_leafLength(int rank);
 private:
 	int rank; 
 	bool initiated, appeared, growing, prolific, aging, terminated;

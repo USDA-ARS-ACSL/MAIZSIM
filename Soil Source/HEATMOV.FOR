@@ -367,13 +367,12 @@ cSolve
         Tmpr(i)=sngl(B(i))
       Enddo      
 *       
-      Do i=1,NumNPD
+      Do i=1,NumNP
         VxOld(i)=Vx(i)
         VzOld(i)=Vz(i)
         ThOld(i)=ThNew(i)
       Enddo
-      Return
-10    Call errmes(im,il)
+      
       Return
       End
 *

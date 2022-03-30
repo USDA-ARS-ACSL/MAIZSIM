@@ -81,7 +81,7 @@ c inputs hourly data
       Include 'public.ins'
       Include 'puplant.ins'
       Include 'puweath.ins'
-      Include 'puSurface.ins'
+      Include 'pusurface.ins'
       
       Parameter (PERIOD =1./24.)
       integer jday,m,DayOfYear,CurYear,Modnum, ThisYear,
@@ -132,12 +132,7 @@ c
 c
       im=160
       il=0
-C      Open (5,file='Weatherhrly.dat',status='old',ERR=10)
       Open (5,file=ClimateFile,status='old',ERR=10)
-cdt
-c       Do i=1,NumNP
-c        PcodeW(i)=CodeW(i)
-c         Enddo
 C
 C  Read descriptors and conversion constants for weather data
 C
@@ -288,10 +283,6 @@ c..................... Input daily data
    11 If((linput.eq.1).OR.idint(t+St).eq.(JDAY+1)) then
       
       tAtm=t          !insure we call the weather code the next step
-      
-c       Do i=1,NumNP
-c        CodeW(i)=PcodeW(i)
-c         Enddo
 
 c
 c ZEROING DAILY ARRAYS
@@ -494,7 +485,15 @@ cd   HSR is watts
            WATTSM(IDAWN) = HSR(IDAWN)
            WATTSM(IDUSK) = HSR(IDUSK)
         ENDIf
-
+c DT 10/12/2021 sometimes due to dst issues and weather station clocks,
+c  radiation between dawn and dusk  can be 0 so need to adjust WATTSM for this
+       Do I = 1, IPERD
+        if (I.ge.IDAWN.and.I.le.IDUSK) then
+          if (WATTSM(I).le.0.0) then
+           WATTSM(I)=WATTSM(I)+0.1
+           endif
+        endif
+       enddo
 c..................... Temperature and vapour pressure submodel
 
 
@@ -591,7 +590,7 @@ C
  
 c....................Light interception submodel
 
-        If(NShoot.ne.0) then
+        If(NShoot.ne.0.and.LAI.gt.0.0) then
 C
 C  CALCULATE SOLAR ALTITUDE AND SOLAR AZIMUTH FOR EACH TIME
 C
@@ -967,7 +966,6 @@ c................... Precipitation and irrigation
       n=KXB(i)
       k=CodeW(n)
       If(K.eq.4.or.K.eq.-4) then 
-cccz         VarBW_old(i,1)=VarBW(i,1)
          VarBW(i,1)=RINT(ITIME)
       If(NumSol.ne.0) then
           do j=1,NumSol
@@ -1088,6 +1086,15 @@ c assume 5% of radiation reaches soil surface through canopy
 
            VarBT(n_sur,1)=TAirN
         Endif
+        
+cccz the reason of using this line
+cccz when surface runoff occurs during rainfall, the rainfall take air temperature to soil surface
+cccz alter the boundary condition
+cccz the boundary condition will be automatically shift to 4 when runoff occurs and shift back to -4 when runoff disappeared.
+          If (k.eq.4) then
+           VarBT(n_sur,1)=TAirN   
+          Endif
+          
 95    Continue
 C ...............End of heat balance
 c................... Gas movement

@@ -96,7 +96,7 @@ class CGasExchange
 		// shortwave radiation (PAR (=0.85) + NIR (=0.15) solar radiation absorptivity of leaves: =~ 0.5
 		//transfer variables to local scope
 		this->CO2 = CO2;
-		this->RH = __min(100.0, __max(RH, 10.0))/100;
+		this->RH = __min(100.0, __max(RH, 20.0))/100; /* made this 20 from 10 for testing DT 2/21*/
 		this->Tair = Tair;
 		this->wind = wind;  //m s-1
 		this->Press = Press; //kPa
