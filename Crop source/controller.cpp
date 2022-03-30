@@ -111,8 +111,8 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.5.0.0 2020               *" << endl
-		<< " *                 2DSOIL version 1.6.4.0 2020             *" << endl
+		<< " *                     VERSION  1.6.0.0 2022               *" << endl
+		<< " *                 2DSOIL version 1.6.5.0 2022             *" << endl
 		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
