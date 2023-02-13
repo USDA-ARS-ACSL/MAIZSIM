@@ -23,7 +23,8 @@ There are two subprojects, Crop Source and Soil Source.
 More documention is being prepared. See the "how to run model" file for information on how to set up the input files and run the executable from the command line. 
 
 See the ExcelInterface repository for an excel based interface and example input files.
-The SolarCorr.Zip file contains intput and output corresponding to the 3/29/22 update. 
+https://github.com/USDA-ARS-ACSL/ExcelInterface
+The most recent updates for the excel interface work with the most recent version of maizsim
 
 
 
