@@ -109,8 +109,7 @@
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
 echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
-echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Kansas"
-echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)MDEasternShore"</Command>
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dennis_Dbg|Win32'">
