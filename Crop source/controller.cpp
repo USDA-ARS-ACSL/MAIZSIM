@@ -40,8 +40,8 @@ CController::CController(const char* filename, const char* outfile, const char* 
 
 	char* temp =       (char*)calloc(133, sizeof(char));
 	char* pathSymbol = (char*)calloc(133, sizeof(char));
-	char *ext_dbg="dbg";
-	char* ext_summ = "sum";
+	const char *ext_dbg="dbg";
+	std::string stressFile = "plantstress.crp";
 	pathSymbol = "/\\"; //for both Linux and Windows
 	std::string basePath;
 	std::size_t found;
@@ -54,7 +54,7 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	std::string root = fileName.substr(0,fileName.length() - 3);
 // create summFile and debug file  names
 // first have to determine if we are linux or windows
-	SummFile = basePath.append("/"+ root +  ext_summ);
+	SummFile  = basePath.append("/"+ stressFile);
 	DebugFile = basePath.append("/" + root + ext_dbg);
 
 // make filename for the leaf file
@@ -111,15 +111,17 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.6.0.0 2022               *" << endl
-		<< " *                 2DSOIL version 1.6.5.0 2022             *" << endl
+		<< " *                     VERSION  1.8.0.0 2023               *" << endl
+		<< " *                 2DSOIL version 3.0.0.0 2023             *" << endl
 		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
 		<< endl << endl;
 // output headings of files
 // This is the leaf file for output (see function "output to leaffile"
+#ifndef _INTERFACE //only print when debug
 	{
+
 		ofstream LeafOut(LeafFile, ios::out);
 		LeafOut << setiosflags(ios::left)
 			<< setiosflags(ios::fixed)
@@ -141,7 +143,7 @@ void CController::initialize()
 			<< setw(9) << "GDDSum"
 			<< endl;
 	}
-
+#endif
 //This is the plant file for output (see function "output to crop file"
 	{
 		ofstream cropOut(cropFile, ios::out); 
@@ -153,7 +155,7 @@ void CController::initialize()
 			<< setw(8) << "Leaves,"
 			<< setw(11)<< "MaturLvs,"
 			<< setw(8) << "Dropped,"
-			<< setw(9) << "LA/pl,"
+			<< setw(9) << "LA_pl,"
 			<< setw(9) << "LA_dead,"
 			<< setw(8) << "LAI,"
 			<< setw(8) << "RH,"
@@ -195,7 +197,7 @@ void CController::initialize()
 			<< setw(8) << "sheathDM,"
 			<< setw(8) << "cobDM,"
 #endif
-			<< setw(10) << "TotleafDM,"
+			<< setw(10) << "TotLeafDM,"
 			<< setw(10) << "DrpLfDM,"
 			<< setw(8) << "stemDM,"
 			<< setw(8) << "rootDM,"
@@ -213,8 +215,7 @@ void CController::initialize()
 		SummOut << setiosflags(ios::left)
 			<< setiosflags(ios::fixed)
 			<< setw(9) << "date,"
-			<< setw(6) << "jday,"
-			<< setw(8) << "time,"
+			<< setw(6) << "time,"
 			<< setw(9) << "waterstress,"
 			<< setw(8) << "N_stress,"
 			<< setw(8) << "Shade_Stress,"
@@ -366,10 +367,8 @@ void CController::initialize()
 
 void CController::readWeatherFrom2DSOIL(const TWeather & wthr)
 {
-	weatherFormat = DDSOIL;
 	weather[iCur] = wthr;
 	ET_supply = wthr.ET_supply;
-	weather[iCur].daytime = wthr.jday + wthr.time;
 }
 
 
@@ -383,26 +382,12 @@ int CController::run(const TWeather & wthr) //todo pass gas exchange parameters 
 		RootWeightFrom2DSOIL=wthr.TotalRootWeight;
 		MaxRootDepth=        wthr.MaxRootDepth;
 		AvailableWater=      wthr.ThetaAvail;
-	//	plant->update(weather[iCur]);
-// dt added ability to output daily based on 2dsoil output
-// Always hourly for now - have to add code to average values
-//		if ((weather[iCur].DailyOutput==1)&&(int(weather[iCur].time*24.0)==6))
-//			{
-			outputToCropFile();
-//			if (plant->get_develop()->Germinated())
-				outputToLeafFile();
-				outputToSummary();
+		outputToCropFile();
+		outputToLeafFile();
+		outputToSummary();
 #ifndef _DEBUG_FILE
 				if (plant->get_develop()->Germinated()) outputToDebug();
 #endif
-//			}
-//		if (weather[iCur].HourlyOutput==1)
-//			{
-//			outputToCropFile();
-//			if (plant->get_develop()->Germinated())
-//				outputToLeafFile();
-//			}
-
 		iCur++;
 		time->step();
 	} 
@@ -442,12 +427,6 @@ void CController::outputToCropFile()
 			else if (plant->get_develop()->Germinated())       {s="Germinated";}
     		else if (plant->get_develop()->Dead())             {s="Inactive";}
 			else {s="none";}
-		//	if (FLOAT_EQ(plant->get_develop()->emergence.daytime,weather[iCur].daytime)){s = "Emergence";}
-		////	if (FLOAT_EQ(plant->get_develop()->tasselInitiation.daytime,weather[iCur].daytime)){s = "Tassel Initiation";}
-		//	if (FLOAT_EQ(plant->get_develop()->anthesis.daytime, weather[iCur].daytime)){s = "Anthesis";}
-		//	if (FLOAT_EQ(plant->get_develop()->silking.daytime, weather[iCur].daytime)){s = "Silking";}
-		//	if (FLOAT_EQ(plant->get_develop()->beginGrainFill.daytime, weather[iCur].daytime)){s = "Begin grain filling";}
-		//	if (FLOAT_EQ(plant->get_develop()->maturity.daytime,weather[iCur].daytime)){s = "Begin grain filling";}
 
 		    ofstream ostr(cropFile, ios::app);
 			ostr << setiosflags(ios::right) 
@@ -621,6 +600,9 @@ void CController::outputToSummary()
 	double MeanN = 0;
 	double actualArea = 0, potentialArea = 0;
 	double  leafAreaRatio = 0;
+	int hour = 0;
+	static double leafW_EffectSum=0, shadeEffectSum = 0, leafN_EffectSum = 0;
+	double leafW_Effect, shadeEffect, leafN_effect, criticalN = 0;
 
 	CNodalUnit* nU;
 	nU = &plant->get_nodalUnit()[0]; // see note in leaf output as to why I used "&"
@@ -629,6 +611,8 @@ void CController::outputToSummary()
 
 	string DateForOutput;
 	time->caldat(weather[iCur].jday, mm, id, iyyy);
+	hour = int(weather[iCur].time * 24.0 * 100.0 + .50) / 100; // int always rounds down, so force rounding up if 
+	                                                           // if decimal is > 0.5
 
 	// at this point, all leaves have the same N content. Later we will implement separate for all leaves
 	// thus we need to cycle through the leaves to get the mean N content
@@ -653,35 +637,55 @@ void CController::outputToSummary()
 		leafAreaRatio = max(0, actualArea / potentialArea);
 
 	}
+	else 
+	{
+		leafAreaRatio = 0.0;
+	}
 
 	// calculate water stress using function in develop
-	double LeafEffect = myDevelop->LWPeffect(weather[iCur].LeafWP, nU->get_leaf()->get_psi_threshold_bars());
-	double shadeEffect = myDevelop->get_shadeEffect();
-	double criticalN = max(MeanN, 0.25);
-	double leafN_effect = myDevelop->LeafN_effect(criticalN);
-#if 0
-	DateForOutput.Format("%.2d/%.2d/%4i", mm, id, iyyy);
-#else
-	char DateForOutputBuff[16];
-	sprintf(DateForOutputBuff, "%.2d/%.2d/%4i", mm, id, iyyy);
-	DateForOutput = DateForOutputBuff;
-#endif
-	ofstream SummOut(SummFile, ios::app);
-	SummOut << setiosflags(ios::right)
-		<< setiosflags(ios::fixed);
-	SummOut
-		<< setw(9) << DateForOutput << comma
-		<< setw(6) << weather[iCur].jday << comma
-		<< setw(8) << setprecision(0) << weather[iCur].time * 24.0 << comma
-		<< setw(8) << setprecision(3) << max(0.0, 1.0-LeafEffect) << comma
-		<< setw(8) << setprecision(3) << max(0.0,1.0-leafN_effect) << comma
-		<< setw(8) << setprecision(3) << max(0.0,1.0-shadeEffect) << comma
-		<< setw(8) << setprecision(3) << leafAreaRatio << comma
-		<< endl;
+	// sum hourly values over the day
+	criticalN = max(MeanN, 0.25);
 
+	leafW_EffectSum += myDevelop->LWPeffect(weather[iCur].LeafWP, nU->get_leaf()->get_psi_threshold_bars());
+	shadeEffectSum += myDevelop->get_shadeEffect();
+	leafN_EffectSum += myDevelop->LeafN_effect(criticalN);
+
+
+
+	if (hour == 0) // output the average
+	{
+
+		leafW_Effect = leafW_EffectSum / 24.0;
+		leafN_effect = leafN_EffectSum / 24.0;
+		shadeEffect = shadeEffectSum / 24.0;
+
+#if 0
+		DateForOutput.Format("%.2d/%.2d/%4i", mm, id, iyyy);
+#else
+		char DateForOutputBuff[16];
+		sprintf(DateForOutputBuff, "%.2d/%.2d/%4i", mm, id, iyyy);
+		DateForOutput = DateForOutputBuff;
+#endif
+		ofstream SummOut(SummFile, ios::app);
+		SummOut << setiosflags(ios::right)
+			<< setiosflags(ios::fixed);
+		SummOut
+			<< setw(9) << DateForOutput << comma
+			<< setw(6) << "   23  " << comma
+			<< setw(8) << setprecision(3) << max(0.0, leafW_Effect) << comma
+			<< setw(8) << setprecision(3) << max(0.0, leafN_effect) << comma
+			<< setw(8) << setprecision(3) << max(0.0, shadeEffect) << comma
+			<< setw(8) << setprecision(3) << leafAreaRatio << comma
+			<< endl;
+		shadeEffectSum = 0.0;
+		leafN_EffectSum = 0.0;
+		leafW_EffectSum = 0.0;
+
+        SummOut.close();
+	}
 	myDevelop = NULL;
 	nU = NULL;
-	SummOut.close();
+	
 
 
 

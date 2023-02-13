@@ -74,7 +74,7 @@ C**                                                                   **
       Include 'public.ins'
       Include 'puplant.ins'
       Include 'puweath.ins'
-      Include 'pusurface.ins'
+      Include 'PuSurface.ins'
       
       Parameter (PERIOD =1./24.)
       integer jday, m, DayofYear,CurYear, ModNum,ThisYear
@@ -102,7 +102,16 @@ CYAPEND
       St=0.1D0*Step
       If (lInput.eq.0) goto 11
       
-      SurWeatherUpdate=0
+cccz
+cccz initialized surface water income  
+      do i=1,NumBPD
+         Varbw_Air(i,1)=0.0D0     ! cccz this is to record the weather data, because the varBW will change based on runoff
+         Varbw_Air(i,2)=0.0D0
+         Varbw_Air(i,3)=0.0D0  
+         Varbw_Mulch(i,1)=0.0D0     ! cccz this is to record the weather data after mulch model, because the varBW will change based on runoff
+         Varbw_Mulch(i,2)=0.0D0
+         Varbw_Mulch(i,3)=0.0D0 
+      enddo
       
       NumMod=NumMod+1
       ModNum=NumMod
@@ -173,7 +182,9 @@ c  read at least one value from the line
       Endif
       IF(MSW7.eq.0) then
          CO2=CLIMAT(NCD) ! last one is always co2
-       Endif
+         GAIR(1)=CO2   
+      Endif
+      
       close(5)      
 C
 C Total number of weather data
@@ -304,8 +315,15 @@ c        Rel_Humid=Climat(4+2*MSW1+MSW2+MSW3+ISOL+MSW6)
 c         Rel_Humid=CLIMAT(5)
        endif
       If(MSW7.gt.0) then
-          CO2=Climat(4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)
-       EndIf
+          CO2=Climat(4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6+MSW7)          !For gas mover, the surface co2 concetration is read from here [ppm]
+          GAIR(1)=CO2                                                 !only for 1 gas now. we need to do that for all the gases
+      EndIf
+      
+           GAIR(2)=209000    !this is the atmospheric O2 concentration in ppm  
+csb O2 content of air=20.95% by volume, ie; 100 parts of air=20.95 parts of O2
+csb 1 part of air=0.2095 parts of O2. in 10^6 parts of air=0.2095*10^6=209000 ppm
+          
+
 Cdt
 c......................... Radiation submodel
 C
@@ -587,12 +605,13 @@ C
           Do 30 I = 1,IPERD
             SINALT(I) = D12 + (D13*COS(HRANG(I)))
             SOLALT(I) = ASIN(SINALT(I))
-            SINAZI(I) = -COS(DEC)*SIN(HRANG(I))/COS(SOLALT(I))
+            SINAZI(I) = max(-1.D0,(-COS(DEC)*
+     &        SIN(HRANG(I))/COS(SOLALT(I))))
  30       Continue
           D18 = 0.0
           Do 60, I = 1,IHPERD
             SOLAZI(I) = PI + ASIN(SINAZI(I))
-            If (.NOT.((D18.GT.0.0).OR.(D18.LT.0.0))) then
+            if(.NOT.((D18.GT.0.0).OR.(D18.LT.0.0))) then
               D19 = HRANG(I) - 0.01
               TESAZI = PI + ((ASIN(-COS(DEC)*SIN(D19))
      &       /(COS(ASIN(D12 + (D13*COS(D19)))))))
@@ -770,7 +789,6 @@ C     Further we have hourly calculations
 C
 55    If(abs(time-tNext(ModNum)).lt.0.001*Step) then
           
-        SurWeatherUpdate=1
 c 55    If(abs(t-tAtm).gt.St) goto 1001
         ITIME=int(MOD(t+St,1.)/PERIOD+1)
 C
@@ -833,7 +851,17 @@ C initialize boundary values to 0
            if (j.lt.4) VarBW(i,j)=0.0
            VarBT(i,j)=0.0
          Enddo
-        Enddo
+      Enddo
+
+cccz -------------------------------------------------------------------------------------
+cccz Dennis, please check here
+c    The revision here is similar to the one in hourwea,
+c    I put "If(PSh.gt.0.) then" after the calculation of "ESO"
+c    the reason is the ELSE part also use ESO
+
+cccz make some initialization
+       ESO=0.0D0
+       EPO=0.0D0      
         Do 90 i=1,ic
 cDT 4-22-2011 assume 10% of et is minimum from a covered node
 cccz this PSh expression is different from the hour.for one, and it has stronger lower boundary
@@ -867,11 +895,12 @@ C See eqn 5.11 of http://mepas.pnnl.gov/mepas/formulations/source_term/5_0/5_13/
      &     - (2.3668*TAIR(ITIME))))
      &     + (VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12))))
      &      /((DEL(ITIME)/GAMMA) + 1.0)
-C
-C   PROPORTIONAL TO THE AREA EXPOSED
+
 c
 c  IF THE NODE IS EXPOSED THEN
 c
+C
+C   PROPORTIONAL TO THE AREA EXPOSED
           If(PSh.gt.0.) then
 C
               VarBW(kS(i),2)=PSh*24.*ESO/10000.
@@ -882,6 +911,8 @@ c
           Else
             VarBW(kS(i),2)=0.05*24.*ESO/10000.
           Endif
+cccz -----------------------------------------------------------------------------------
+          
 c                Endif for the surface nodes
  90     Continue
 C
@@ -1001,12 +1032,11 @@ c  AND THEIR LATERAL COORDINATES
 c
       Do 95 i=1,ic
         PSh=FSh(i,xBSTEM,SHADE,xS,ic)
-        n_sur=kS(i)
-        n=KXB(n_sur)
+        n=kS(i)
         k=codeT(n)
-        Varbt(n_sur,4)=0.0
-        VarBT(n_sur,3)=0.0
-        VarBT(n_sur,2)=0.0
+        Varbt(kS(i),4)=0.0
+        VarBT(kS(i),3)=0.0
+        VarBT(kS(i),2)=0.0
 
         If (k.eq.-4) then
 C     if node is exposed         
@@ -1018,67 +1048,111 @@ C     if node is exposed
 * RNS*3600*24/10000 is total energy going to soil in J day-1 cm-2
 C           FELWR=max(0.0,(tmpr(i)-TairN)*40.6)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(n_sur,4)=RNS*3600.0*24.0/10000.0
+                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
 
 *  calculate convected heat  if soil is warmer than air
 * FELWR should be zero when TAirN is warmer than soil
-              if(tmpr(n).GT.TAirN) then
-                VarBT(n_sur,2)=+FCSH+FELWR
-                VarBT(n_sur,3)=VarBT(n_sur,2)*TAirN
+              if(tmpr(kS(i)).GT.TAirN) then
+                VarBT(kS(i),2)=+FCSH+FELWR
+                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
               endif
 C See if sensible heat transport works here in canopy              
               TFac=((0.058+1.7e-4*TAirN)+
      !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
-               VarBT(n_sur,2)=VarBT(n_sur,2)+TFac
-               VarBT(n_sur,3)=VarBT(n_sur,3)+TFac*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
+               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
 
          else
                     
 *  the amount of heat added to the soil
 *     is determined by air temperature.
 *  units are millcal cm-2 sec-1 C-1
-               VarBT(n_sur,2)=((0.058+1.7e-4*TAirN)+
+               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
 * the first term is thermal conductivity of the air. 
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
 
-               VarBT(n_sur,2)=VarBT(n_sur,2)*0.004184*3600.0*24.0
-               VarBT(n_sur,3)=VarBT(n_sur,2)*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
+               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
 
 Cdt and a part for radiative transfer               
-               if(tmpr(n).GT.TAirN) then
-                 VarBT(n_sur,2)=VarBT(n_sur,2)+(FCSH+FELWR)
-                 VarBT(n_sur,3)=VarBT(n_sur,3)+(FCSH+FELWR)*TAirN
+               if(tmpr(kS(i)).GT.TAirN) then
+                 VarBT(kS(i),2)=VarBT(kS(i),2)+(FCSH+FELWR)
+                 VarBT(kS(i),3)=VarBT(kS(i),3)+(FCSH+FELWR)*TAirN
                   endif
 c assume 5% of radiation reaches soil surface through canopy              
               fact=1.0-BEERS(ITIME)
               if (fact.LE.0) fact=0
               if (fact.GT.1.0) fact=1.0
-              VarBT(n_sur,4)=fact*RNS*3600.0*24.0/10000.0
+              VarBT(kS(i),4)=fact*RNS*3600.0*24.0/10000.0
               
 *  units are now J cm-2 d-1
 * end if for crop canopy
           Endif
  
-          VarBT(n_sur,1)=TAirN
+          VarBT(kS(i),1)=TAirN
         Endif
 95    Continue
 C ...............End of heat balance
 c................... Gas movement
       Do i=1,NumBP
       n=KXB(i)
-      k=CodeW(n)
-      If(K.eq.4.or.K.eq.-4) then
+      k=CodeG(n)
+      If(K.eq.4.or.K.eq.-4) then                      !-4: soil atmospheric boundary with gas flux instead of Gas content at the nodes
         do jjj=1,NumG
-          VarBG(i,jjj,2)=PG*Width(i)
-          VarBG(i,jjj,3)=PG*GAIR(jjj)*Width(i)
+          VarBG(i,jjj,2)=GasTransfCoeff(jjj)                !GasTransfCoeff(jjj) : is the conductance of surface air layer to gas flow or rate constant of the gas exchange between the soil and the atmosphere [cm/day]
+          VarBG(i,jjj,3)=GasTransfCoeff(jjj) 
+     !       *GAIR(jjj)/ppm_to_ugGasCm3air(jjj)             ! convert the initial concentration of CO2 in [ppm]  to [ug co2/cm3 air] !GAIR: is the atmospheric CO2 concentration [ppm], see conversion details in grid_bnd
+          VarBG(i,jjj,1)= GAIR(jjj)/ppm_to_ugGasCm3air(jjj) ! convert the initial concentration of CO2 in [ppm]  to [ug co2/cm3 air] !This is if BC=4, is gas content instead of flux, 
         Enddo
       Endif
+      if (K.eq.1.or.K.eq.3.or.k.eq.6) then
+          do jjj=1,NumG
+              VarBG(i,jjj,2)=GasTransfCoeff(jjj)  
+              VarBG(i,jjj,1)= GAIR(jjj)/ppm_to_ugGasCm3air(jjj)          ! convert the atm CO2 in [ppm]  to [ug co2/cm3 air]       
+          end do
+      end if
       Enddo
+     
+ 
 c................... End gas movement      
 c................... This is the end of hourly calculations
       tNext(ModNum)=tNext(ModNum)+PERIOD
+      
+      do i=1,NumBPD
+cccz extract useful variables for surface physical processes
+cccz water input from air-mulch interface
+         Varbw_Air(i,1)=VarBW(i,1)
+         Varbw_Air(i,2)=VarBW(i,2)
+         Varbw_Air(i,3)=VarBW(i,3)
+cccz water input from mulch soil interface (wait to be adjusted by surface runoff)
+         Varbw_Mulch(i,1)=VarBW(i,1)
+         Varbw_Mulch(i,2)=VarBW(i,2)
+         Varbw_Mulch(i,3)=VarBW(i,3) 
+cccz renormalize heat fluxes at air-mulch interface
+         Varbt_Air(i,1)=Varbt(i,1)
+         Varbt_Air(i,2)=Varbt(i,2)
+         Varbt_Air(i,3)=Varbt(i,3)
+         Varbt_Air(i,4)=Varbt(i,4)
+cccz renormalize heat fluxes at mulch-soil interface (wait to be adjusted by surface runoff)
+         Varbt_Mulch(i,1)=Varbt(i,1)
+         Varbt_Mulch(i,2)=Varbt(i,2)
+         Varbt_Mulch(i,3)=Varbt(i,3)
+         Varbt_Mulch(i,4)=Varbt(i,4)
+         do jjj=1,NumG
+cccz renormalize gas fluxes at air-mulch interface
+          Varbg_Air(i,jjj,1)=Varbg(i,jjj,1)
+          Varbg_Air(i,jjj,2)=Varbg(i,jjj,2)
+          Varbg_Air(i,jjj,3)=Varbg(i,jjj,3)
+cccz renormalize gas fluxes at mulch-soil interface (wait to be adjusted by surface runoff)
+          Varbg_Mulch(i,jjj,1)=Varbg(i,jjj,1)
+          Varbg_Mulch(i,jjj,2)=Varbg(i,jjj,2)
+          Varbg_Mulch(i,jjj,3)=Varbg(i,jjj,3)
+         enddo
+      enddo      
+      
+      
       EndIf                   ! hourly calcs defined by tnext
  1001  Continue
 c................... Furrow irrigation

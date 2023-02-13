@@ -4,7 +4,8 @@
       Include 'puplant.ins'
       Dimension iLoc(4)
       Integer n,n1,e,SW10,SW20,SW30,SW40
-      Real*4  WeightNeighbor(4),LeftDist, RightDist, TopDist,BottomDist
+      Real*4  WeightNeighbor(4),LeftDist, RightDist,TopDist,BottomDist,
+     !		alphaR, Q10MR
       
                              
       t=sngl(Time)
@@ -32,9 +33,10 @@ C  ARE MOST FAVORABLE FOR GROWTH
 
 
 C  No Plant = No Root Activity
-      If(NShoot.eq.0.or.isGerminated.eq.0) Return
-C
-
+      If(NShoot.eq.0.or.isGerminated.eq.0) then       ! if nshoot=0 (before crop start and after harvest), root respiration=0
+       gSink_root=0
+      Return
+      end if 
 
 
 C   Taken from ACTGRO of GLYCIM
@@ -105,8 +107,43 @@ cccz   node RMassY and RMassM results
       do n=1,NumNP
           TotalRootWeight=TotalRootWeight
      &      +nodeArea(n)*(RMassM(n)+RMassY(n))
-      enddo
+	enddo
 
+csun add the root respiration, two method:1) is using the Agro_IBIS
+csun Agro_IBIS:root respiration = rroot * cbior(i,k) * funcb !mol-C / m**2 / second
+csun: cbior: root biomass kg C m-2
+csun rroot   = 1.2500 / (ndaypy * 86400.0) * (1000.0 / 12.0)  ! maintenance respiration coefficient for root (/s)
+csun funcb = exp(3500.0 * (1. / 288.16 - 1. / roottemp)) !temperature function for roots
+csun funcb: calculate respiration terms on a 15 degree base following respiration parameterization of Lloyd and Taylor	
+csun: 2) using Q10 method
+
+
+csun gSink_root as [ug co2/cm3 air/day]
+csun RMassY(n) RMassM(n) root weigth in each cell g/cm^2
+csun alphaR: 0.032 mg 02.g-1.h-1 to 288ug Cho.g-1.day-1 to 115ug C g-1.day-1 This from VEEN, (1981)
+csun alphaR: 14.468 ug C.g-1.day-  This from Agro_IBIS
+csun alphaR: 800 ug C.g-1CH20.day- 320 ug C.g-1C.day at degree 10.
+csun Soilair(i):        [cm3air/cm3soil]
+csun Tmpr(n) soil temperature
+csun Q10MR oomis and Amthor (1999) Crop Sci 39:1584-1596
+
+Csun need to get the air porosity through ThNew(NumNPD) 
+csun 2.65 is used as a rule of thumb based on the average bulk density of rock with no pore space.
+	
+       alphaR = 3000
+	 Q10MR =2.0
+       Do i=1,NumNP
+csun young root respiration
+         gSink_rootY(i,1)=((RMassY(i))*alphaR*44/(12))*
+     &   (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10))
+csun mature root respiration,assume half root respiration rate of young roots 	
+	   gSink_rootM(i,1)=((RMassM(i))*alphaR*0.5*44.0/(12))*
+     &    (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10.0))
+	  
+	   gSink_root(i,1) = gSink_rootM(i,1) +	gSink_rootY(i,1)
+	   
+	 Enddo	  
+	 	
 c   Actual growth
 
 25    format (F12.6,1x,i6,2x,6G12.3,1x,2i5)

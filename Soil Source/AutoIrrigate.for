@@ -7,10 +7,9 @@ C it is called once a day, at 5:00 am
        Subroutine AutoIrrigate()
        include 'public.ins'
        include 'puweath.ins'
-       include 'pusurface.ins'
+       include 'PuSurface.ins'
        Parameter (PERIOD =1./24.)
-       
-       
+
        Real ThetaAvail50, ThetaFull50,AvailWaterRatio
        Real Thi, Thj, Thl, ThFl_i,ThFl_j, ThFl_l
        Real Bii(3),Cii(3), AE, Sum1, Sum2
@@ -92,20 +91,31 @@ cccz
            
 C      Auto irrigate if available water is less than 60%
 C  irrigation goes into Q values
+C TODO need to check code this was partially merged between the gas exchange and mulch versions
           If (AvailWaterRatio.lt.(0.60).and.lInput.lt.1) then
-             do k=1, NumBp
-               i=KXB(k)
-               Qautoirrig(i)=0.0D0
-               If(abs(CodeW(i)).eq.4) then
-                if (Q(i).lt.0) then 
-                   CodeW(i)=4
-                   Qautoirrig(i)=AutoIrrigAmt*(Width(k))   ! add to irrigation so we don't lose any rain if needed
-c                   if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
-                 End if    !Q(n) <0
-                End if   ! CodeW=4
-              End Do
+           do k=1, NumBp
+            i=KXB(k)
+            If(abs(CodeW(i)).eq.4) then
+             if (Q(i).lt.0) then 
+              CodeW(i)=4
+cccz since we treat auto-irrigation as rainfall, we directly change the varbw terms
+cccz so varbw_air will be rainfall+autoirrigation
+              Varbw_Air(k,1)=Varbw_Air(k,1)+AutoIrrigAmt
+              Varbw_Mulch(k,1)=Varbw_Mulch(k,1)+AutoIrrigAmt
+              VarBW(k,1)=Varbw(k,1)+AutoIrrigAmt
+cccz then re-calculation of Q, folloiwng VarBW and the starndard method show in weather
+              VarBW_Air(k,3)=VarBW_Air(k,2)-VarBW_Air(k,1)
+              VarBW_Mulch(k,3)=VarBW_Mulch(k,2)-VarBW_Mulch(k,1)
+              VarBW(k,3)=VarBW(k,2)-VarBW(k,1)
+              Q(i)=-Width(k)*VarBW(k,3)
+cccz now the autoirrigation is recorded by the "varbw flux temrs"
+cccz   Q(i)=Q(i)+AutoIrrigAmt*Width(k)   ! add to irrigation so we don't lose any rain if needed
+cccz                   if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
+             End if    !Q(i) <0
+            End if   ! CodeW=4
+          End Do
               
-           End If  ! end auto irrigation
+         End If  ! end auto irrigation
            tNext(ModNum) = time +PERIOD
            
          End if  ! Tnext hourly calcs     

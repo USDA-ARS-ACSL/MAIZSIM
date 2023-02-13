@@ -173,15 +173,17 @@
 	           double starter;
 	           char WeatherFile[256], TimeFile[256], BiologyFile[256],
                ClimateFile[256], NitrogenFile[256], SoluteFile[256],
-               SoilFile[256], 
+               ParamGasFile[256],SoilFile[256], 
                ManagementFile[256], DripFile[256],
                WaterFile[256], WaterBoundaryFile[256], 
                GraphicsFile[256], InitialsFile[256],VarietyFile[256],
 			   NodeGraphics[256],ElemGraphics[256],NodeGeomFile[256],
 			   GeometryFile[256], SurfaceGraphics[256],
-			   FluxGraphics[256], MasssBalanceFile[256],MassBalanceFileOut[256],
-			   LeafFileIn[256], OrganicMatterGraphics[256],RunFile[256], 
-			   MassBalanceRunoffFileOut[256];
+			   FluxGraphics[256], MasssBalanceFile[256],
+			   MassBalanceFileOut[256],LeafFileIn[256],
+			   OrganicMatterGraphics[256],
+			   RunFile[256], MassBalanceRunoffFileOut[256],
+			   MulchFile[256],MassBalanceMulchFileOut[256];
  };
 
 

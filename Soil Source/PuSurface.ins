@@ -1,26 +1,95 @@
+      Parameter (NumMulHLD=15, NumMulFluxD=2*NumMulHLD)
 cccz the following blocks are for irrigation
        Double Precision Qautoirrig(NumNPD)
        Common /SurWaterInput/ Qautoirrig
 
+
 cccz the following blocks are used for surface runoff
 cccz Zhuangji Wang
-       Integer SurWeatherUpdate,SurNodeIndex,
+       Integer SurNodeIndex,
      !        SurfNodeNodeIndexH(NumBPD),
      !        SurfNodeSurfIndexH(NumBPD)
-	   Double Precision h_Stay(NumBPD),
+	   Double Precision h_Pond(NumBPD),
      !        q_Flux(NumNPD), Efflux(NumBPD), Exflux(NumBPD),
-     !        VarBW_Record(NumBPD,3),
+     !        Varbw_Air(NumBPD,3),Varbw_Mulch(NumBPD,3),
+     !        Varbt_Air(NumBPD,4),Varbt_Mulch(NumBPD,4),
+     !        Varbg_Air(NumBPD,NumGD,3),Varbg_Mulch(NumBPD,NumGD,3),
      !        CriticalH,CriticalH_R,
      !        RunoffLeft,RunoffRight,
-     !        RunoffLeft_Efflux,RunoffRight_Efflux
+     !        RunoffLeft_Efflux,RunoffRight_Efflux,
+     !        WaterStorageFrac
 	   Double Precision slopeCoord(NumBPD,2)
 	   Double Precision PEAK
-       Common /SurWaterBalAdjust/ SurWeatherUpdate, SurNodeIndex,
+       Common /SurWaterBalAdjust/ SurNodeIndex,
      !        SurfNodeNodeIndexH,SurfNodeSurfIndexH,
-     !        h_Stay,q_Flux,Efflux,Exflux,
+     !        h_Pond,q_Flux,Efflux,Exflux,
      !        CriticalH,CriticalH_R,
      !        slopeCoord,PEAK,
-     !        VarBW_Record,RunoffLeft,RunoffRight,
-     !        RunoffLeft_Efflux,RunoffRight_Efflux
+     !        Varbw_Air,Varbw_Mulch,
+     !        Varbt_Air,Varbt_Mulch,
+     !        Varbg_Air,Varbg_Mulch,
+     !        RunoffLeft,RunoffRight,
+     !        RunoffLeft_Efflux,RunoffRight_Efflux,
+     !        WaterStorageFrac
 
 
+cccz the following blocks are used for surface modules
+cccz Zhuangji Wang
+      Double precision rho_mulch,rho_mulch_b,
+     !        rho_w,rho_dryair,
+     !        ParMulch(13,1),
+     !        MulchNodeTmpr(NumNPD),
+     !        MulchEleTmpr(NumMulHLD,NumBPD),
+     !        MulchNodehNew(NumNPD),
+     !        MulchElehNew(NumMulHLD,NumBPD),
+     !        MulchNodeThNew(NumNPD),
+     !        MulchEleThNew(NumMulHLD,NumBPD),
+     !        widthPerMulchUnit(NumBPD),
+     !        MulchNodeMarkerArea(NumNPD),
+     !        MulchEleMarkerArea(NumNPD),
+     !        LayerHeight(NumMulHLD),
+     !        thickPerLayer(NumMulHLD),
+     !        mulchNodeCoord(NumNPD,2),
+     !        Frac_Decomp(NumMulHLD),
+     !        CARB_mass(NumMulHLD,NumBPD),
+     !        CELL_mass(NumMulHLD,NumBPD),
+     !        LIGN_mass(NumMulHLD,NumBPD),
+     !        CARB_N_mass(NumMulHLD,NumBPD),
+     !        CELL_N_mass(NumMulHLD,NumBPD),
+     !        LIGN_N_mass(NumMulHLD,NumBPD),
+     !        mulchThick,thresholdThick,TotalMulchMass,
+     !        totalMulchWidth,f_mulch_pore,
+     !        Mulch_Decompose_C,Mulch_Decompose_N,
+     !        CO2mass_2_Cmass, 
+     !        slopeCoord_M(NumBPD,2),
+     !        begin_mulch_date
+      Integer SurNodeIndex_M, SurfMulchNodeSubIndex(NumBPD),
+     !        SurNodeIndex_M_Match(NumBPD)
+      Double Precision Min_Hori_Ele_Size
+      Integer mulchLayer,numMulchNode,numMulchEle,
+     !        MulchNodeMatrix(NumMulHLD,NumBPD),
+     !        MulchEleMatrix(NumMulHLD,NumBPD),
+     !        MulchEleMarker(NumNPD,6),
+     !        DecompCtrl
+      Integer BoolMulchApply,MulchDecompIni,
+     !        residueApplied,BoolMulch_TotalDecomposed
+      Character Thick_Mass
+      Common /SurfaceProcess_Para/ BoolMulchApply,MulchDecompIni,
+     !        rho_mulch,rho_mulch_b,rho_w,rho_dryair,
+     !        numMulchNode,numMulchEle,
+     !        MulchNodeTmpr,MulchEleTmpr,
+     !        MulchNodehNew,MulchElehNew,
+     !        MulchNodeThNew,MulchEleThNew,
+     !        MulchNodeMatrix,MulchEleMatrix,MulchEleMarker,
+     !        mulchThick,thresholdThick,totalMulchWidth,
+     !        f_mulch_pore,widthPerMulchUnit,
+     !        MulchNodeMarkerArea,MulchEleMarkerArea,
+     !        LayerHeight,thick_Mass,thickPerLayer,mulchNodeCoord,
+     !        Frac_Decomp,CARB_mass,CELL_mass,LIGN_mass,
+     !        CARB_N_mass,CELL_N_mass,LIGN_N_mass,TotalMulchMass,
+     !        mulchLayer,ParMulch,DecompCtrl,
+     !        CO2mass_2_Cmass,  
+     !        SurNodeIndex_M, SurfMulchNodeSubIndex, slopeCoord_M,
+     !        Min_Hori_Ele_Size, SurNodeIndex_M_Match,
+     !        begin_mulch_date, residueApplied,
+     !        BoolMulch_TotalDecomposed

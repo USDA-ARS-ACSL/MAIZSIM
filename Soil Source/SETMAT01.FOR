@@ -17,12 +17,13 @@ C
      &                  BlkDn,hTemp,Explic,Theta,hTab1,hTabN,
      &                  hSat,ThSat,ThR, ThAvail,ThFull,
      &                  FracOM, FracSind, FracClay,
-     &                  TupperLimit, TLowerLimit,SoilFile)
+     &                  TupperLimit,TLowerLimit,soilair,SoilFile,
+     &                  ThAMin,ThATr)
       Logical Explic
  !InitType allows us to input water content(w) or head (m) as an initial condition
       character SoilFile*132
       ! or character*1 InitType(5)
-      Real BldDn
+      Real BldDn,soilair,ThAMin,ThATr
       Parameter (NTabD=100,NPar=13,NMatD=15)
       character*1, dimension(NMatD)::InitType
 
@@ -36,7 +37,9 @@ C
      !          thR(NMatD),hSat(NMatD),thSat(NMatD),ThAvail(NumNP),
      !           ThFull(NMatD),BlkDn(NMatD),
      !          FracOM(NMatD), FracSind(NMatD), FracClay(NMatD),
-     !          TUpperLimit(NMatD),TLowerLimit(NMatD)
+     !          TUpperLimit(NMatD),TLowerLimit(NMatD),soilair(NumNP),
+     !          ThAMin (NMatD),ThATr(NMatD)
+      
 c   parameters:
 c         1  thr
 c         2  ths
@@ -99,11 +102,12 @@ c calculate MP from water content if wc is given as an initial
           
 CDT FracSind is sand + silt. Since we don't input silt, we 
 C     get it by difference
-C was an error - was using fracsind as 1-(sand+silt) which was wrong 
           BlkDn(M)=  Par(10,M)
           FracOM(M)   =Par(11,M)
-          FracSind(M) =(Par(12,M)+Par(13,M))
-          FracClay(M) =1.0-FracSind(M)
+c          FracSind(M) =1.0-(Par(12,M)+Par(13,M))
+c          FracClay(M) =Par(13,M)
+          FracSind(M) = Par(12,M)+Par(13,M) 
+          FracClay(M) = 1-Par(12,M)-Par(13,M) 
           TUpperLimit(M)=FQ(-100.0,Par(1,M))
           TLowerLimit(M)=FQ(-150000.0,Par(1,M))
           ThFull(M)=TUpperLimit(M)-TLowerLimit(M)
@@ -118,6 +122,11 @@ C was an error - was using fracsind as 1-(sand+silt) which was wrong
             TheTab(i,M)=FQ(hTab(i),Par(1,M))
            
 13        Continue
+          
+          ThAMin(M)=0.01                           !Entrapped air, value can be estimated as a function of soil properties
+          ThATr(M)=0.00                           !Threshold air filled porosity below which diffusion does not occur, value can be estimated as a function of soil properties
+           
+          
 14      Continue
       Endif  !lInput=1
       Do 15 i=1,NumNP
@@ -141,7 +150,7 @@ C was an error - was using fracsind as 1-(sand+silt) which was wrong
         If(Explic) hi2=hi1
         If(hi2.ge.hSat(M)) then
           Ci=0
-          Ci=FC(hSat(M),PAR)
+          Ci=FC(hSat(M),PAR) !prevent capacitance from going to 0
           Ti=thSat(M)
         Else if(hi2.ge.(hTab(NTabD)+.04).and.hi2.le.hTab(1)) then
           iT=int((alog10(-hi2)-alh1)/dlh)+1
@@ -155,6 +164,10 @@ C was an error - was using fracsind as 1-(sand+silt) which was wrong
         Endif
         Cap(i)=Ci
         theta(i)=thR(M)+(Ti-thR(M))
+
+csb soil air  equals total porosity (or saturated water content)- current water content
+        soilair(i)= AMAX1(thSat(M)-theta(i),0.0001)
+	
 C calculate available water content
         If (theta(i).lt.TLowerLimit(M)) Then 
           ThAvail(i)=0;     
@@ -176,10 +189,13 @@ C calculate available water content
       implicit double precision(A-H,O-Z)
       double precision n,m,Ks,Kr,Kk
       real h,Par(12)
+c      double precision PPar
       integer PPar
+      
+      Kr=1.0D0
 
-      BPar=.5
-      PPar=2.
+      BPar=0.5D0
+      PPar=2.0D0
       Qr=Par(1)
       Qs=Par(2)
       Qa=Par(3)
@@ -203,7 +219,7 @@ C calculate available water content
         FFQ =1.-(1.-Qee**(1./m))**m
         FFQk=1.-(1.-Qeek**(1./m))**m
         if(FFQ.le.0.d0) FFQ=m*Qee**(1./m)
-        Kr=(Qe/Qek)**Bpar*(FFQ/FFQk)**PPar*Kk/Ks
+        Kr=((Qe/Qek)**Bpar)*((FFQ/FFQk)**PPar)*Kk/Ks
         FK=max(Ks*Kr,1.d-37)
         return
       endif
@@ -240,7 +256,8 @@ C calculate available water content
         FC=max(C2,1.d-37)
         return
       else
-        FC=0.0
+        FC=0.0001
+       ! write(*,*) 'h > hs', h, Hs
       endif
       return
       end

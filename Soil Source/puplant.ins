@@ -1,8 +1,9 @@
 	 
 	  REAL(8) PCRL, PCRQ,PCRS,ET_demand,LCAI,COVER,CONVR
 	  Real(8) HourlyCarboUsed 
-        REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
+      REAL(4) SHADE,HEIGHT,LAI,AWUPS,NitroDemand,NDemandError
 	  REAL LAREAT, MaxRootDepth, InitialRootCarbo
+      REAL cContentRootY,nContentRootY,cContentRootM,nContentRootM
 	  integer isGerminated, isEmerged
 ! includes variables shared with crop model	 
       Common /ShootR/   PCRL,PCRQ,PCRS,HourlyCarboUsed, ET_demand,
@@ -33,6 +34,8 @@
      !                   potential_T_EO,
      !                  AWUPS_old, WUPMS, EORSCF,WUPDS, WUP2S, 
      !                 WUP0S, DPSI02,SCF, PSIST,PROPAR,
-     !                 VUP(NumNPD,2),FUP(NumNPD,2)
+     !                 VUP(NumNPD,2),FUP(NumNPD,2),
+     !                 cContentRootM,cContentRootY,
+     !                 nContentRootM, nContentRootY
      
      

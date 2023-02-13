@@ -146,6 +146,7 @@ private:
 	double C_content;
 	double C_demand;
 	double C_supply;
+	double N_effectOnKernal;  //N effect on kernel development - to slow it down
 	double C_ReserveLeaf;  //holds extra C in leaf - allows SLA to change
 	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass, cobMass, sheathMass; // this is redundant, but for convenience of access
 	double maintRespiration;

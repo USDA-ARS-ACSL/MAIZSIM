@@ -17,24 +17,27 @@ c   will be transferred.
       Real BlkDn, FracSind, FracClay, FracOM, hCritS,hCritA
 	  Real nodeArea
       Integer CodeW,CodeS,CodeT,CodeG,errPlant
-	  Integer MaxItO, OutPutSoilNo, OutPutSoilYes   
+	  Integer MaxItO, OutPutSoilNo, OutPutSoilYes  
       Logical*1 lOrt
       Integer DailyOutput, HourlyOutput,RunFlag,  
      !  DailyWeather,HourlyWeather,ITIME, IDAWN, IDUSK,
      !  beginDay, sowingDay, endDay,year
      
-        character WeatherFile*132, TimeFile*132, BiologyFile*132,
-     !          ClimateFile*132, NitrogenFile*132, SoluteFile*132,
-     !          SoilFile*132,
-     !          ManagementFile*132,DripFile*132,
-     !          WaterFile*132, WaterBoundaryFile*132,
-     !          PlantGraphics*132,InitialsFile*132,  VarietyFile*132,
-     !          NodeGraphics*132,ElemGraphics*132,
-     !          NodeGeomFile*132,
-     !          GeometryFile*132,SurfaceGraphics*132,
-     !          FluxGraphics*132,MassBalanceFile*132,
-     !          MassBalanceFileOut*132,LeafGraphics*132,
-     !          RunFile*132, MassBalanceRunoffFileOut*132
+        character WeatherFile*256, TimeFile*256, BiologyFile*256,
+     !          ClimateFile*256, NitrogenFile*256, SoluteFile*256,
+     !          ParamGasFile*256,SoilFile*256,
+     !          ManagementFile*256,DripFile*256,
+     !          WaterFile*256, WaterBoundaryFile*256,
+     !          PlantGraphics*256,InitialsFile*256,  VarietyFile*256,
+     !          NodeGraphics*256,ElemGraphics*256,
+     !          NodeGeomFile*256,
+     !          GeometryFile*256,SurfaceGraphics*256,
+     !          FluxGraphics*256,MassBalanceFile*256,
+     !          MassBalanceFileOut*256,LeafGraphics*256,
+     !          OrganicMatterGraphics*256,
+     !          RunFile*256, MassBalanceRunoffFileOut*256,
+     !          MulchFile*256,MassBalanceMulchFileOut*256
+
       Common /grid_public/  NumNP, NumEl, IJ, KAT, MBand,Nmat,
      !        KX(NumElD,4),x(NumNPD), y(NumNPD), Area(NumElD),
      !        nodeArea(NumNPD)
@@ -43,11 +46,14 @@ c   will be transferred.
      !       Vz(NumNPD),Q(NumNPD), Conc(NumNPD,NumSD), 
      !       g(NumNPD,NumGD), Tmpr(NumNPD), Con(NumNPD),TcsXX(NumNPD),
      !       RO(NumNPD), hNew_org(NumNPD),QAct(NumNPD),ThetaAvail, 
-     !       ThetaFull, ThAvail(NumNPD),ThFull(NMAtD),  lOrt
+     !       ThetaFull, ThAvail(NumNPD),ThFull(NMAtD),  lOrt,
+     !       QGas(NumNPD,NumGD),ThetaAir(NumNPD)
       Common /elem_public/  MatNumE(NumElD),Sink(NumNPD), 
      !       cSink(NumNPD,NumSD),gSink(NumNPD,NumGD),tSink(NumNPD),
      !       RTWT(NumNPD),RUTDEN(NumNPD),RMassM(NumNPD),RDenM(NumNPD),
-     !       RMassY(NumNPD), RDenY(NumNPD) 
+     !       RMassY(NumNPD), RDenY(NumNPD), gSink_OM(NumNPD,NumGD),
+     !       gSink_root(NumNPD,NumGD),gSink_rootY(NumNPD,NumGD),
+     !       gSink_rootM(NumNPD,NumGD)
       Common /bound_public/ NumBP, NSurf, NVarBW,NVarBS,NVarBT,NVarBG,
      !       NumSurfDat, NSeep, NSP(NSeepD), NP(NSeepD,NumSPD),
      !       NDrain,NDR(NDrainD),ND(NDrainD,NumDR),
@@ -76,20 +82,25 @@ c   will be transferred.
 	 
 	  Common /DataFilenames/ Starter, WeatherFile, TimeFile, 
      !          BiologyFile,ClimateFile, NitrogenFile, SoluteFile,
-     !          SoilFile, 
+     !          ParamGasFile, SoilFile, 
      !          ManagementFile,DripFile,
      !          WaterFile, WaterBoundaryFile, 
      !          PlantGraphics,InitialsFile,VarietyFile,
      !          NodeGraphics,ElemGraphics,NodeGeomFile,
      !          GeometryFile,SurfaceGraphics,
-     !          FluxGraphics, MassBalanceFile,MassBalanceFileOut,
-     !          LeafGraphics,RunFile, MassBalanceRunoffFileOut
+     !          FluxGraphics, MassBalanceFile,
+     !          MassBalanceFileOut, LeafGraphics,
+     !          OrganicMatterGraphics,
+     !          RunFile, MassBalanceRunoffFileOut,
+     !          MulchFile, MassBalanceMulchFileOut
 
      
 c the following blocks are not passed to the crop model
        Common /Nodal_pub_Aux/ ROForInfil(NumBPD)
        
        Common /Materials/BlkDn(NMatD),FracSind(NMatD), FracClay(NMatD),
-     !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD)
-             
+     !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD),
+     !           soilair(NumNPD),thSat(NMatD),ThAMin(NMatD),ThATr(NMatD)
 	  
+      Common /ConversionFactors_parameters/ppm_to_ugGasCm3air(NumGD), 
+     !           GasTransfCoeff(NumGD)

@@ -81,9 +81,9 @@ c          Ac(i)=0.
 12          Continue
           Endif
 13      Continue
-c
-
+C
 C  assign fluxes of root growth
+C
         Do n=1,NumNP
           Gc(n)=ADWR(n)/nodeArea(n)
         Enddo
@@ -92,7 +92,6 @@ C Assembling matrixes
 C
         Do 21 Level=1,NLevel
          If(lUpW.eq.1) then
-          
           Call RDisper(NumNP,Dispxx,Dispzz,Dispxz,DMolx,DMolz,
      &             hNew,Tmpr,RDenTotal)
          Endif
@@ -174,6 +173,8 @@ C
              B(i)=B(i)/A(newjjj,i)
 22        Continue
         Else if(lOrt) then
+cccz             
+c             print*,time,',','Root Diff'
 	       call ILU(A,NumNP,MBandD,IAD,IADN,IADD,A1)
              call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,
      !	            IADN,IADD,A1,VRV,
@@ -241,7 +242,7 @@ CDT 10/10/11 using the max statement here was causing root system to lose mass. 
      
 c calculate mature root mass, total root mass and rool lengths
 c set up for next step     
-      Do i=1,NumNPD 
+      Do i=1,NumNP 
         RMean=(RMassY(i)+RMassOld(i))/2.0d0
         RTWT(i)=(RMassM(i)+RMassY(i))
         RMassM(i)=RMassM(i)+ALPY*RMassY(i)*Step

@@ -12,6 +12,9 @@
 // 2006-2007 modified to use leaf water potentials to adjust photosynthesis for water stress Y. Yang
 // modified 2009 to adjust photosynthesis for nitroge stress Y. Yang
 
+// there are two ways to do max to make it linux friendly __max(blah, blah) or (std::max)(blah,blah)
+// the second form has to be used with std as there is some macro somewhere for max
+
 /*! @file
    Contains code to simulate gas exchange 
    */
@@ -288,7 +291,7 @@ class CGasExchange
 			
 				 // the commented line is from the original but doesn't make much difference for dry matter
             Tleaf= Tair + (R_abs- thermal_air-Lambda*VaporConductance*this->VPD/Press)/(Cp*RadiativeAndHeatConductance+Lambda*Slope(Tair)*VaporConductance); // eqn 14.6a
-			if (isnan(Tleaf)) badval = true;
+			if (std::isnan(Tleaf)) badval = true;
 			thermal_leaf=epsilon*sbc*pow(Tleaf+273,4)*2;
 			Res = R_abs - thermal_leaf - Cp*HeatConductance*(Tleaf - Tair) - Lambda*VaporConductance*0.5*(Es(Tleaf)-Ea)/Press; // Residual function: f(Ti), KT Paw (1987)
 			dRes= -4*epsilon*sbc*pow(273+Tleaf,3)*2-Cp*HeatConductance*Tleaf-Lambda*VaporConductance*Slope(Tleaf); // derivative of residual: f'(Ti)
@@ -446,7 +449,7 @@ class CGasExchange
 			fprime = (EvalCi(Ci2)-EvalCi(Ci1))/(Ci2-Ci1);  // f'(Ci)
 			if (fprime != 0.0) 
 			{
-				Ci_m = max(errTolerance, Ci1-EvalCi(Ci1)/fprime);
+				Ci_m = (std::max)(errTolerance, Ci1-EvalCi(Ci1)/fprime); // use (std::max) because somewhere max is defined as a macro
 			}
 			else
 				Ci_m = Ci1;
@@ -472,8 +475,8 @@ class CGasExchange
 			{
 				Ci_m = (Ci_low + Ci_hi)/2;
 				if (abs(EvalCi(Ci_low)*EvalCi(Ci_m)) <= eqlTolerance) break;
-				else if (EvalCi(Ci_low)*EvalCi(Ci_m) < 0.0) {Ci_hi = max(Ci_m, errTolerance);}
-				else if (EvalCi(Ci_m)*EvalCi(Ci_hi) < 0.0)  {Ci_low = max(Ci_m, errTolerance);}
+				else if (EvalCi(Ci_low)*EvalCi(Ci_m) < 0.0) {Ci_hi = (std::max)(Ci_m, errTolerance);}
+				else if (EvalCi(Ci_m)*EvalCi(Ci_hi) < 0.0)  {Ci_low =(std::max)(Ci_m, errTolerance);}
 				else {isCiConverged = false; break;}
 			}
 
@@ -556,7 +559,7 @@ class CGasExchange
 		x = ((fn1+fn2)*(fn1+fn2)-4*theta2*fn1*fn2);
 		if (x<0)
 		{
-			res = min(fn1,fn2); 
+			res = __min(fn1,fn2); 
 			return res;
 		}
 		if (theta2==0.0)

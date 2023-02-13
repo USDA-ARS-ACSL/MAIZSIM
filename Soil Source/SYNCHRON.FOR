@@ -7,9 +7,9 @@
       Character*10 SDate,FDate
       double precision tFix,tRigid,dt,t,dtmax
       real*4 progress, Prev_progress,Clock_start
-      integer*4 ProgressFlag
+      integer*4 ProgressFlag,RunToEnd
       Common /Sychron/ProgressFlag, Prev_progress, 
-     !  Clock_start
+     !  Clock_start,RunToEnd
 *
       If (lInput.eq.1) then
         If (NumMod.eq.-1) then
@@ -24,6 +24,8 @@
           Read(42,*,ERR=10) DailyOutput,HourlyOutput
           Read(42,*,ERR=10)
           Read(42,*,ERR=10) DailyWeather,HourlyWeather
+          Read(42,*,ERR=10)
+          Read(42,*,ERR=10) RunToEnd
           Close(42)
           Time=Julday(Sdate)
           TFin=Julday(Fdate)
@@ -62,7 +64,10 @@ cccz          endif
         If(Iter.ge.7)
      !  dtOpt=dmax1(dtMin,dMul2*dtOpt)
         dt=dmin1(dtOpt,tFix-t)
-        If ((abs(dt/t).lt.1.E-20).or.(RunFlag.eq.0)) then
+cdt  RunFlag is set by the crop model when the crop reaches maturity
+cdt can be overridden for a full year sim of RunToEnd>0
+        If ((abs(dt/t).lt.1.E-20).or.
+     !           ((RunFlag.eq.0).and.(RunToEnd.eq.0))) then
 	    write(*,*) 'Finished at',time
           Stop
         Endif

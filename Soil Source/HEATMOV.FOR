@@ -24,7 +24,6 @@ C
         VClay(i)=BlkDn(i)*FracClay(i)/2.65
         VOrgM(i)=BlkDn(i)*FracOm(i)/1.0
         ThTot(i)=1-BlkDn(i)/2.65
-        il=il+1
       Enddo     
 *       
       Do i=1,NumNP
@@ -241,9 +240,11 @@ c not evaporated.
      &                  (2500.8-2.3668*VarBT(j,1))
                   else
                     If(Q(i).ge.0) then
-                        Qn=VarBT(j,4)+VarBW(j,2)   
+                        Qn=VarBT(j,4)+VarBW(j,2) 
      &                     *cWat
 c     &                     *(2500.8-2.3668*VarBT(j,1))
+cccz try this one
+c                   Qn=VarBT(j,4)-VarBW(j,2)*(2500.8-2.3668*VarBT(j,1))
                         Qn=Qn*width(j) !goes with above take out width above, units are J day-1
                      endif
                 endif
@@ -442,7 +443,7 @@ CDT debugging -check to see if 4.186 is needed, not sure it is.
 C 0.004184 J per milical 
         Tcsxx(i)=TcSxx(i)*0.004184*24.*3600
         Tcszz(i)=Tcsxx(i)
- 10   Continue
+10      Continue
 C     -----------
       Return
       End

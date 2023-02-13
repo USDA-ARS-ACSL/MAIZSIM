@@ -13,36 +13,43 @@ c     for writing frequency to output
       Daily=0
       Hourly=0
       AutoIrrigateF=0
+      cContentRootM=0.40
+      cContentRootY=0.40
+      nContentRootM=0.012
+      nContentRootY=0.19
       open(9,file=RunFile,status='old', ERR=10)
-	read(9,'(A132)')WeatherFile
-	read(9,'(A132)')TimeFile
-	read(9,'(A132)')BiologyFile
-	read(9,'(A132)')ClimateFile
-	read(9,'(A132)')NitrogenFile
-	read(9,'(A132)')SoluteFile
-	read(9,'(A132)')SoilFile
-c      read(9,'(A132)')MulchFile
-	read(9,'(A132)')ManagementFile
-      read(9,'(A132)')DripFile
-	read(9,'(A132)')WaterFile
-	read(9,'(A132)')WaterBoundaryFile
-	read(9,'(A132)')InitialsFile
-	read(9,'(A132)')VarietyFile
-	read(9,'(A132)')GeometryFile
-      read(9,'(A132)')NodeGeomFile   
-      read(9,'(A132)')MassBalanceFile
-	read(9,'(A132)')PlantGraphics
-      read(9,'(A132)')LeafGraphics 	
-       read(9,'(A132)')NodeGraphics   
+	read(9,5)WeatherFile
+	read(9,5)TimeFile
+	read(9,5)BiologyFile
+	read(9,5)ClimateFile
+	read(9,5)NitrogenFile
+	read(9,5)SoluteFile
+      read(9,5)ParamGasFile
+	read(9,5)SoilFile
+      read(9,5)MulchFile
+	read(9,5)ManagementFile
+      read(9,5)DripFile
+	read(9,5)WaterFile
+	read(9,5)WaterBoundaryFile
+	read(9,5)InitialsFile
+	read(9,5)VarietyFile
+	read(9,5)GeometryFile
+      read(9,5)NodeGeomFile   
+      read(9,5)MassBalanceFile
+	read(9,5)PlantGraphics
+      read(9,5)LeafGraphics 	
+       read(9,5)NodeGraphics   
 C15    Continue 
-      read(9,'(A132)')ElemGraphics
+      read(9,5)ElemGraphics
 C25    Continue
-      read(9,'(A132)')SurfaceGraphics
+      read(9,5)SurfaceGraphics
 C35    Continue
-      read(9,'(A132)')FluxGraphics
+      read(9,5)FluxGraphics
+      read(9,5)OrganicMatterGraphics
 C45    Continue
       read(9,'(A132)')MassBalanceFileOut
       read(9,'(A132)')MassBalanceRunoffFileOut
+      read(9,'(A132)')MassBalanceMulchFileOut
 	close(9)
       Open(4,file='2DSOIL03.LOG')
 c   end of temporary block
@@ -61,9 +68,12 @@ c    Open and read initials file
         read(41,*,err=8)
         read(41,*,err=8) LATUDE, Longitude, Altitude
         read(41,*,err=8)  
-     
 cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'        
-        read(41,*,err=8) AutoIrrigateF
+cccz change here according to "GAS branch"
+c        read(41,*,err=8) AutoIrrigateF
+        read(41,*,err=8) AutoIrrAmt
+        if (AutoIrrAmt.GT.0)  AutoIrrigateF=1
+        
         read(41,*,err=8) 
         read(41,'(A80)',err=8) inDates
         beginDate=0
@@ -90,50 +100,37 @@ cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'
          sowingDay=JulDay(Sowing)
          endDay=JulDay(Ending)
          Year=CurYear(Sowing)
-         
-         
-      Do i=1,NumNPD
-        hNew(i)=0.
+
 c dt
-        hNew_org(i)=0.
-cdtend 8/28/98
-        ThNew(i)=0.
-        Vx(i)=0.
-        Vz(i)=0.
-        Q(i)=0.
-        Tmpr(i)=0.
-        Do j=1,NumSD
-          Conc(i,j)=0.
-        Enddo
-        Do j=1,NumGD
-          g(i,j)=0.
-        Enddo
+      hNew_org(:)=0.
+      ThNew(:)=0.
+      Vx(:)=0.
+      Vz(:)=0.
+      Q(:)=0.
+      Tmpr(:)=25.
+      Conc(:,:)=0.
+      g(:,:)=0.
+      QGas(:,:)=0.
 *
-        Tmpr(i)=25.
-        g(i,2)=0.21
+      g(:,2)=0.
 *
-        CodeW(i)=0
-        CodeS(i)=0
-        CodeT(i)=0
-        CodeG(i)=0
-      Enddo
-*
-      Do i=1,NumElD
-        Sink(i)=0.
-        RTWT(i)=0.
-        Do j=1,NumSD
-          cSink(i,j)=0.
-        Enddo
-        Do j=1,NumGD
-          gSink(i,j)=0.
-        Enddo
-      Enddo
+      CodeW(:)=0
+      CodeS(:)=0
+      CodeT(:)=0
+      CodeG(:)=0
+      Sink(:)=0.
+      RTWT(:)=0.
+      cSink(:,:)=0.
+      gSink(:,:)=0.
+	gSink_OM=0.
+	gSink_rootY=0.
+	gSink_rootM=0.
+      
+
 * 
       NumMod=-1
       NumBP =0
       NumSol=0
-      NimG  =0
-C AD NimG is not used in the entire solution      
       NSurf =0
       NVarBW=0
       NvarBS=0
@@ -141,10 +138,9 @@ C AD NimG is not used in the entire solution
       NvarBG=0
       NShoot=0
       im=0
-      Do i=1,NumBPD
-        KXB(i)=0
-        Width(i)=0.
-      Enddo
+    
+        KXB(:)=0
+        Width(:)=0.
 *
       lInput=1
       Do i=1,NumModD
@@ -156,7 +152,7 @@ C AD NimG is not used in the entire solution
         Movers(i)=0
       Enddo
       tatm=1.E+31
-      
+ 5    format(A256)     
       Return
  8    Write(*,*) 'Error in initials file'
       goto 11     

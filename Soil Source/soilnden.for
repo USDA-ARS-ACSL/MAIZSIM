@@ -1,10 +1,12 @@
       Subroutine SoilNitrogen()
 C new comment
+c second new comment
       Include 'public.ins'
       Include 'nitvar.ins'
-      common /nitrog/ModNum
+      Include 'PuSurface.ins'
+      common /nitrog/ModNum, ThOld(NumNPD)
       Real*8 BCh,BNh, BCl,BNl,BCm,BNm,BNNH4,BNO3,BDENIT
-      
+	 
       Logical enough
        t=time
        If(lInput.eq.1) then
@@ -27,9 +29,8 @@ C new comment
            il=il+1
            Read(40,*,ERR=10) m,kh0(m),kL0(m),km0(m),kn0(m),kd0(m),
      &      fe(m),fh(m),r0(m),rL(m),rm(m),fa(m),nq(m),cs(m)
-        Enddo         
+	  Enddo    
 
-      
         Close(40)
         NumSol=1
         Call SetAbio(ew,et,ed,0,0.,0.)
@@ -39,21 +40,29 @@ C new comment
         Do i=1,NumNP
         m=MatNumN(i)
         BCh=Ch_Old(i)
-        BNh=Nh_Old(i)
-        BCL=CL_Old(i)
-        BNL=NL_Old(i)
+c        BCL=CL_Old(i)
+c        BNL=NL_Old(i)
         BCm=Cm_Old(i)
         BNm=Nm_Old(i)
 C
-C                soil water concentration is ug NO3 cm-3 of water  (multiply by water to get ug N per cm3 of soil) 
+C               Soil water concentration is ug NO3 cm-3 of water  (multiply by water to get ug N per cm3 of soil) 
 C               The units of N in this routine are mg N liter-1 of soil. 
 C               The two are equivalent (both numerator and denominator differ by a factor of 1000)
-C                   
-        BNO3=Conc(i,1)/Blkdn(m)*thNew(i) !conc(i,1) is ug NO3 per cm3 water so convert to ug/g soil (mg L-1)
+C        
+C           Conc is input as ppm, then converted to ug/cm3 in solmov initialization
+cccz        BNO3=Conc(i,1)/Blkdn(m)*thNew(i) !conc(i,1) is ug NO3 per cm3 water so convert to ug/g soil (mg L-1)
+cccz we need to convert the unit of BNO3 as "ug N per cm3 volume", therefore
+        BCL=CL(i)
+        BNL=NL(i)
+        BNO3=Conc(i,1)*thNew(i)*NO3mass_2_Nmass
+     &     +NO3_from_residue(i)
         NNO3_OLD(i)=BNO3
-C 
-
-        BNNH4=NNH4_Old(i) !8/28/2014 DT was BNH4 original typo
+C
+        BNh=Nh(i)
+        Nh_Old(i)=Nh(i) !Nh was modified in the mulch decomp model
+cccz note here the unit of NNH4_Old is already changed
+        BNNH4=NNH4(i) 
+        NNH4_old(I)=NNH4(i)
         BDENIT=Denit_old(i)
         DO IT=1,3
 C  Rate constants
@@ -69,10 +78,11 @@ C  Nitrification rate (day-1)
           kn=kn0(m)*ew*et
 C  Denitrification rate (day-1)
 C calculate mean of current concentration and concentration from past time step
+cccz note the unit is "ug N per g soil"
           Aux=(BNO3+NNO3_Old(i))/2.
           kd=kd0(m)*ed*et*Aux/(Aux+cs(m))
-C  Carbon and nitrogen fluxes
-          P1 =    kh * (Ch_old(i)+BCh)/2. ! rate is given as mg C per cm3 of area (or mg per liter?)
+C  Carbon (P) and nitrogen (Q) fluxes
+          P1 =    kh * (Ch_old(i)+BCh)/2.  ! rate is given as ug C per cm3 of area 
           Q1 =    kh * (Nh_old(i)+BNh)/2.  !N from humus pool to Nitrate pool (NH4)
           P2 =    kL * ((CL_old(i)+BCL)/2.) * fe(m) * fh(m)
           Q2 =    P2 / r0(m)               !N from litter to humus pool
@@ -81,7 +91,7 @@ C  Carbon and nitrogen fluxes
           P3 =    kL * (CL_old(i)+BCL)/2.
           Q3 =    kL * (NL_old(i)+BNL)/2.   ! N from litter pool 
           P13 =   km * (Cm_old(i)+BCm)/2.
-          Q13 =   km * (Nm_old(i)+BNm)/2.    ! N from Organic Fert pool to NH4
+          Q13 =   km * (Nm_old(i)+BNm)/2.    ! N from Organic Fert pool to NH4	
 C Added mineral nitrogen
           Added = (Q1+Q3+Q13)*Step          ! N going to mineral N via NH4
 C Potentially immobilized and lost mineral nitrogen
@@ -91,6 +101,8 @@ C Potentially immobilized and lost mineral nitrogen
           PotLost = (Q45pot + Q1415pot + Q7)*Step  !N lost from min N pool via immobilization and denitrification
 C Present mineral nitrogen
 CDT this uses N from previous time step
+          
+cccz the “present” makes sense now since those component are all based on "ug N per g soil"
           Present  = NNO3_old(i)+NNH4_old(i)
 C 'Enough' is true when it is enough mineral nitrogen for immobilization
 C Q45 is immobilization via NH4 and NO3 via the litter pool
@@ -150,7 +162,10 @@ C Incrementing nitrogen and carbon contents in compartments
      &             ( Q1 + Q3 + Q13 - Q4 - Q14 - Q6 )
           BNO3 = NNO3_old(i) + Step * 
      &             ( Q6 - Q7 - Q5 - Q15)
+
+c rate is given as ug C per cm3 of area (mg per L) then P rate transfer to C mol
 C No negative values
+		g(i,1) = AMAX1(g(i,1),0.)							   
           BCh = AMAX1(BCh,0.)
           BNh = AMAX1(BNh,0.)
           BCl = AMAX1(BCl,0.)
@@ -160,7 +175,18 @@ C No negative values
           BNNH4 = AMAX1(BNNH4,0.)
           BNO3  = AMAX1(BNO3,0.)
           BDENIT=Denit_old(i)+Q7*Step
-          ENDDO
+	 ENDDO
+
+
+csun (P1+P3+P13):[ugC/cm3 volume]/day
+csun Step:[day]
+csun Soilair(i):        [cm3air/cm3 volume]
+Csun  the release of C from organic matter (: ug C /cm3 soil day-1) to (ug CO2 cm-3 air)
+cDT removed BlkDn, it is not needed. 
+	   gsink_OM(i,1)=AMAX1(((P1+P3+P13-P45-P1415)*
+     &         44/(12))*(1/soilair(i)),0.0)
+     				 
+
 C End of iterations
           Ch(i) = BCh
           Nh(i) = BNh
@@ -171,7 +197,9 @@ C End of iterations
           Denit(i)=BDENIT
           NNH4(i) = BNNH4
           NNO3_sol = BNO3
-          Conc(i,1)=NNO3_sol/ThNew(i)*BlkDn(MatNumN(i))
+cccz          Conc(i,1)=NNO3_sol/ThNew(i)*BlkDn(MatNumN(i))
+cccz the unit of NNO3 and BNO3 are "ug N per g soil", so need adjustment to calculate "Conc(i,1)"
+          Conc(i,1)=NNO3_sol/ThNew(i)/NO3mass_2_Nmass
           TotNitO=Nh_old(i)+Nl_old(i)+Nm_Old(i)+NNO3_Old(i)+NNH4_old(i)
           TotNit=Nh(i)+Nl(i)+Nm(i)+NNO3_sol+NNH4(i)  
           DTot=TotNit-TotNitO
@@ -183,8 +211,11 @@ C End of iterations
           Cm_old(i)=Cm(i)
           Denit_old(i)=Denit(i)
           NNH4_old(i)=NNH4(i)
+cccz          NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i))
+cccz     &                         /Blkdn(MatNumN(i))
+cccz the unit of NNO3 and BNO3 are "ug N per g soil", so need adjustment to calculate "Conc(i,1)"          
           NNO3_old(i)=amax1(0.,Conc(i,1)*ThNew(i))
-     &                         /Blkdn(MatNumN(i))
+     &          *NO3mass_2_Nmass
 CDT the following is OK if we sum BNO3 above          
 cdt          NNO3_old(i)=NNO3_sol
           ThOld(i)=ThNew(i)
