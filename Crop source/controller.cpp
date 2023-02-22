@@ -634,7 +634,7 @@ void CController::outputToSummary()
 	MeanN = MeanN / myDevelop->get_LvsInitiated();
 	if (potentialArea > 0.0)
 	{
-		leafAreaRatio = std::max(0.0, actualArea / potentialArea);
+		leafAreaRatio = __max(0.0, actualArea / potentialArea);
 
 	}
 	else 
