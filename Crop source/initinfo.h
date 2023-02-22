@@ -1,11 +1,10 @@
 #pragma once
 #ifndef _INITINFO_H_
 #define _INITINFO_H_
-#define MINUTESPERDAY (24*60);
+#define MINUTESPERDAY (24.0*60.0);
 #ifndef FLOAT_EQ
 #define EPSILON 0.001   // floating point comparison tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
-#define MINUTESPERDAY (24*60);
 #endif
 
 struct TInitInfo

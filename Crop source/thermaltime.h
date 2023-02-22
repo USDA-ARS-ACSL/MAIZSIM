@@ -1,5 +1,5 @@
 #pragma once
-#define MINUTESPERDAY (24*60);
+#define MINUTESPERDAY (24.0*60.0);
 
 class CThermalTime
 {
