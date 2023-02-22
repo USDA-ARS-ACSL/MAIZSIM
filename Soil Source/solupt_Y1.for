@@ -4,6 +4,7 @@ c         1   Plant regulation diffusive and convective uptake
 c         2  'convective diffusive uptake no plant regulation (Constant IMax)
 c         3  'diffusive uptake only, no effect of water movement 
 c         4  Michaelis-Menton uptake only
+c TODO take out CSink_M as the nodal value works since this is no longer element wise
 
       subroutine SoluteUptake()
       include 'public.ins'
@@ -109,7 +110,7 @@ c     $     young     old    young     old      sum       sumSink'
        
        Do n=1,NumNP
           Csink_M(n)=Conc(n,1)   ! mean of concentration for element 
-          CSink(n,1)=Conc(n,1)*Sink(n)          
+          CSink(n,1)=Conc(n,1)*Sink(n) 
           M=MatNumN(n)
           TotalFUPY=TotalFUPY+FUP(n,2)
           TotalFUPM=TotalFUPM+FUP(n,1)
@@ -181,7 +182,11 @@ c calculate and alternative alphaK depending on demand
            do n=1,NumNP
            RootLenFact=RootLenFact+FUP(n,j)*Cr_M(n,j)
            enddo
-           alphaKK(j)=PotNitrogen_t/(TwoPi*RootRadius*RootLenFact)
+           if (RootLenFact.LE.0.0001) then  ! protect from zero values
+            alphaKK(j)=0.0
+            else
+            alphaKK(j)=PotNitrogen_t/(TwoPi*RootRadius*RootLenFact)
+          endif
        enddo         
 	 do j = 1,2
 	  do n = 1, NumNP 
@@ -189,7 +194,7 @@ c calculate and alternative alphaK depending on demand
 	   do k=1,3
          Iroot(n,j) = 0                 ! 1 if length >0
 	   qsinkC(n,j) = 0.0 
-	   if(FUP(n,j).gt.0) THEN
+	   if(FUP(n,j).gt.0.0001) THEN  ! don't want use the code if FUP is very small DT 8/31/2021
 	    alphak(n,j)=(ConstI(j))/(ConstK(j)+Cr_M(n,j)) 
 	    F_MM(n,j)=alphak(n,j)*Cr_M(n,j)
 	    Rx = 1.0 / sqrt(pi * (FUP(n,1) + FUP(n,2)))
@@ -198,32 +203,35 @@ c calculate and alternative alphaK depending on demand
 	    SC = 0.017  -  (PSIS(n) * 0.5)  
 	    betR = SC / RootRadius
 	    RootRatio = dmin1(betR,RootRatio)
+          if (RootRatio.le.1.0) then 
+             RootRatio=1.1
+           endif
 	    RootRatio2=RootRatio*RootRatio
 	     if (Disp(n,j).le.0.0) then
              GammaB=0
+             PC=1.0 ! PC is not used but this is just to be safe
 	      else
-	      If ((VUP(n,j).le.0).OR.(iSink.EQ.3)) Then
+	      If ((VUP(n,j).le.1.0e-6).OR.(iSink.EQ.3)) Then
 	       GammaB=alphaK(n,j)*RootRadius/(Disp(n,j))
-	       PC=1-0.5*GammaB
+	       PC=1.0-0.5*GammaB
 	       PC2=Rx*Rx*GammaB*alog(RootRatio)/(Rx*Rx-RootRadius**2)
 	       PC=1.0/(PC+PC2)
-	       PC=amax1(0.0,amin1(1.0,PC))
+	       PC=amax1(0.00001,amin1(1.0,PC))  ! prevent PC from going to zero
 	         Else
 	       GammaB=RootRadius*VUP(n,j)/Disp(n,j)
 	       GammaB2=2.0/(2.0-GammaB)
 	       PC=(RootRatio**(2.0-GammaB)-1.0)/(RootRatio**2-1.0)
 	       PC=AlphaK(n,j)+(VUP(n,j)-AlphaK(n,j))*GammaB2*PC
-	       if (PC.eq.0.0) then
-	         PC=0.0
+	       if (PC.le.0.0) then
+	         PC=0.00001
 	         Else
-                PC=amax1(0.0,amin1(1.0,VUP(n,j)/PC))	       
+                PC=amax1(0.00001,amin1(1.0,VUP(n,j)/PC))	       
                EndIf
+               if (isNAN(PC)) then
+                iii=1
+               endif
 	       EndIF  !VUP <=0
 	     EndIf   !Disp <= 0
-	    if ((PC.lt.0).or.(PC.gt.1.0))then 
-	    
-	      iii=1
-	      EndIf
 	    qSinkC(n,j)=TwoPi*RootRadius
 	    qSinkC(n,j)=qSinkC(n,j)*alphaK(n,j)*PC*Csink_M(n)	
 	    Cr_M(n,j)=PC*CSink_M(n)         ! update value at root, may have to iterate      

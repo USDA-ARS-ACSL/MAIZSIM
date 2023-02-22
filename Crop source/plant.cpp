@@ -567,10 +567,6 @@ void CPlant::calcGasExchange(const TWeather & weather, const TGasExSpeciesParam&
     sunlit_LAI = light->LAIsl();
 	shaded_LAI = light->LAIsh();
     
-    if (weather.jday == 37356 && weather.time * 24 >= 6) {
-        double temp10 = 1;
-    }
-	 	
 	//Calculating transpiration and photosynthesis with stomatal controlled by leaf water potential LeafWP Y
 	    sunlit->SetVal(sunlit_PFD, weather.airT, weather.CO2, weather.RH,
 	                weather.wind, atmPressure, leafwidth, weather.LeafWP, weather.ET_supply*initInfo.plantDensity/3600/18.01/LAI); 
@@ -831,6 +827,7 @@ void CPlant::C_allocation(const TWeather & w)
 	   const int maxKernelNo = 800.; // assumed maximum kerner number per ear
 	   double maxKernelFillRate = 0.012*(initInfo.timeStep/(24.*60.)); // 
 	                                                                  //max kernel filling rate = 0.012g Kernel-1 day-1, Grant (1989)
+	   // N facilitates use of  sugars for grain filling. 
 	   C_demand = maxKernelNo*maxKernelFillRate*tmprEffect*C_content; //dt added c_content
 	   shootPart = __max(0,Yg*(C_supply-maintRespiration)); // gCH2O partitioned to shoot
 	   //Because limit for partitioning is 0.925 there is always some c sent to roots. During grainfill we want to zero that
@@ -852,7 +849,6 @@ void CPlant::C_allocation(const TWeather & w)
 	   }
 
 	   rootPart_old = rootPart;
-	   
 	   grainPart = shootPart_real*1.0;
    }
 
@@ -921,7 +917,6 @@ void CPlant::C_allocation(const TWeather & w)
    this->get_ear()->import_cobWeight(cobPart);
    this->get_ear()->import_sheathWeight(sheathPart);
    this->get_ear()->import_grainWeight(grainPart);
-
 
 
    double partSum = stemPart + earPart + leafPart; // checking the balance if sums up to shootPart

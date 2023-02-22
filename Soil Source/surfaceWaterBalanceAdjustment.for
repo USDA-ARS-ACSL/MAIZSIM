@@ -1,3 +1,5 @@
+  
+      
 cccz ************************************************************************************************************
 c The development history
 c There are three parts in the program, representing three trials we made for the runoff simulation
@@ -9,25 +11,27 @@ c         The momentun equation will be used to estimate the flux speed.???
 c ************************************************************************************************************
 
       Subroutine Surface_Water_Balance_Adjustment()
-      include 'Public.ins'
+      include 'public.ins'
+      include 'puweath.ins'
 cccz      include 'puplant.ins'
       include 'PuSurface.ins'
       
       
       integer FlatSurface
-      double precision totalLength
+      double precision totalLength,MaxPondFlatSur,
+     !       AvePondFlatSur,MaxFlatSurHnew
       double precision  n_Stiff, g_accel, Add_Flux,
      !       RunoffLeft_Efflux_Old,RunoffRight_Efflux_Old,
      !       Slope_0_R, Slope_f, Slope_f_left, Slope_f_right,
      !       Slope_0_n,Slope_0_n_1,Fraction_n,Fraction_n_1,
-     !       q_flux_square, h_flux_square,                        !cccz this are aux variables 
+     !       q_flux_square, h_flux_square,                        ! this are aux variables 
      !       q_flux_square1, h_flux_square1,
      !       q_flux_square2, h_flux_square2 
 cccz SURNODE to index the node order from the whole node array      
 cccz SURNODE_Sur to index the node order from the boundary node array
 cccz Now use SurfNodeNodeIndexH/SurfNodeSurfIndexH to be consistent with the mulch module
       integer  FluxDir(15),iteration_Flux, iteration_Head, 
-     !       FurtherCheck_h_Stay(NumBPD),Check_Exchange_V(NumBPD),
+     !       FurtherCheck_h_Pond(NumBPD),Check_Exchange_V(NumBPD),
      !       InElement,EdgeReloc
       double precision iteration_Num,FluxLimit, HeadLimit
       double precision time_runoff_old
@@ -36,8 +40,8 @@ cccz Now use SurfNodeNodeIndexH/SurfNodeSurfIndexH to be consistent with the mul
      !       Ava_Height_R,Volume_L,Volume_R,Volume_T,Volume,
      !       Exchange_V(NumBPD), Exchange_V_temp(NumBPD)
       double precision RunoffInten(NumBPD),
-     !    h_Stay_temp(NumBPD),q_Flux_temp(NumBPD),q_Flux_Node(NumBPD),
-     !    h_Stay_Old(NumBPD),q_Flux_Old(NumBPD),q_Flux_Node_Old(NumBPD),
+     !    h_Pond_temp(NumBPD),q_Flux_temp(NumBPD),q_Flux_Node(NumBPD),
+     !    h_Pond_Old(NumBPD),q_Flux_Old(NumBPD),q_Flux_Node_Old(NumBPD),
      !      Efflux_Old(NumBPD),
      !      RunoffLeft_old, RunoffRight_old,
      !      RunoffLeft_temp, RunoffRight_temp
@@ -46,18 +50,28 @@ cccz if so we can bypass this module to save some time.
       double precision TotalhStay_test,TotalqFlux_test,TotalR_test
       double precision CriticalH_R_Sur(NumNPD),
      !      BaseLeft,BaseRight,xBaseLeft,xBaseRight
-      Common /SurWaterBalance/ FlatSurface,
+      double precision varbw_Runoff_Loc_Record(NumBPD,3),   
+     !     RunoffRight_Runoff_Loc_Record,
+     !     RunoffLeft_Runoff_Loc_Record,
+     !     Q_Runoff_Loc_Record(NumNPD) 
+      integer TmprBCRecord(NumBPD),
+     !     GasBCRecord(NumBPD)
+      Common /SurWaterBalance/ FlatSurface,TmprBCRecord,GasBCRecord,
      !       ll,RunoffInten,
-     !       h_Stay_temp,h_Stay_Old,
+     !       h_Pond_temp,h_Pond_Old,
      !       q_Flux_temp,q_Flux_Node,q_Flux_Node_Old,q_Flux_Old,
      !       Efflux_Old, 
      !       RunoffLeft_old, RunoffRight_old,
      !       CriticalH_R_Sur,
      !       n_Stiff, g_accel,
      !       time_runoff_old,
-     !       FluxLimit, HeadLimit
+     !       FluxLimit, HeadLimit,
+     !       varbw_Runoff_Loc_Record,   
+     !       RunoffRight_Runoff_Loc_Record,
+     !       RunoffLeft_Runoff_Loc_Record,
+     !       Q_Runoff_Loc_Record
       
-      If (lInput.eq.1) then
+      If (lInput.eq.1) then 
 cccz Flat surface is 0, irregular surface is 1.
         FlatSurface=0
         time_runoff_old=time
@@ -70,6 +84,14 @@ c the basic usage of this portion is to provide an initialization
           
 cccz CriticalH_R is the assumed surface height of ponded water before free flow occur
         CriticalH_R=0.1D0
+cccz_this will be a new adjustment for runoff (mulch can hold more surface water)
+      if (residueApplied.le.0) then 
+         CriticalH_R=0.1D0  
+      else
+         CriticalH_R=mulchThick*WaterStorageFrac
+      endif  
+cccz_try
+c        CriticalH_R=5.0D0
           
 cccz CriticalH is for soil water module for 
         CriticalH=-0.01D0
@@ -79,24 +101,21 @@ cccz but we do not need a module number because this runoff process is always co
 cccz    ModNum=1
           
 cccz Initially, we do not request the weather update for each hour based on "SurWeatherUpdate"
-cccz But we actually do the weather update
+cccz But we actually do the weather update within the weather module, so remove such variable
 cccz Because the weather module make the first calculation during the initialization
-       SurWeatherUpdate=0
+
           
        do i=1,NumNPD
          RO(i)=0.0D0                 ! cccz: set the initial runoff from each soil node is zero
        enddo
           
        do i=1,NumBPD
-         VarBW_Record(i,1)=0.0D0     ! cccz this is to record the weather data, because the varBW will change based on runoff
-         VarBW_Record(i,2)=0.0D0
-         VarBW_Record(i,3)=0.0D0
-         h_Stay(i)=0.0D0             ! cccz: initially, there is no ponded water (surface runoff water)
+         h_Pond(i)=0.0D0             ! cccz: initially, there is no ponded water (surface runoff water)
          q_Flux(i)=0.0D0             ! cccz: initially, there is surface water flux                
-         h_Stay_temp(i)=0.0D0        ! cccz: zero ponded height during iteration
+         h_Pond_temp(i)=0.0D0        ! cccz: zero ponded height during iteration
          q_Flux_temp(i)=0.0D0        ! cccz: zero surface flux during iteration
          q_Flux_Node(i)=0.0D0        ! cccz: initialize zero surface flux based on each node
-         Efflux(i)=0.0D0             ! cccz: when h_stay>CriticalH_R_Sur, then there will be free water flux
+         Efflux(i)=0.0D0             ! cccz: when h_Pond>CriticalH_R_Sur, then there will be free water flux
          RunoffInten(i)=0.0D0        ! cccz: the runoff intensity, RunoffInten=RO/width
          CriticalH_R_Sur(i)=CriticalH_R  ! cccz: Surface ponded height limit before free water flux
          ll(i)=0.0D0
@@ -155,7 +174,7 @@ cccz
                 SurfNodeNodeIndexH(i+1)=KX(j,kk) 
               else
               if(abs(X(SurfNodeNodeIndexH(i))-X(KX(j,kk))).lt.Dist) then
-                 Dist=abs(X(SurfNodeNodeIndexH(i))-X(KX(j,kk)))                          
+                 Dist=abs(X(SurfNodeNodeIndexH(i))-X(KX(j,kk)))        
                  SurfNodeNodeIndexH(i+1)=KX(j,kk) 
               endif
               endif
@@ -212,6 +231,17 @@ cccz In the iteration we will not care about the error if the magnitude of the f
         ll(i)=sqrt((abs(slopeCoord(i,1)-slopeCoord(i+1,1))**2.0D0)
      &         +(abs(slopeCoord(i,2)-slopeCoord(i+1,2))**2.0D0))
       enddo
+      
+cccz record the surface temperature boundary condition
+      do i=1, SurNodeIndex
+        n=SurfNodeNodeIndexH(i) 
+        TmprBCRecord(i)=CodeT(n) 
+        GasBCRecord(i)=CodeG(n) 
+      enddo
+      
+      RunoffRight_Runoff_Loc_Record=RunoffRight
+      RunoffLeft_Runoff_Loc_Record=RunoffLeft
+      
                
       Endif
 cccz initialization finished here
@@ -223,9 +253,40 @@ cccz the simplist way is to track the time and do nothing if the time moves back
 
 cccz illustrate some return conditions
 cccz if the time step move backwards, return
-      if(time.lt.time_runoff_old) return
+      if(time.le.time_runoff_old) then
+          do n=1,SurNodeIndex
+            kk=SurfNodeSurfIndexH(n)
+            nn=SurfNodeNodeIndexH(n)
+            varbw(kk,1)=varbw_mulch(kk,1)
+            varbw(kk,2)=varbw_mulch(kk,2)
+            varbw(kk,3)=varbw_mulch(kk,3)
+            Q(nn)=-Width(kk)*VarBW_mulch(kk,3)
+          enddo    
+          RunoffRight=RunoffRight_Runoff_Loc_Record
+          RunoffLeft=RunoffLeft_Runoff_Loc_Record
+          time_runoff_old=time
+          return
+      endif
       
       time_runoff_old=time
+      
+      do n=1,SurNodeIndex
+          kk=SurfNodeSurfIndexH(n)
+          nn=SurfNodeNodeIndexH(n)
+          Q(nn)=-Width(kk)*VarBW_mulch(kk,3)
+      enddo          
+      
+      CriticalH_R=0.1D0 
+      if (residueApplied.le.0) then 
+         CriticalH_R=0.1D0  
+      else
+        if(mulchThick.ge.thresholdThick) then
+          CriticalH_R=mulchThick*WaterStorageFrac
+        else
+          CriticalH_R=0.1D0  
+        endif 
+      endif
+      
       
 cccz first save the data from previous step
 cccz and make initialization
@@ -235,17 +296,17 @@ cccz and make initialization
       do n=1,SurNodeIndex
         i=SurfNodeSurfIndexH(n)           ! NumBP based indices
         k=SurfNodeNodeIndexH(n)           ! NumP based indices
-        h_Stay_Old(n)=h_Stay(n)           ! Save the old ponded depth, h_Stay_Old is within this module
+        h_Pond_Old(n)=h_Pond(n)           ! Save the old ponded depth, h_Pond_Old is within this module
         q_Flux_Old(n)=q_Flux(n)           ! Save the old surface flux (not free one), q_Flux_Old is within this module
         Efflux_Old(n)=Efflux(n)           ! Save the old surface flux (free one), Efflux_Old is within this module
         q_Flux_Node_Old(n)=q_Flux_Node(n) ! Save the node flux (free one), q_Flux_Node_Old is within this module
         RunoffInten(n)=max(RO(k)/width(i),0.0D0)  ! calculate the runoff intensity, i.e. RO/width
-        CriticalH_R_Sur(n)=h_Stay(n)      ! The surface critical height is (at least) the ponded depth              
+        CriticalH_R_Sur(n)=h_Pond(n)      ! The surface critical height is (at least) the ponded depth              
         Exchange_V(n)=0.0D0               ! water exchange for smoothing process
         Check_Exchange_V(n)=0
-        FurtherCheck_h_Stay(n)=1   
+        FurtherCheck_h_Pond(n)=1   
 cccz made some addition to check
-        TotalhStay_test=TotalhStay_test+h_Stay(n)
+        TotalhStay_test=TotalhStay_test+h_Pond(n)
         TotalqFlux_test=TotalqFlux_test+q_Flux(n) 
         TotalR_test=TotalR_test+RunoffInten(n)
       enddo
@@ -256,46 +317,48 @@ cccz made some addition to check
      
       
 cccz when entering this module, first check if the weather need to be updated.
-cccz VarBW_Record records the "weather-based" input because "VarBW" should be changed when the runoff
+cccz Varbw_Air records the "weather-based" input because "VarBW" should be changed when the runoff
 cccz occurs, because watermov always take "VarBW" as the surface water flux.
-      If(SurWeatherUpdate.ge.1.or.lInput.eq.1) then
-       do i=1,NumBP
-         VarBW_Record(i,1)=VarBW(i,1)
-         VarBW_Record(i,2)=VarBW(i,2)
-         VarBW_Record(i,3)=VarBW(i,3)                     
-       enddo
+
           
 cccz we have to adjust the rainfall based on the normal direction/vertical direction
 cccz we always use the width, but for soil surface with slopes'
 cccz the rainfall should be based on horizontal "cross-sectional" surface
-cccz Dennis, think if this is necessary!!!
+cccz Dennis, think if this is necessary
 cccz for very small slope, this can be neglected
-      if(FlatSurface.ne.0) then    
+
+cccz ------------------------------------------------------------
+      if(FlatSurface.ne.0) then
        do n=1,SurNodeIndex
         i=SurfNodeSurfIndexH(n)
         if(n.eq.1) then
-          VarBW_Record(i,1)=VarBW_Record(i,1)*0.5D0*
+          Varbw_Mulch(i,1)=Varbw_Mulch(i,1)*0.5D0*
      &       (slopeCoord(2,1)-slopeCoord(1,1))/width(i)
         elseif(n.gt.1.and.n.lt.SurNodeIndex) then
-          VarBW_Record(i,1)=VarBW_Record(i,1)*0.5D0*
+          Varbw_Mulch(i,1)=Varbw_Mulch(i,1)*0.5D0*
      &       (slopeCoord(n+1,1)-slopeCoord(n-1,1))/width(i) 
         else
-          VarBW_Record(i,1)=VarBW_Record(i,1)*0.5D0*
+          Varbw_Mulch(i,1)=Varbw_Mulch(i,1)*0.5D0*
      &       (slopeCoord(n,1)-slopeCoord(n-1,1))/width(i)
         endif      
        enddo
-      endif
-          
-cccz this value will be changed in weather module
-cccz if the weather data is updated
-          SurWeatherUpdate=0
-      endif
+      endif 
+cccz ------------------------------------------------------------      
+      
       
 cccz the second by-pass condition   
 cccz there is no surface ponding water/surface flux, nor runoff (efflux) from soil
       if((TotalhStay_test.le.0.0D0)
      &   .and.(TotalqFlux_test.le.0.0D0)
-     &   .and.(TotalR_test.le.0.0D0)) return
+     &   .and.(TotalR_test.le.0.0D0)) then
+cccz resume the original surface temperature boundary condition (in case it is recovered from surface runoff)
+         do i=1, SurNodeIndex
+           n=SurfNodeNodeIndexH(i) 
+           CodeT(n)=TmprBCRecord(i)
+           CodeG(n)=GasBCRecord(i)
+         enddo  
+         return
+      endif
             
 c ******************************************************************************************          
 cccz Start the calculation
@@ -303,7 +366,7 @@ cccz Start the calculation
 cccz if we have simple surface, then calculate it separately
       if(FlatSurface.eq.0) goto 1200
           
-cccz need to evaluate criticalH_R for each node based on the hNew, horizontal/vertical distance, and h_Stay.
+cccz need to evaluate criticalH_R for each node based on the hNew, horizontal/vertical distance, and h_Pond.
 cccz the idea is look left-side, look right-side, see how large the "water pool" can be
       do n=1,SurNodeIndex
 cccz two boundary points do not need this setting,
@@ -330,7 +393,7 @@ cccz if "if condition" is true, k+1 “maybe” a local bounday for pools
 cccz but the pool now is so large that it can already pass the k+1 and 
 cccz go left further
 cccz so k+1 is not the left boundary of the pool we want
-              if(h_stay(k+1).gt.CriticalH_R) then                         
+              if(h_Pond(k+1).gt.CriticalH_R) then 
               else
                 BaseLeft=slopeCoord(k+1,2)   
                 xBaseLeft=slopeCoord(k+1,1)
@@ -359,7 +422,7 @@ cccz if this "if" is true, "k-1" is not the point we want
              else
 cccz if this "if" is true, "k-1" is already under water
 cccz need to look further on the right side
-               if(h_stay(k-1).gt.CriticalH_R) then                         
+               if(h_Pond(k-1).gt.CriticalH_R) then  
                else
                  BaseRight=slopeCoord(k-1,2)
                  xBaseRight=slopeCoord(k-1,1)
@@ -417,70 +480,68 @@ cccz          CriticalH_S=CriticalH-0.000001D0
           
 cccz start to solve the SV equations
 cccz We need some hard judgement for the unit, we use "cm" and "day" 
-          iteration_Num=0          
-1101      iteration_Flux=0
-          iteration_Head=0
-          RunoffLeft_temp=0.0D0
-          RunoffRight_temp=0.0D0
-          do i=1,NumBPD
-              h_Stay_temp(i)=0.0D0
-              q_Flux_temp(i)=0.0D0
-              q_Flux_Node(i)=0.0D0
-              Efflux(i)=0.0D0
-          enddo
-          RunoffLeft_Efflux=0.0D0
-          RunoffRight_Efflux=0.0D0
-
-          
-          do n=1,SurNodeIndex-1
+        iteration_Num=0          
+1101    iteration_Flux=0
+        iteration_Head=0
+        RunoffLeft_temp=0.0D0
+        RunoffRight_temp=0.0D0
+        do i=1,NumBPD
+          h_Pond_temp(i)=0.0D0
+          q_Flux_temp(i)=0.0D0
+          q_Flux_Node(i)=0.0D0
+          Efflux(i)=0.0D0
+        enddo
+        RunoffLeft_Efflux=0.0D0
+        RunoffRight_Efflux=0.0D0
+      
+        do n=1,SurNodeIndex-1
 cccz use iteration to partition the real runoff and amount of water stay 
 cccz take the absolute value of the slope to ensure the following calculation
-            Slope_0_R=abs((slopeCoord(n+1,2)-slopeCoord(n,2))
-     &                   /(slopeCoord(n,1)-slopeCoord(n+1,1)))
+          Slope_0_R=abs((slopeCoord(n+1,2)-slopeCoord(n,2))
+     &           /(slopeCoord(n,1)-slopeCoord(n+1,1)))
 cccz start the explicit version for the q_flux
 cccz we also check the right/left directions and made average for stability
-           if(h_Stay(n+1).eq.0) then
-              Slope_f_left=0.0D0
-           else
-              Slope_f_left=((n_Stiff*q_Flux(n))**2.0D0)
-     &           /(h_Stay(n+1)**(3.333D0))
-           endif
-           if(h_Stay(n).eq.0) then
-              Slope_f_right=0.0D0
-           else
-              Slope_f_right=((n_Stiff*q_Flux(n)**2.0D0)
-     &          /(h_Stay(n)**(3.333D0)))
-           endif
-           Slope_f=0.50D0*(Slope_f_left+Slope_f_right)
+          if(h_Pond(n+1).eq.0.0D0) then
+             Slope_f_left=0.0D0
+          else
+             Slope_f_left=((n_Stiff*q_Flux(n))**2.0D0)
+     &          /(h_Pond(n+1)**(3.333D0))
+          endif
+          if(h_Pond(n).eq.0.0D0) then
+             Slope_f_right=0.0D0
+          else
+             Slope_f_right=((n_Stiff*q_Flux(n)**2.0D0)
+     &         /(h_Pond(n)**(3.333D0)))
+          endif
+          Slope_f=0.50D0*(Slope_f_left+Slope_f_right)
 
 cccz now we calcualte the fluxes
 cccz start from the first (left) node
-           if(n.eq.1) then
+          if(n.eq.1) then
 cccz first determine the width between two point,
 cccz for the partial derivative along the edge.
 c            ll=sqrt((abs(slopeCoord(1,1)-slopeCoord(2,1))**2.0D0)
 c     &         +(abs(slopeCoord(1,2)-slopeCoord(2,2))**2.0D0))
 cccz Water will flow from node 1 to node 2
 cccz Always follow the upwind direction
-            if((slopeCoord(1,2)+h_Stay(1)).ge.
-     &         (slopeCoord(2,2)+h_Stay(2))) then
-             if(h_Stay(1).eq.0.0D0) then
-               q_flux_square=0.0D0
-               h_flux_square=10.0D0       ! arbitrary none-zero number here
-             else
-               q_flux_square=q_Flux(1)
-               h_flux_square=h_Stay(1)
-             endif
-
+           if((slopeCoord(1,2)+h_Pond(1)).ge.
+     &        (slopeCoord(2,2)+h_Pond(2))) then
+            if(h_Pond(1).eq.0.0D0) then
+              q_flux_square=0.0D0
+              h_flux_square=10.0D0       ! arbitrary none-zero number here
+            else
+              q_flux_square=q_Flux(1)
+              h_flux_square=h_Pond(1)
+            endif
 cccz we can see for values labeled "_Old" is used to store old data
 cccz which is not changed during the iteration
 cccz this setting will be also important if the time-scale varies
 cccz e.g., the mulch model
 
             q_Flux_temp(1)=q_Flux_Old(1)+
-     &         (-(q_flux_square**2.0D0)/h_flux_square/ll(1)             ! there is no flux on the left of left edge
-     &         +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)   
-     &         +g_accel*h_Stay(1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &         (-(q_flux_square**2.0D0)/h_flux_square/ll(1)      ! there is no flux on the left of left edge
+     &         +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1)
+     &         +g_accel*h_Pond(1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(1)=max(q_Flux_temp(1),0.0D0)
             
 cccz the direction implies runoff will not be discharged from the left side
@@ -488,73 +549,70 @@ cccz the direction implies runoff will not be discharged from the left side
            else
 cccz Water will flow from Node 2 to Node 1, momentum source from q_flux(2), between Node 2 and Node 3
 cccz this depends on whether Node 2 is a local maximum                   
-            if ((slopeCoord(2,2)+h_Stay(2)).ge.
-     &        (slopeCoord(3,2)+h_Stay(3))) then  
+            if ((slopeCoord(2,2)+h_Pond(2)).ge.
+     &        (slopeCoord(3,2)+h_Pond(3))) then  
      
 cccz now we calcualte water flow     
-             if(h_Stay(2).eq.0.0D0) then
+             if(h_Pond(2).eq.0.0D0) then
                q_flux_square=0.0D0
                h_flux_square=10.0D0                                   ! arbitrary number here
              else
                q_flux_square=q_Flux(1)
-               h_flux_square=h_Stay(2)
+               h_flux_square=h_Pond(2)
              endif
        
              q_Flux_temp(1)=q_Flux_Old(1)+
-     &          ((q_flux_square**2.0D0)/h_flux_square/ll(1)              ! there is no income momentum from q_flux(2)
-     &          +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)
-     &          -g_accel*h_Stay(2)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &          ((q_flux_square**2.0D0)/h_flux_square/ll(1)       ! there is no income momentum from q_flux(2)
+     &          +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1)
+     &          -g_accel*h_Pond(2)*max(Slope_0_R-Slope_f,0.0D0))*step
              q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
              
             else
 cccz in this case, there is momentum source from q_flux(2)                 
-             if(h_Stay(2).eq.0.0D0) then
+             if(h_Pond(2).eq.0.0D0) then
                q_flux_square1=0.0D0
                h_flux_square1=10.0D0                                  ! arbitrary number here
              else
                q_flux_square1=q_Flux(1)
-               h_flux_square1=h_Stay(2)
+               h_flux_square1=h_Pond(2)
              endif
-             if(h_Stay(3).eq.0.0D0) then
+             if(h_Pond(3).eq.0.0D0) then
                q_flux_square2=0.0D0
                h_flux_square2=10.0D0                                  ! arbitrary number here
              else
                q_flux_square2=q_Flux(2)
-               h_flux_square2=h_Stay(3)
+               h_flux_square2=h_Pond(3)
              endif
                      
              q_Flux_temp(1)=q_Flux_Old(1)+
      &         (((q_flux_square1**2.0D0)/h_flux_square1
      &              -(q_flux_square2**2.0D0)/h_flux_square2)/ll(1)
-     &         +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)           
-     &         -g_accel*h_Stay(2)*max(Slope_0_R-Slope_f,0.0D0))*step         
+     &         +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1) 
+     &         -g_accel*h_Pond(2)*max(Slope_0_R-Slope_f,0.0D0))*step 
              q_Flux_temp(1)=min(q_Flux_temp(1),0.0D0)
            endif
-
 cccz finish the calculation of q in the case Node 2 --> Node 1
 cccz then calculate the runoff from the left edge
-
-           if(h_Stay(1).eq.0.0D0) then
+           if(h_Pond(1).eq.0.0D0) then
              q_flux_leftrunoff=0.0D0
              h_flux_leftrunoff=10.0D0                                 ! arbitrary number here
            else
              q_flux_leftrunoff=RunoffLeft
-             h_flux_leftrunoff=h_Stay(1)
+             h_flux_leftrunoff=h_Pond(1)
            endif
-           if(h_Stay(2).eq.0.0D0) then
+           if(h_Pond(2).eq.0.0D0) then
              q_flux_square=0.0D0
              h_flux_square=10.0D0                                     ! arbitrary number here
            else
              q_flux_square=q_Flux(1)
-             h_flux_square=h_Stay(2)
+             h_flux_square=h_Pond(2)
            endif
-                  
            RunoffLeft_temp=RunoffLeft_old+
      &       (((q_flux_leftrunoff**2.0D0)/h_flux_leftrunoff
      &          -(q_flux_square**2.0D0)/h_flux_square)
      &          /width(SurfNodeSurfIndexH(n))
-     &       +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1) 
-     &       -g_accel*h_Stay(1)*max(Slope_0_R-Slope_f,0.0D0))*step 
+     &       +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1) 
+     &       -g_accel*h_Pond(1)*max(Slope_0_R-Slope_f,0.0D0))*step 
            RunoffLeft_temp=min(RunoffLeft_temp,0.0D0)
           endif
 
@@ -566,50 +624,50 @@ cccz first calculate the
 c          ll=sqrt(abs(slopeCoord(n,1)-slopeCoord(n+1,1))**2.0D0
 c     &      +abs(slopeCoord(n,2)-slopeCoord(n+1,2))**2.0D0)
      
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
 cccz water will flow from Node n -> n+1, right-bound, momentun source may from n-1?
 cccz always follow the upwind direction 
 cccz in the first case, Node n is the local peak s.t. no momentun from the left side 
-           if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &        (slopeCoord(n-1,2)+h_Stay(n-1))) then   
+           if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &        (slopeCoord(n-1,2)+h_Pond(n-1))) then   
 cccz the momentum is only from the current slope section, i.e., n
-            if(h_Stay(n).eq.0.0D0) then
+            if(h_Pond(n).eq.0.0D0) then
               q_flux_square=0.0D0
               h_flux_square=10.0D0                                    ! arbitrary none-zero number here
             else
               q_flux_square=q_Flux(n)
-              h_flux_square=h_Stay(n)
+              h_flux_square=h_Pond(n)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        (-(q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
            
            else
 cccz the momentum is from the left side, i.e., n-1                  
-            if(h_Stay(n).eq.0.0D0) then
+            if(h_Pond(n).eq.0.0D0) then
               q_flux_square1=0.0D0
               h_flux_square1=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square1=q_Flux(n)
-              h_flux_square1=h_Stay(n)
+              h_flux_square1=h_Pond(n)
             endif
-            if(h_Stay(n-1).eq.0.0D0) then
+            if(h_Pond(n-1).eq.0.0D0) then
               q_flux_square2=0.0D0
               h_flux_square2=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square2=q_Flux(n-1)
-              h_flux_square2=h_Stay(n-1)
+              h_flux_square2=h_Pond(n-1)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        ((-(q_flux_square1**2.0D0)/h_flux_square1
      &           +(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step  
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step  
             q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
            endif
          else
@@ -617,44 +675,44 @@ cccz Water will flow from Node n+1 -> n, momentun source of q_Flux(n+1)?
 cccz always follow the upwind direction 
 cccz now we assume n+1 is a local maximum, so no water flow Node n+2->n+1
 cccz thus, there is no external momentum from q_Flux(n+1), which should be in an opposite direction
-           if((slopeCoord(n+1,2)+h_Stay(n+1)).ge.
-     &        (slopeCoord(n+2,2)+h_Stay(n+2))) then
-             if(h_Stay(n+1).eq.0.0D0) then
+           if((slopeCoord(n+1,2)+h_Pond(n+1)).ge.
+     &        (slopeCoord(n+2,2)+h_Pond(n+2))) then
+             if(h_Pond(n+1).eq.0.0D0) then
                q_flux_square=0.0D0
                h_flux_square=10.0D0                                    ! arbitrary none-zero number here
              else
                q_flux_square=q_Flux(n)
-               h_flux_square=h_Stay(n+1)
+               h_flux_square=h_Pond(n+1)
              endif
                                          
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        ((q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        -g_accel*h_Stay(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        -g_accel*h_Pond(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
            else    
 cccz now we assume n+2 is higher than n+1
 cccz thus, there is external momentum from q_Flux(n+1), from Node n+2
-            if(h_Stay(n+1).eq.0.0D0) then
+            if(h_Pond(n+1).eq.0.0D0) then
               q_flux_square1=0.0D0
               h_flux_square1=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square1=q_Flux(n)
-              h_flux_square1=h_Stay(n+1)
+              h_flux_square1=h_Pond(n+1)
             endif
-            if(h_Stay(n+2).eq.0.0D0) then
+            if(h_Pond(n+2).eq.0.0D0) then
               q_flux_square2=0.0D0
               h_flux_square2=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square2=q_Flux(n+1)
-              h_flux_square2=h_Stay(n+2)
+              h_flux_square2=h_Pond(n+2)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        (((q_flux_square1**2.0D0)/h_flux_square1
      &           -(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &       -g_accel*h_Stay(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &       -g_accel*h_Pond(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
                      
           endif
@@ -668,74 +726,74 @@ c     &      +(abs(slopeCoord(n,2)-slopeCoord(n+1,2))**2.0D0))
              
 cccz Finish the calculation for n=SurNodeIndex-1
 cccz or in other words, we have "n=SurNodeIndex-1" here, so you will not see "n+2"
-         if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
+         if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
 cccz water flow to the end point n=SurNodeIndex, need to calculate the momentun from n-2?
 cccz n=SurNodeIndex-1 is the local maxima, no water flux from left side 
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &        (slopeCoord(n-1,2)+h_Stay(n-1))) then 
-           if(h_Stay(n).eq.0.0D0) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &        (slopeCoord(n-1,2)+h_Pond(n-1))) then 
+           if(h_Pond(n).eq.0.0D0) then
              q_flux_square=0.0D0
              h_flux_square=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square=q_Flux(n)
-             h_flux_square=h_Stay(n)
+             h_flux_square=h_Pond(n)
            endif
                        
            q_Flux_temp(n)=q_Flux_Old(n)+
      &        (-(q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
            q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
           else
 cccz n=SurNodeIndex-2 is higher, water flux from left side                   
-           if(h_Stay(n).eq.0.0D0) then
+           if(h_Pond(n).eq.0.0D0) then
              q_flux_square1=0.0D0
              h_flux_square1=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square1=q_Flux(n)
-             h_flux_square1=h_Stay(n)
+             h_flux_square1=h_Pond(n)
            endif    
-           if(h_Stay(n-1).eq.0.0D0) then
+           if(h_Pond(n-1).eq.0.0D0) then
              q_flux_square2=0.0D0
              h_flux_square2=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square2=q_Flux(n-1)
-             h_flux_square2=h_Stay(n-1)
+             h_flux_square2=h_Pond(n-1)
            endif
                   
            q_Flux_temp(n)=q_Flux_Old(n)+
      &       ((-(q_flux_square1**2.0D0)/h_flux_square1
      &           +(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &       +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &       +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
            q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
           endif
 
 cccz in this case, runoff discharge on the right hand side occurs
 cccz this calculation should be processed based on the SV equation
-          if(h_Stay(n+1).eq.0.0D0) then
+          if(h_Pond(n+1).eq.0.0D0) then
             q_flux_runoffright=0.0D0
             h_flux_runoffright=10.0D0       ! arbitrary number here
           else
             q_flux_runoffright=RunoffRight
-            h_flux_runoffright=h_Stay(SurNodeIndex)
+            h_flux_runoffright=h_Pond(SurNodeIndex)
           endif    
-          if(h_Stay(n).eq.0.0D0) then
+          if(h_Pond(n).eq.0.0D0) then
             q_flux_square=0.0D0
             h_flux_square=10.0D0       ! arbitrary number here
           else
             q_flux_square=q_Flux(n)
-            h_flux_square=h_Stay(n)
+            h_flux_square=h_Pond(n)
           endif                  
 
           RunoffRight_temp=RunoffRight_old+
      &      ((-(q_flux_runoffright**2.0D0)/h_flux_runoffright
      &         +(q_flux_square**2.0D0)/h_flux_square)
      &         /width(SurfNodeSurfIndexH(SurNodeIndex))
-     &      +0.5D0*g_accel*(h_Stay(n)**2.0D0
-     &         -h_Stay(SurNodeIndex)**2.0D0)/ll(n) 
-     &      +g_accel*h_Stay(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
+     &      +0.5D0*g_accel*(h_Pond(n)**2.0D0
+     &         -h_Pond(SurNodeIndex)**2.0D0)/ll(n) 
+     &      +g_accel*h_Pond(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
      &         *step 
           RunoffRight_temp=max(RunoffRight_temp,0.0D0)
                              
@@ -745,19 +803,19 @@ cccz water flow to from Node SurNodeIndex -> SurNodeIndex-1
 cccz in this case, no right runoff discharge
 cccz also, a good news is there is no right-hand node, thus, no external momentum source
 
-          if(h_Stay(n+1).eq.0.0D0) then
+          if(h_Pond(n+1).eq.0.0D0) then
             q_flux_square=0.0D0
             h_flux_square=10.0D0       ! arbitrary number here
           else
             q_flux_square=q_Flux(n)
-            h_flux_square=h_Stay(SurNodeIndex)
+            h_flux_square=h_Pond(SurNodeIndex)
           endif
 
           q_Flux_temp(n)=q_Flux_Old(n)+
      &       ((q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0
-     &          -h_Stay(SurNodeIndex)**2.0D0)/ll(n) 
-     &       -g_accel*h_Stay(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0
+     &          -h_Pond(SurNodeIndex)**2.0D0)/ll(n) 
+     &       -g_accel*h_Pond(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
      &          *step
           q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
           RunoffRight_temp=0.0D0
@@ -773,25 +831,25 @@ cccz so after solving the SV equation, we need additional processes
         i=SurfNodeSurfIndexH(n)
         k=SurfNodeNodeIndexH(n)
         if(n.eq.1) then
-         h_Stay_temp(1)=h_Stay_Old(1)+step*
+         h_Pond_temp(1)=h_Pond_Old(1)+step*
      &     ((-q_Flux_temp(1)+RunoffLeft_temp)/width(i)+RunoffInten(1))
-         h_Stay_temp(1)=max(h_Stay_temp(1),0.0D0)
+         h_Pond_temp(1)=max(h_Pond_temp(1),0.0D0)
 
 cccz calculate the amound of efflux -- which means "free flux"         
-         if((slopeCoord(1,2)+h_Stay(1)).le.
-     &      (slopeCoord(2,2)+h_Stay(2))) then
-           if(h_Stay_temp(1).gt.CriticalH_R_Sur(1)) then
+         if((slopeCoord(1,2)+h_Pond(1)).le.
+     &      (slopeCoord(2,2)+h_Pond(2))) then
+           if(h_Pond_temp(1).gt.CriticalH_R_Sur(1)) then
 cccz for boundary point, it is easy
-cccz the h_stay should not exceed criticalH_R
+cccz the h_Pond should not exceed criticalH_R
              RunoffLeft_Efflux=RunoffLeft_Efflux
-     &         -(h_Stay_temp(1)-CriticalH_R_Sur(1))*width(i)/step
-             h_Stay_temp(1)=min(h_Stay_temp(1),CriticalH_R_Sur(1))
+     &         -(h_Pond_temp(1)-CriticalH_R_Sur(1))*width(i)/step
+             h_Pond_temp(1)=min(h_Pond_temp(1),CriticalH_R_Sur(1))
            endif
          else
-           if(h_Stay_temp(1).gt.CriticalH_R_Sur(1)) then
+           if(h_Pond_temp(1).gt.CriticalH_R_Sur(1)) then
              Efflux(1)=Efflux(1)
-     &         +(h_Stay_temp(1)-CriticalH_R_Sur(1))*width(i)/step
-             h_Stay_temp(1)=min(h_Stay_temp(1),CriticalH_R_Sur(1))
+     &         +(h_Pond_temp(1)-CriticalH_R_Sur(1))*width(i)/step
+             h_Pond_temp(1)=min(h_Pond_temp(1),CriticalH_R_Sur(1))
              RunoffLeft_temp=0.0D0
              RunoffLeft_Efflux=0.0D0
            endif 
@@ -799,35 +857,35 @@ cccz the h_stay should not exceed criticalH_R
          
 cccz for the interior nodes, the efflux could be left/right/outwards/inwards
         elseif(n.gt.1.and.n.lt.SurNodeIndex) then
-          h_Stay_temp(n)=h_Stay_Old(n)+step*
+          h_Pond_temp(n)=h_Pond_Old(n)+step*
      &      ((-q_Flux_temp(n)+q_Flux_temp(n-1))/width(i)+RunoffInten(n))
-          h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)     
+          h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)     
 
-          if((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
+          if((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
 cccz Previuos time step will not take care of EFFlux(n-1)
-           if((slopeCoord(n,2)+h_Stay(n)).le.
-     &        (slopeCoord(n+1,2)+h_Stay(n+1))) then
+           if((slopeCoord(n,2)+h_Pond(n)).le.
+     &        (slopeCoord(n+1,2)+h_Pond(n+1))) then
 
 cccz in this geometry, water will flow left in "n"             
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                Efflux(n-1)=Efflux(n-1)
-     &           -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n)) 
+     &           -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n)) 
              endif
 
 cccz in this geometry, water will flow outwards like "/\" 
 cccz but how the runoff partitioned to left/right sides
            else
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz first calculate all avail runoff water
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
 cccz calculate left/right slope
-              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Stay(n-1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Pond(n-1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n-1,1)))
-              Slope_0_n=abs(((slopeCoord(n+1,2)+h_stay(n+1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+              Slope_0_n=abs(((slopeCoord(n+1,2)+h_Pond(n+1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n+1,1)))
 cccz use the slope to determine the fraction
               Fraction_n_1=Slope_0_n_1/(Slope_0_n_1+Slope_0_n)
@@ -835,29 +893,29 @@ cccz use the slope to determine the fraction
 cccz calculate the Efflux based on the fraction
               Efflux(n-1)=Efflux(n-1)-Fraction_n_1*Add_Flux
               Efflux(n)=Efflux(n)+Fraction_n*Add_Flux
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
              endif
            endif
-         elseif((slopeCoord(n,2)+h_Stay(n)).lt.
-     &     (slopeCoord(n-1,2)+h_Stay(n-1))) then
+         elseif((slopeCoord(n,2)+h_Pond(n)).lt.
+     &     (slopeCoord(n-1,2)+h_Pond(n-1))) then
 cccz The q_Flux(n-1) are taken cared by previous steps, then just calculate new q_Flux(n)
 cccz if and only if q_Flux(n)>0
 cccz i.e., calculate rightwards efflux on the rightside
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               Efflux(n)=Efflux(n)
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
             endif
 cccz here we deal with a special case -- a valley
 cccz if there is a valley, the efflux water will not go anywhere,
 cccz but we should record it and be prepared to add it as water input for the next iteration
           else
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              q_Flux_Node(n)=(h_Stay_temp(n)-CriticalH_R_Sur(n))
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              q_Flux_Node(n)=(h_Pond_temp(n)-CriticalH_R_Sur(n))
      &           *width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
             endif
           endif
 
@@ -865,27 +923,27 @@ cccz now the elevation of the water level @ Node n and Node n-1
 cccz was the same.
 
          else
-           if((slopeCoord(n,2)+h_Stay(n)).lt.
-     &       (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           if((slopeCoord(n,2)+h_Pond(n)).lt.
+     &       (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz the rightside is higher, momentum points leftwards
               Efflux(n-1)=Efflux(n-1)
-     &           -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))   
+     &           -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))   
             endif
-           elseif((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           elseif((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz the rightside is lower, momentum points rightwards
               Efflux(n)=Efflux(n)
-     &          +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n)) 
+     &          +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n)) 
             endif
            else
 cccz totally flat  
 cccz first record the potential efflux quantity
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
 cccz need to refer the momentum from previous step
               if(Efflux_old(n-1).gt.0.0D0) then
                if(Efflux_old(n).ge.0.0D0) then
@@ -913,30 +971,30 @@ cccz                  Efflux(n)=Efflux(n)+0.50D0*Add_Flux
                   q_Flux_Node(n)=q_Flux_Node(n)+Add_Flux/3.0D0
                endif
               endif
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
              endif
            endif
           endif
                 
-cccz finally, we calcualte the h_stay for the right-most point
+cccz finally, we calcualte the h_Pond for the right-most point
          else
-          h_Stay_temp(n)=h_Stay_Old(n)+step*
+          h_Pond_temp(n)=h_Pond_Old(n)+step*
      &    ((-RunoffRight_temp+q_Flux_temp(n-1))/width(i)+RunoffInten(n))
-          h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
+          h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
 cccz right runoff discharge case
-          if((slopeCoord(n,2)+h_Stay(n)).le.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          if((slopeCoord(n,2)+h_Pond(n)).le.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                RunoffRight_Efflux=RunoffRight_Efflux
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))    
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))    
             endif
-          elseif((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          elseif((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               Efflux(n-1)=Efflux(n-1)
-     &          -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+     &          -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
               RunoffRight_temp=0.0D0
               RunoffRight_Efflux=0.0D0
             endif
@@ -957,8 +1015,9 @@ cccz take average between the current iteration and previous iteration steps to 
        do n=1,SurNodeIndex
          q_Flux_temp(n)=q_Flux_temp(n)/iteration_Num+
      &     (iteration_Num-1)*q_Flux(n)/iteration_Num
-         h_Stay_temp(n)=h_Stay_temp(n)/iteration_Num+
-     &     (iteration_Num-1)*h_Stay(n)/iteration_Num
+         h_Pond_temp(n)=h_Pond_temp(n)/iteration_Num+
+     &     (iteration_Num-1)*h_Pond(n)/iteration_Num
+         h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
        enddo
        RunoffRight_temp=RunoffRight_temp/iteration_Num+
      &   (iteration_Num-1)*RunoffRight/iteration_Num
@@ -969,8 +1028,8 @@ cccz take average between the current iteration and previous iteration steps to 
         if(abs(q_Flux_temp(n)-q_Flux(n)).gt.0.01*abs(q_Flux(n))) then
           if(abs(q_Flux_temp(n)).gt.FluxLimit)  iteration_Flux=1
         endif
-        if(abs(h_Stay_temp(n)-h_Stay(n)).gt.0.01*abs(h_Stay(n))) then
-          if(abs(h_Stay_temp(n)).gt.HeadLimit)  iteration_Head=1
+        if(abs(h_Pond_temp(n)-h_Pond(n)).gt.0.01*abs(h_Pond(n))) then
+          if(abs(h_Pond_temp(n)).gt.HeadLimit)  iteration_Head=1
         endif
        enddo
           
@@ -985,7 +1044,7 @@ cccz take average between the current iteration and previous iteration steps to 
        if (iteration_Flux.eq.1.or.iteration_Head.eq.1) then
         do n=1,SurNodeIndex
           q_Flux(n)=q_Flux_temp(n)
-          h_Stay(n)=h_Stay_temp(n)
+          h_Pond(n)=h_Pond_temp(n)
         enddo
           RunoffLeft=RunoffLeft_temp
           RunoffRight=RunoffRight_temp
@@ -993,80 +1052,45 @@ cccz take average between the current iteration and previous iteration steps to 
        else
         do n=1,SurNodeIndex
           q_Flux(n)=q_Flux_temp(n)
-          h_Stay(n)=h_Stay_temp(n)
-          FurtherCheck_h_Stay(n)=1
+          h_Pond(n)=h_Pond_temp(n)
+          FurtherCheck_h_Pond(n)=1
         enddo
         RunoffLeft=RunoffLeft_temp
         RunoffRight=RunoffRight_temp
        endif
 
-cccz Now we already solve the SV equation
-cccz assign the flux as water input at each node
-cccz for regular grid, the program can be ended here, after some arrangement
 
-cccz ask a question, why use "Efflux_Old" here
-c       do n=1,SurNodeIndex
-c         if (n.eq.1) then
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      -min(q_Flux(n)+Efflux_Old(n),0.0D0)
-c     &      +max(RunoffLeft+RunoffLeft_Efflux_Old,0.0D0)
-c         elseif (n.gt.1.and.n.lt.SurNodeIndex) then
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      +max(q_Flux(n-1)+Efflux_Old(n-1),0.0D0)
-c     &      -min(q_Flux(n)+Efflux_Old(n),0.0D0)
-c         else
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      +max(q_Flux(n-1)+Efflux_Old(n-1),0.0D0)
-c     &      -min(RunoffRight+RunoffRight_Efflux_Old,0.0D0)
-c         endif
-c       enddo
-cccz the q_flux_node here is redundant calculation
-c        do n=1,SurNodeIndex
-c         if (n.eq.1) then
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      -min(q_Flux(n)+Efflux(n),0.0D0)
-c     &      +max(RunoffLeft+RunoffLeft_Efflux,0.0D0)
-c         elseif (n.gt.1.and.n.lt.SurNodeIndex) then
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      +max(q_Flux(n-1)+Efflux(n-1),0.0D0)
-c     &      -min(q_Flux(n)+Efflux(n),0.0D0)
-c         else
-c          q_Flux_Node(n)=q_Flux_Node(n)
-c     &      +max(q_Flux(n-1)+Efflux(n-1),0.0D0)
-c     &      -min(RunoffRight+RunoffRight_Efflux,0.0D0)
-c         endif
-c       enddo
 cccz ask a question, why use "q_Flux_Node_Old" here?
        do n=1,SurNodeIndex
 c         k=SurfNodeNodeIndexH(n)              ! for index in the whole node set
 c         i=SurfNodeSurfIndexH(n)              ! for index in the boundary node set
-c         VarBW(i,1)=VarBW_Record(i,1)+q_Flux_Node_Old(n)/width(i)
-c         VarBW(i,3)=VarBW_Record(i,2)-VarBW(i,1)                 
+c         VarBW(i,1)=Varbw_Mulch(i,1)+q_Flux_Node_Old(n)/width(i)
+c         VarBW(i,3)=Varbw_Mulch(i,2)-VarBW(i,1)                 
 c         Q(k)=-Width(i)*VarBW(i,3)                   
 
 cccz there is more water can be used to redistribute/infiltration         
-        if(h_Stay(n).ge.h_Stay_Old(n).and.h_Stay(n).ge.CriticalH_R) then
-          FurtherCheck_h_Stay(n)=1
+        if(h_Pond(n).ge.h_Pond_Old(n).and.h_Pond(n).ge.CriticalH_R) then
+          FurtherCheck_h_Pond(n)=1
         else
-          FurtherCheck_h_Stay(n)=0
+          FurtherCheck_h_Pond(n)=0
         endif
        enddo
 
-cccz need to further check h_Stay(n)
-cccz fix a good h_Stay value based on the topology of the domain
+cccz need to further check h_Pond(n)
+cccz fix a good h_Pond value based on the topology of the domain
        iteration_Num=0.0D0
-1105    do n=1,NumBPD
-         Exchange_V_temp(n)=0.0D0
-         Check_Exchange_V(n)=0
+1105   do n=1,NumBPD
+        Exchange_V_temp(n)=0.0D0
+        Check_Exchange_V(n)=0
        enddo
 cccz the boundary points does not need to checked, because there is always runoff discharge
 cccz the internal points need to be checked "pool-by-pool"
        do n=2,SurNodeIndex-1
-         if(FurtherCheck_h_Stay(n).eq.1) then
+         if(FurtherCheck_h_Pond(n).eq.1) then
 cccz record the water level on the left/self/right          
-           H_L=slopeCoord(n-1,2)+h_Stay(n-1)
-           H_M=slopeCoord(n,2)+h_Stay(n)
-           H_R=slopeCoord(n+1,2)+h_Stay(n+1)
+           H_L=slopeCoord(n-1,2)+h_Pond(n-1)
+           H_M=slopeCoord(n,2)+h_Pond(n)
+           H_R=slopeCoord(n+1,2)+h_Pond(n+1)
 cccz record the scale of width to the left/right node
            if(n.eq.2) then
             L_L=0.5*(slopeCoord(n,1)-slopeCoord(n-1,1))
@@ -1084,14 +1108,14 @@ cccz valley case @ n
             Ava_Height=(H_R*L_R+H_L*L_L+H_M*L_M)/(L_R+L_L+L_M)    
 cccz the amount of water need for the middle node
             Volume=max((Ava_Height-
-     &         (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &         (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
 cccz check avaliable water from both sides
-cccz ask a question, here try to use "min((h_Stay_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
-c            Ava_Volume_L=(h_Stay_temp(n-1)-CriticalH_R)*L_L
-c            Ava_Volume_R=(h_Stay_temp(n+1)-CriticalH_R)*L_R
-            Ava_Volume_L=min((h_Stay_temp(n-1)-CriticalH_R),
+cccz ask a question, here try to use "min((h_Pond_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
+c            Ava_Volume_L=(h_Pond_temp(n-1)-CriticalH_R)*L_L
+c            Ava_Volume_R=(h_Pond_temp(n+1)-CriticalH_R)*L_R
+            Ava_Volume_L=min((h_Pond_temp(n-1)-CriticalH_R),
      &         (H_L-Ava_Height))*L_L
-            Ava_Volume_R=min((h_Stay_temp(n+1)-CriticalH_R),
+            Ava_Volume_R=min((h_Pond_temp(n+1)-CriticalH_R),
      &         (H_R-Ava_Height))*L_R
             Ava_Volume=Ava_Volume_L+Ava_Volume_R
 cccz there is enough water 
@@ -1120,7 +1144,7 @@ cccz this process focused on the computing stability
             if(Exchange_V_temp(n-1).lt.0.0D0) then
               Exchange_V_temp(n-1)=max(Exchange_V_temp(n-1),Volume_L)
             else
-              Exchange_V_temp(n-1)=min(Exchange_V_temp(n-1),Volume_L)     
+              Exchange_V_temp(n-1)=min(Exchange_V_temp(n-1),Volume_L)
             endif
            endif
            if(Check_Exchange_V(n).eq.0) then
@@ -1130,7 +1154,7 @@ cccz this process focused on the computing stability
             if(Exchange_V_temp(n).lt.0.0D0) then
               Exchange_V_temp(n)=max(Exchange_V_temp(n),-Volume_R)
             else
-              Exchange_V_temp(n)=min(Exchange_V_temp(n),-Volume_R)                   
+              Exchange_V_temp(n)=min(Exchange_V_temp(n),-Volume_R)     
             endif
            endif
 cccz this case indicate a leftwards slope     
@@ -1148,17 +1172,17 @@ cccz convex shape or concave shape
             endif
 cccz how much water I need
             Volume_L=max((Ava_Height_L-
-     &        (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &        (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
 cccz how much I have
             Volume_L=min(Volume_L,
-     &        max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_L,
-     &        h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &        max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_L,
+     &        h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
 cccz similar idea to the left side     
             Volume_R=max((Ava_Height_R-
-     &        (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &        (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
             Volume_R=min(Volume_R,
-     &        max(min(slopeCoord(n+1,2)+h_Stay_temp(n+1)-Ava_Height_R,
-     &        h_Stay_temp(n+1)-CriticalH_R)*L_R,0.0D0))
+     &        max(min(slopeCoord(n+1,2)+h_Pond_temp(n+1)-Ava_Height_R,
+     &        h_Pond_temp(n+1)-CriticalH_R)*L_R,0.0D0))
                        
             if(Check_Exchange_V(n-1).eq.0) then
               Exchange_V_temp(n-1)=-Volume_L
@@ -1197,15 +1221,15 @@ cccz rightwards slope
             endif
           
             Volume_R=max((Ava_Height_R-
-     &        (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &        (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
             Volume_R=min(Volume_R,
-     &        max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_R,
-     &        h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &        max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_R,
+     &        h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
             Volume_L=max((Ava_Height_L-
-     &        (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &        (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
             Volume_L=min(Volume_L,
-     &        max(min(slopeCoord(n-1,2)+h_Stay_temp(n-1)-Ava_Height_L,
-     &        h_Stay_temp(n-1)-CriticalH_R)*L_L,0.0D0))
+     &        max(min(slopeCoord(n-1,2)+h_Pond_temp(n-1)-Ava_Height_L,
+     &        h_Pond_temp(n-1)-CriticalH_R)*L_L,0.0D0))
                        
             if(Check_Exchange_V(n-1).eq.0) then
               Exchange_V_temp(n-1)=Volume_L
@@ -1244,16 +1268,16 @@ cccz now we do the peak
             endif
                   
             Volume_L=max((Ava_Height_L-
-     &        (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &        (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
             Volume_R=max((Ava_Height_R-
-     &        (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &        (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
 cccz the total volume we need     
             Volume_T=Volume_L+Volume_R
 cccz the total volume we have
             Volume=min(Volume_T,
-     &        max(min(slopeCoord(n,2)+h_Stay_temp(n)-
+     &        max(min(slopeCoord(n,2)+h_Pond_temp(n)-
      &                min(Mean_Height_L,Mean_Height_R),
-     &        h_Stay_temp(n)-CriticalH_R)*L_L,0.0D0))
+     &        h_Pond_temp(n)-CriticalH_R)*L_L,0.0D0))
      
             if(Volume_T.eq.0.0D0) then
             else
@@ -1304,24 +1328,24 @@ cccz similar to the Exchange_V_temp(n), which cannot be <0
          endif
           
          if(n.eq.1) then
-           h_Stay_temp(n)=h_Stay_temp(n)-Exchange_V_temp(n)/L_M
-           if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           h_Pond_temp(n)=h_Pond_temp(n)-Exchange_V_temp(n)/L_M
+           if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
             RunoffLeft_Efflux=RunoffLeft_Efflux
-     &       -(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-            h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &       -(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+            h_Pond_temp(n)=CriticalH_R_Sur(n)
            endif
          elseif(n.eq.SurNodeIndex) then
-           h_Stay_temp(n)=h_Stay_temp(n)+Exchange_V_temp(n-1)/L_M
-           if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           h_Pond_temp(n)=h_Pond_temp(n)+Exchange_V_temp(n-1)/L_M
+           if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
             RunoffRight_Efflux=RunoffRight_Efflux
-     &        +(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-            h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &        +(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+            h_Pond_temp(n)=CriticalH_R_Sur(n)
            endif
          else
-           h_Stay_temp(n)=h_Stay_temp(n)+(Exchange_V_temp(n-1)
+           h_Pond_temp(n)=h_Pond_temp(n)+(Exchange_V_temp(n-1)
      &        -Exchange_V_temp(n))/L_M          
          endif             
-         error=max(error,abs(h_Stay_temp(n)-h_Stay(n)))          
+         error=max(error,abs(h_Pond_temp(n)-h_Pond(n)))          
         enddo
 cccz finish update the water level after post-adjustment (one iteration)     
         iteration_Num=iteration_Num+1
@@ -1336,49 +1360,49 @@ cccz should not use
 cccz try the two way and think about it
 cccz doable in the way without average, but for final calculation, have to use the one without average
 cccz since mass balance has to be processed.
-cccz      h_Stay(n)=(h_Stay_temp(n)+h_Stay(n)*(iteration_Num-1))/iteration_Num
-         h_Stay(n)=h_Stay_temp(n)
+cccz      h_Pond(n)=(h_Pond_temp(n)+h_Pond(n)*(iteration_Num-1))/iteration_Num
+         h_Pond(n)=h_Pond_temp(n)
          Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
         enddo
-        h_Stay(1)=CriticalH_R_Sur(1)
-        h_Stay(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
+        h_Pond(1)=CriticalH_R_Sur(1)
+        h_Pond(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
         goto 1105
        else
         do n=1,SurNodeIndex
-          h_Stay(n)=h_Stay_temp(n)
+          h_Pond(n)=h_Pond_temp(n)
           Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
         enddo
        endif
           
-cccz after the h_Stay adjustment, we should have a better idea of CriticalH_R_Sur
+cccz after the h_Pond adjustment, we should have a better idea of CriticalH_R_Sur
 cccz now set the new CriticalH_R_Sur
-cccz and we should make h_stay and flux calculation based on the new CriticalH_R_Sur
+cccz and we should make h_Pond and flux calculation based on the new CriticalH_R_Sur
        do n=1,SurNodeIndex
-         CriticalH_R_Sur(n)=max(h_Stay(n),CriticalH_R)
+         CriticalH_R_Sur(n)=max(h_Pond(n),CriticalH_R)
          Efflux(n)=0.0D0
          q_Flux_Node(n)=0.0D0
        enddo
           
        do n=2,SurNodeIndex-1
          k=SurfNodeNodeIndexH(n)
-cccz         H_L=slopeCoord(n-1,2)+h_Stay_temp(n-1)
-cccz         H_M=slopeCoord(n,2)+h_Stay_temp(n)
-cccz         H_R=slopeCoord(n+1,2)+h_Stay_temp(n+1)
-         H_L=slopeCoord(n-1,2)+h_Stay(n-1)
-         H_M=slopeCoord(n,2)+h_Stay(n)
-         H_R=slopeCoord(n+1,2)+h_Stay(n+1)
+cccz         H_L=slopeCoord(n-1,2)+h_Pond_temp(n-1)
+cccz         H_M=slopeCoord(n,2)+h_Pond_temp(n)
+cccz         H_R=slopeCoord(n+1,2)+h_Pond_temp(n+1)
+         H_L=slopeCoord(n-1,2)+h_Pond(n-1)
+         H_M=slopeCoord(n,2)+h_Pond(n)
+         H_R=slopeCoord(n+1,2)+h_Pond(n+1)
         if(H_M.lt.H_L.and.H_M.lt.H_R) then
          CriticalH_R_Sur(n)=(H_L*(slopeCoord(n+1,1)-slopeCoord(n,1))
      &    +H_R*(slopeCoord(n,1)-slopeCoord(n-1,1)))
      &    /(slopeCoord(n+1,1)-slopeCoord(n-1,1))-slopeCoord(n,2)
 cccz the volume water needed at the center point to reach maximum volume 
-         DeltaVolume=(max(slopeCoord(n-1,2)+h_Stay(n-1),
-     &     slopeCoord(n+1,2)+h_Stay(n+1))-(slopeCoord(n,2)+h_Stay(n)))
+         DeltaVolume=(max(slopeCoord(n-1,2)+h_Pond(n-1),
+     &     slopeCoord(n+1,2)+h_Pond(n+1))-(slopeCoord(n,2)+h_Pond(n)))
      &     *0.5D0*(slopeCoord(n+1,1)-slopeCoord(n-1,1))               
 cccz the runoff @ this point is enough to support is amount of water     
          if(DeltaVolume/step.lt.RO(k)) then
-          CriticalH_R_Sur(n)=max(slopeCoord(n-1,2)+h_Stay(n-1),
-     &     slopeCoord(n+1,2)+h_Stay(n+1))-slopeCoord(n,2)
+          CriticalH_R_Sur(n)=max(slopeCoord(n-1,2)+h_Pond(n-1),
+     &     slopeCoord(n+1,2)+h_Pond(n+1))-slopeCoord(n,2)
          endif
         endif
 cccz the target node is at the edge of the "local pool"
@@ -1398,127 +1422,127 @@ cccz now set the new Efflux and the runoff
         i=SurfNodeSurfIndexH(n)
         k=SurfNodeNodeIndexH(n)
         if(n.eq.1) then
-         h_Stay_temp(n)=h_Stay_Old(n)+step*
+         h_Pond_temp(n)=h_Pond_Old(n)+step*
      &    ((-q_Flux(n)+step*RunoffLeft)/width(i)+RunoffInten(n))
-         h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-         if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-cccz ask a question, why use h_Stay here. the answer is, it is on the edge
-            h_Stay(n)=CriticalH_R_Sur(n)
+         h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+         if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+cccz ask a question, why use h_Pond here. the answer is, it is on the edge
+            h_Pond(n)=CriticalH_R_Sur(n)
          endif
         elseif(n.gt.1.and.n.lt.SurNodeIndex) then
-         h_Stay_temp(n)=h_Stay_Old(n)+step*
+         h_Pond_temp(n)=h_Pond_Old(n)+step*
      &     ((-q_Flux(n)+q_Flux(n-1))/width(i)+RunoffInten(n))
-         h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-         if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-cccz ask a question, why use h_Stay here
-            h_Stay(n)=CriticalH_R_Sur(n)
+         h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+         if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+cccz ask a question, why use h_Pond here
+            h_Pond(n)=CriticalH_R_Sur(n)
          endif 
 cccz ask a question, here for           
-         CriticalH_R_Sur(n)=max(CriticalH_R_Sur(n),h_Stay_Old(n))
+         CriticalH_R_Sur(n)=max(CriticalH_R_Sur(n),h_Pond_Old(n))
         else
-         h_Stay_temp(n)=h_Stay_Old(n)+step*
+         h_Pond_temp(n)=h_Pond_Old(n)+step*
      &    ((-RunoffRight+q_Flux(n-1))/width(i)+RunoffInten(n))
-         h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-         if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-            h_Stay(n)=CriticalH_R_Sur(n)
+         h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+         if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+            h_Pond(n)=CriticalH_R_Sur(n)
          endif 
         endif  
        enddo
          
 cccz ask a question, seems we redo it here
-cccz because we revise the critical H
+cccz the answer is : because we revise the critical H
         do n=1,SurNodeIndex
          i=SurfNodeSurfIndexH(n)
          k=SurfNodeNodeIndexH(n)
          if(n.eq.1) then
-          h_Stay_temp(n)=h_Stay_Old(n)+step*
+          h_Pond_temp(n)=h_Pond_Old(n)+step*
      &      ((-q_Flux(n)+RunoffLeft)/width(i)+RunoffInten(n))
-          h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-          if((slopeCoord(n,2)+h_Stay(n))
-     &     .le.(slopeCoord(n+1,2)+h_Stay(n+1))) then
-           if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+          if((slopeCoord(n,2)+h_Pond(n))
+     &     .le.(slopeCoord(n+1,2)+h_Pond(n+1))) then
+           if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
             RunoffLeft_Efflux=RunoffLeft_Efflux
-     &       -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-            h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &       -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+            h_Pond_temp(n)=CriticalH_R_Sur(n)
            endif
           else
-           if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
              Efflux(n)=Efflux(n)+
-     &         (h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-             h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &         (h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+             h_Pond_temp(n)=CriticalH_R_Sur(n)
              RunoffLeft=0.0D0
              RunoffLeft_Effux=0.0D0
            endif 
           endif
          elseif(n.gt.1.and.n.lt.SurNodeIndex) then
-           h_Stay_temp(n)=h_Stay_Old(n)+step*
+           h_Pond_temp(n)=h_Pond_Old(n)+step*
      &       ((-q_Flux(n)+q_Flux(n-1))/width(i)+RunoffInten(n))
-           h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-           if((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
+           h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+           if((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
 c Previuos time step will not take care of q_Flux(n-1)
-            if((slopeCoord(n,2)+h_Stay(n)).le.
-     &        (slopeCoord(n+1,2)+h_Stay(n+1))) then
-              if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            if((slopeCoord(n,2)+h_Pond(n)).le.
+     &        (slopeCoord(n+1,2)+h_Pond(n+1))) then
+              if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                Efflux(n-1)=Efflux(n-1)
-     &          -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=CriticalH_R_Sur(n)                   
+     &          -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=CriticalH_R_Sur(n)                   
               endif
             else
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Stay(n-1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Pond(n-1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n-1,1)))
-              Slope_0_n=abs(((slopeCoord(n+1,2)+h_stay(n+1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+              Slope_0_n=abs(((slopeCoord(n+1,2)+h_Pond(n+1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n+1,1)))
               Fraction_n_1=Slope_0_n_1/(Slope_0_n_1+Slope_0_n)
               Fraction_n=Slope_0_n/(Slope_0_n_1+Slope_0_n)
 
               Efflux(n-1)=Efflux(n-1)-Fraction_n_1*Add_Flux      
               Efflux(n)=Efflux(n)+Fraction_n*Add_Flux
-              h_Stay_temp(n)=CriticalH_R_Sur(n)
+              h_Pond_temp(n)=CriticalH_R_Sur(n)
              endif
             endif
                   
-           elseif((slopeCoord(n,2)+h_Stay(n)).lt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
+           elseif((slopeCoord(n,2)+h_Pond(n)).lt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
 c The q_Flux(n-1) are taken cared by previous steps, then just calculate new q_Flux(n)
 c if and only if q_Flux(n)>0
-            if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &        (slopeCoord(n+1,2)+h_Stay(n+1))) then
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &        (slopeCoord(n+1,2)+h_Pond(n+1))) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                Efflux(n)=Efflux(n)
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=CriticalH_R_Sur(n)
              endif
             else
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                q_Flux_Node(n)=
-     &           (h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &           (h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=CriticalH_R_Sur(n)
              endif
             endif
 
            else
-            if((slopeCoord(n,2)+h_Stay(n)).lt.
-     &         (slopeCoord(n+1,2)+h_Stay(n+1))) then
-              if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            if((slopeCoord(n,2)+h_Pond(n)).lt.
+     &         (slopeCoord(n+1,2)+h_Pond(n+1))) then
+              if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                 Efflux(n-1)=Efflux(n-1)
-     &            -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-                h_Stay_temp(n)=CriticalH_R_Sur(n)               
+     &            -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+                h_Pond_temp(n)=CriticalH_R_Sur(n)               
               endif
-            elseif((slopeCoord(n,2)+h_Stay(n)).gt.
-     &         (slopeCoord(n+1,2)+h_Stay(n+1))) then
-              if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            elseif((slopeCoord(n,2)+h_Pond(n)).gt.
+     &         (slopeCoord(n+1,2)+h_Pond(n+1))) then
+              if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                 Efflux(n)=Efflux(n)
-     &            +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-                h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &            +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+                h_Pond_temp(n)=CriticalH_R_Sur(n)
               endif
             else
-              if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
+              if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
               if (Efflux_old(n-1).gt.0.0D0) then
                if (Efflux_old(n).ge.0.0D0) then
                  Efflux(n)=Efflux(n)+Add_Flux
@@ -1540,27 +1564,27 @@ c if and only if q_Flux(n)>0
                  Efflux(n)=Efflux(n)+0.50D0*Add_Flux
                endif
               endif
-              h_Stay_temp(n)=CriticalH_R_Sur(n)
+              h_Pond_temp(n)=CriticalH_R_Sur(n)
               endif
             endif
            endif
           else
 cccz the right-most point            
-           h_Stay_temp(n)=h_Stay_Old(n)+step*
+           h_Pond_temp(n)=h_Pond_Old(n)+step*
      &       ((-RunoffRight+q_Flux(n-1))/width(i)+RunoffInten(n))
-           h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
-           if((slopeCoord(n,2)+h_Stay(n)).le.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
+           if((slopeCoord(n,2)+h_Pond(n)).le.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                RunoffRight_Efflux=RunoffRight_Efflux
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=CriticalH_R_Sur(n)
              endif
            else
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                Efflux(n-1)=Efflux(n-1)
-     &           -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &           -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=CriticalH_R_Sur(n)
                         
                RunoffRight_temp=0.0D0
                RunoffRight_Efflux=0.0D0
@@ -1570,7 +1594,7 @@ cccz the right-most point
          enddo
 cccz update the ponded depth         
          do n=1,SurNodeIndex
-               h_Stay(n)=h_Stay_temp(n)
+           h_Pond(n)=max(h_Pond_temp(n),0.0D0)
          enddo
           
          do n=1,SurNodeIndex
@@ -1592,29 +1616,33 @@ cccz update the ponded depth
          do n=1,SurNodeIndex
           k=SurfNodeNodeIndexH(n)            ! for index in the whole node set
           i=SurfNodeSurfIndexH(n)            ! for index in the boundary node set
-          VarBW(i,1)=VarBW_Record(i,1)+q_Flux_Node(n)/width(i) 
-          VarBW(i,3)=VarBW_Record(i,2)-VarBW(i,1)                 
+          VarBW(i,1)=Varbw_Mulch(i,1)+q_Flux_Node(n)/width(i) 
+          VarBW(i,3)=Varbw_Mulch(i,2)-VarBW(i,1)                 ! no changes for varbw_mulch(k,2) or varbw(k,2), assumed equal
           Q(k)=-Width(i)*VarBW(i,3)                   
           If(Q(k).gt.0.0) then
            CodeW(k)=-4    
           endif
           if(Q(k).lt.Qact(k)) then
            Q_ave=max(Qact(k),0.0D0)
-           h_Stay_temp(n)=max(h_Stay(n)-max(Q_ave-Q(k),0.0D0)
+           h_Pond_temp(n)=max(h_Pond(n)-max(Q_ave-Q(k),0.0D0)
      &       *step/width(i),0.0D0)     
-           VarBW(i,1)=VarBW(i,1)+(h_Stay(n)-h_Stay_temp(n))/step
-           Q(k)=Q(k)+(h_Stay(n)-h_Stay_temp(n))/step*width(i)
-           h_Stay(n)=h_Stay_temp(n)
-           FurtherCheck_h_Stay(n)=1
+           VarBW(i,1)=VarBW(i,1)+(h_Pond(n)-h_Pond_temp(n))/step
+           Q(k)=Q(k)+(h_Pond(n)-h_Pond_temp(n))/step*width(i)
+           h_Pond(n)=max(h_Pond_temp(n),0.0D0)
+           if(h_Pond(n).gt.CriticalH_R) then
+              FurtherCheck_h_Pond(n)=1
+           else
+              FurtherCheck_h_Pond(n)=0
+           endif
           else
-           FurtherCheck_h_Stay(n)=0                 
+           FurtherCheck_h_Pond(n)=0                 
           endif
 cccz we need this furthercheck because we need to adjust 
 cccz the ponded height based on the soil infiltrability
          enddo
           
-c need to further check h_Stay(n)
-c fix a good h_Stay value based on the topology of the domain
+c need to further check h_Pond(n)
+c fix a good h_Pond value based on the topology of the domain
          iteration_Num=0.0D0
 1106      do n=1,NumBPD
            Exchange_V_temp(n)=0.0D0
@@ -1622,13 +1650,13 @@ c fix a good h_Stay value based on the topology of the domain
          enddo
           
          do n=2,SurNodeIndex-1
-          if(FurtherCheck_h_Stay(n).eq.1) then
-cccz         H_L=slopeCoord(n-1,2)+h_Stay_temp(n-1)
-cccz         H_M=slopeCoord(n,2)+h_Stay_temp(n)
-cccz         H_R=slopeCoord(n+1,2)+h_Stay_temp(n+1)
-            H_L=slopeCoord(n-1,2)+h_Stay(n-1)
-            H_M=slopeCoord(n,2)+h_Stay(n)
-            H_R=slopeCoord(n+1,2)+h_Stay(n+1)
+          if(FurtherCheck_h_Pond(n).eq.1) then
+cccz         H_L=slopeCoord(n-1,2)+h_Pond_temp(n-1)
+cccz         H_M=slopeCoord(n,2)+h_Pond_temp(n)
+cccz         H_R=slopeCoord(n+1,2)+h_Pond_temp(n+1)
+            H_L=slopeCoord(n-1,2)+h_Pond(n-1)
+            H_M=slopeCoord(n,2)+h_Pond(n)
+            H_R=slopeCoord(n+1,2)+h_Pond(n+1)
             if(n.eq.2) then
               L_L=0.5*(slopeCoord(n,1)-slopeCoord(n-1,1))
             else
@@ -1644,14 +1672,14 @@ cccz this is a valley shape
             if(H_M.lt.H_L.and.H_M.lt.H_R) then
               Ava_Height=(H_R*L_R+H_L*L_L+H_M*L_M)/(L_R+L_L+L_M)
               Volume=max((Ava_Height-
-     &          (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &          (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
 cccz check avaliable water from both sides
-cccz ask a question, here try to use "min((h_Stay_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
-c            Ava_Volume_L=(h_Stay_temp(n-1)-CriticalH_R)*L_L
-c            Ava_Volume_R=(h_Stay_temp(n+1)-CriticalH_R)*L_R
-            Ava_Volume_L=min((h_Stay_temp(n-1)-CriticalH_R),
+cccz ask a question, here try to use "min((h_Pond_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
+c            Ava_Volume_L=(h_Pond_temp(n-1)-CriticalH_R)*L_L
+c            Ava_Volume_R=(h_Pond_temp(n+1)-CriticalH_R)*L_R
+            Ava_Volume_L=min((h_Pond_temp(n-1)-CriticalH_R),
      &         (H_L-Ava_Height))*L_L
-            Ava_Volume_R=min((h_Stay_temp(n+1)-CriticalH_R),
+            Ava_Volume_R=min((h_Pond_temp(n+1)-CriticalH_R),
      &         (H_R-Ava_Height))*L_R
               Ava_Volume=Ava_Volume_L+Ava_Volume_R
                   
@@ -1705,16 +1733,16 @@ cccz always choose the higher value
                endif
      
                Volume_L=max((Ava_Height_L-
-     &           (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &           (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
                Volume_L=min(Volume_L,
-     &           max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_L,
-     &           h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &           max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_L,
+     &           h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
      
                Volume_R=max((Ava_Height_R-
-     &           (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &           (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
                Volume_R=min(Volume_R,
-     &          max(min(slopeCoord(n+1,2)+h_Stay_temp(n+1)-Ava_Height_R,
-     &          h_Stay_temp(n+1)-CriticalH_R)*L_R,0.0D0))
+     &          max(min(slopeCoord(n+1,2)+h_Pond_temp(n+1)-Ava_Height_R,
+     &          h_Pond_temp(n+1)-CriticalH_R)*L_R,0.0D0))
         
               if(Check_Exchange_V(n-1).eq.0) then
                 Exchange_V_temp(n-1)=-Volume_L
@@ -1750,16 +1778,16 @@ cccz always choose the higher value
                 Ava_Height_L=Mean_Height
               endif
               Volume_R=max((Ava_Height_R-
-     &          (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &          (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
               Volume_R=min(Volume_R,
-     &          max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_R,
-     &          h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &          max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_R,
+     &          h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
                   
               Volume_L=max((Ava_Height_L-
-     &          (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &          (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
               Volume_L=min(Volume_L,
-     &          max(min(slopeCoord(n-1,2)+h_Stay_temp(n-1)-Ava_Height_L,
-     &          h_Stay_temp(n-1)-CriticalH_R)*L_L,0.0D0))
+     &          max(min(slopeCoord(n-1,2)+h_Pond_temp(n-1)-Ava_Height_L,
+     &          h_Pond_temp(n-1)-CriticalH_R)*L_L,0.0D0))
                        
               if(Check_Exchange_V(n-1).eq.0) then
                 Exchange_V_temp(n-1)=Volume_L
@@ -1797,15 +1825,15 @@ cccz flat/peak case
               endif
 cccz water requirement                  
               Volume_L=max((Ava_Height_L-
-     &          (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &          (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
               Volume_R=max((Ava_Height_R-
-     &          (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &          (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
               Volume_T=Volume_L+Volume_R
 cccz water supply          
               Volume=min(Volume_T,
-     &          max(min(slopeCoord(n,2)+h_Stay_temp(n)-
+     &          max(min(slopeCoord(n,2)+h_Pond_temp(n)-
      &          min(Mean_Height_L,Mean_Height_R),      
-     &          h_Stay_temp(n)-CriticalH_R)*L_L,0.0D0))      
+     &          h_Pond_temp(n)-CriticalH_R)*L_L,0.0D0))      
 cccz water redistributed     
               if(Volume_T.eq.0.0D0) then
               else
@@ -1851,25 +1879,25 @@ cccz moreover, the edge points should not provide inwards water flux since it is
             L_M=0.5*(slopeCoord(n+1,1)-slopeCoord(n-1,1))
           endif
           if(n.eq.1) then
-            h_Stay_temp(n)=h_Stay_temp(n)-Exchange_V_temp(n)/L_M
+            h_Pond_temp(n)=h_Pond_temp(n)-Exchange_V_temp(n)/L_M
 cccz if "gt", the Exchange_V_temp(1)<0, and leftwards exchange occurs
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               RunoffLeft_Efflux=RunoffLeft_Efflux
-     &          -(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-              h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &          -(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+              h_Pond_temp(n)=CriticalH_R_Sur(n)
             endif
           elseif(n.eq.SurNodeIndex) then
-            h_Stay_temp(n)=h_Stay_temp(n)+Exchange_V_temp(n-1)/L_M
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+            h_Pond_temp(n)=h_Pond_temp(n)+Exchange_V_temp(n-1)/L_M
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               RunoffRight_Efflux=RunoffRight_Efflux
-     &          +(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-              h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &          +(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+              h_Pond_temp(n)=CriticalH_R_Sur(n)
             endif
           else
-            h_Stay_temp(n)=h_Stay_temp(n)+
+            h_Pond_temp(n)=h_Pond_temp(n)+
      &        (Exchange_V_temp(n-1)-Exchange_V_temp(n))/L_M
           endif
-          error=max(error,abs(h_Stay_temp(n)-h_Stay(n)))
+          error=max(error,abs(h_Pond_temp(n)-h_Pond(n)))
          enddo
           
          iteration_Num=iteration_Num+1
@@ -1877,22 +1905,23 @@ cccz if "gt", the Exchange_V_temp(1)<0, and leftwards exchange occurs
          if((error.gt.0.01D0*CriticalH_R).and.(iteration_Num.lt.100)) 
      &       then
            do n=1,SurNodeIndex  
-cccz              h_Stay(n)=(h_Stay_temp(n)+h_Stay(n)*(iteration_Num-1))
+cccz              h_Pond(n)=(h_Pond_temp(n)+h_Pond(n)*(iteration_Num-1))
 cccz     &               /iteration_Num
-             h_Stay(n)=h_Stay_temp(n) 
+             h_Pond(n)=h_Pond_temp(n) 
              Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
            enddo
-           h_Stay(1)=CriticalH_R_Sur(1)
-           h_Stay(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
+           h_Pond(1)=CriticalH_R_Sur(1)
+           h_Pond(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
            goto 1106
          else
            do n=1,SurNodeIndex
              k=SurfNodeNodeIndexH(n)
-             h_Stay(n)=h_Stay_temp(n)
+             h_Pond(n)=h_Pond_temp(n)
+             h_Pond(n)=max(h_Pond_temp(n),0.0D0)
              Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
-             if(h_Stay(n).gt.CriticalH_R) then
+             if(h_Pond(n).gt.CriticalH_R) then
 cccz assign the boundary condition for infiltration
-               hNew(k)=CriticalH+h_Stay(n)                 
+               hNew(k)=CriticalH+h_Pond(n)                 
              endif
            enddo
            endif
@@ -1930,7 +1959,7 @@ cccz first calculate the hori distance
       RunoffLeft_temp=0.0D0
       RunoffRight_temp=0.0D0
       do i=1,NumBPD
-         h_Stay_temp(i)=0.0D0
+         h_Pond_temp(i)=0.0D0
          q_Flux_temp(i)=0.0D0
          q_Flux_Node(i)=0.0D0
          Efflux(i)=0.0D0
@@ -1946,17 +1975,17 @@ cccz take the absolute value of the slope to ensure the following calculation
      &      /(slopeCoord(n,1)-slopeCoord(n+1,1)))
 cccz start the explicit version for the q_flux
 cccz we also check the right/left directions and made average for stability
-        if(h_Stay(n+1).eq.0) then
+        if(h_Pond(n+1).eq.0) then
            Slope_f_left=0.0D0
         else
            Slope_f_left=((n_Stiff*q_Flux(n))**2.0D0)
-     &       /(h_Stay(n+1)**(3.333D0))
+     &       /(h_Pond(n+1)**(3.333D0))
         endif
-        if(h_Stay(n).eq.0) then
+        if(h_Pond(n).eq.0) then
            Slope_f_right=0.0D0
         else
            Slope_f_right=((n_Stiff*q_Flux(n)**2.0D0)
-     &       /(h_Stay(n)**(3.333D0)))
+     &       /(h_Pond(n)**(3.333D0)))
         endif
         Slope_f=0.50D0*(Slope_f_left+Slope_f_right)
 
@@ -1965,22 +1994,22 @@ cccz start from the first (left) node
         if(n.eq.1) then
 cccz Water will flow from node 1 to node 2
 cccz Always follow the upwind direction
-         if((slopeCoord(1,2)+h_Stay(1)).ge.
-     &    (slopeCoord(2,2)+h_Stay(2))) then
-           if(h_Stay(1).eq.0.0D0) then
+         if((slopeCoord(1,2)+h_Pond(1)).ge.
+     &    (slopeCoord(2,2)+h_Pond(2))) then
+           if(h_Pond(1).eq.0.0D0) then
             q_flux_square=0.0D0
             h_flux_square=10.0D0       ! arbitrary none-zero number here
            else
             q_flux_square=q_Flux(1)
-            h_flux_square=h_Stay(1)
+            h_flux_square=h_Pond(1)
            endif
 cccz we can see for values labeled "_Old" is used to store old data
 cccz which is not changed during the iteration
          
            q_Flux_temp(1)=q_Flux_Old(1)+
      &         (-(q_flux_square**2.0D0)/h_flux_square/ll(1)             ! there is no flux on the left of left edge
-     &         +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)   
-     &         +g_accel*h_Stay(1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &         +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1)   
+     &         +g_accel*h_Pond(1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(1)=max(q_Flux_temp(1),0.0D0)
             
 cccz the direction implies runoff will not be discharged from the left side
@@ -1988,44 +2017,44 @@ cccz the direction implies runoff will not be discharged from the left side
            else
 cccz Water will flow from Node 2 to Node 1, momentum source from q_flux(2), between Node 2 and Node 3
 cccz this depends on whether Node 2 is a local maximum                   
-            if ((slopeCoord(2,2)+h_Stay(2)).ge.
-     &        (slopeCoord(3,2)+h_Stay(3))) then  
+            if ((slopeCoord(2,2)+h_Pond(2)).ge.
+     &        (slopeCoord(3,2)+h_Pond(3))) then  
 cccz now we calcualte water flow     
-             if(h_Stay(2).eq.0.0D0) then
+             if(h_Pond(2).eq.0.0D0) then
                q_flux_square=0.0D0
                h_flux_square=10.0D0                                   ! arbitrary number here
              else
                q_flux_square=q_Flux(1)
-               h_flux_square=h_Stay(2)
+               h_flux_square=h_Pond(2)
              endif       
              q_Flux_temp(1)=q_Flux_Old(1)+
      &          ((q_flux_square**2.0D0)/h_flux_square/ll(1)              ! there is no income momentum from q_flux(2)
-     &          +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)
-     &          -g_accel*h_Stay(2)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &          +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1)
+     &          -g_accel*h_Pond(2)*max(Slope_0_R-Slope_f,0.0D0))*step
              q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
              
             else
 cccz in this case, there is momentum source from q_flux(2)                 
-             if(h_Stay(2).eq.0.0D0) then
+             if(h_Pond(2).eq.0.0D0) then
                q_flux_square1=0.0D0
                h_flux_square1=10.0D0                                  ! arbitrary number here
              else
                q_flux_square1=q_Flux(1)
-               h_flux_square1=h_Stay(2)
+               h_flux_square1=h_Pond(2)
              endif
-             if(h_Stay(3).eq.0.0D0) then
+             if(h_Pond(3).eq.0.0D0) then
                q_flux_square2=0.0D0
                h_flux_square2=10.0D0                                  ! arbitrary number here
              else
                q_flux_square2=q_Flux(2)
-               h_flux_square2=h_Stay(3)
+               h_flux_square2=h_Pond(3)
              endif
                      
              q_Flux_temp(1)=q_Flux_Old(1)+
      &         (((q_flux_square1**2.0D0)/h_flux_square1
      &              -(q_flux_square2**2.0D0)/h_flux_square2)/ll(1)
-     &         +0.5D0*g_accel*(h_Stay(1)**2.0D0-h_Stay(2)**2.0D0)/ll(1)           
-     &         -g_accel*h_Stay(2)*max(Slope_0_R-Slope_f,0.0D0))*step         
+     &         +0.5D0*g_accel*(h_Pond(1)**2.0D0-h_Pond(2)**2.0D0)/ll(1)           
+     &         -g_accel*h_Pond(2)*max(Slope_0_R-Slope_f,0.0D0))*step         
              q_Flux_temp(1)=min(q_Flux_temp(1),0.0D0)
             endif
 
@@ -2041,50 +2070,50 @@ cccz finished the calculation when n=1 (left-most) edge
 cccz now calculate the flux in interior nodes
          elseif(n.gt.1.and.n.lt.SurNodeIndex-1) then
      
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
 cccz water will flow from Node n -> n+1, right-bound, momentun source may from n-1?
 cccz always follow the upwind direction 
 cccz in the first case, Node n is the local peak s.t. no momentun from the left side 
-           if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &        (slopeCoord(n-1,2)+h_Stay(n-1))) then   
+           if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &        (slopeCoord(n-1,2)+h_Pond(n-1))) then   
 cccz the momentum is only from the current slope section, i.e., n
-            if(h_Stay(n).eq.0.0D0) then
+            if(h_Pond(n).eq.0.0D0) then
               q_flux_square=0.0D0
               h_flux_square=10.0D0                                    ! arbitrary none-zero number here
             else
               q_flux_square=q_Flux(n)
-              h_flux_square=h_Stay(n)
+              h_flux_square=h_Pond(n)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        (-(q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
            
            else
 cccz the momentum is from the left side, i.e., n-1                  
-            if(h_Stay(n).eq.0.0D0) then
+            if(h_Pond(n).eq.0.0D0) then
               q_flux_square1=0.0D0
               h_flux_square1=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square1=q_Flux(n)
-              h_flux_square1=h_Stay(n)
+              h_flux_square1=h_Pond(n)
             endif
-            if(h_Stay(n-1).eq.0.0D0) then
+            if(h_Pond(n-1).eq.0.0D0) then
               q_flux_square2=0.0D0
               h_flux_square2=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square2=q_Flux(n-1)
-              h_flux_square2=h_Stay(n-1)
+              h_flux_square2=h_Pond(n-1)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        ((-(q_flux_square1**2.0D0)/h_flux_square1
      &           +(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step  
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step  
             q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
            endif
          else
@@ -2092,44 +2121,44 @@ cccz Water will flow from Node n+1 -> n, momentun source of q_Flux(n+1)?
 cccz always follow the upwind direction 
 cccz now we assume n+1 is a local maximum, so no water flow Node n+2->n+1
 cccz thus, there is no external momentum from q_Flux(n+1), which should be in an opposite direction
-           if((slopeCoord(n+1,2)+h_Stay(n+1)).ge.
-     &        (slopeCoord(n+2,2)+h_Stay(n+2))) then
-             if(h_Stay(n+1).eq.0.0D0) then
+           if((slopeCoord(n+1,2)+h_Pond(n+1)).ge.
+     &        (slopeCoord(n+2,2)+h_Pond(n+2))) then
+             if(h_Pond(n+1).eq.0.0D0) then
                q_flux_square=0.0D0
                h_flux_square=10.0D0                                    ! arbitrary none-zero number here
              else
                q_flux_square=q_Flux(n)
-               h_flux_square=h_Stay(n+1)
+               h_flux_square=h_Pond(n+1)
              endif
                                          
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        ((q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &        +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &        -g_accel*h_Stay(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &        +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &        -g_accel*h_Pond(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
            else    
 cccz now we assume n+2 is higher than n+1
 cccz thus, there is external momentum from q_Flux(n+1), from Node n+2
-            if(h_Stay(n+1).eq.0.0D0) then
+            if(h_Pond(n+1).eq.0.0D0) then
               q_flux_square1=0.0D0
               h_flux_square1=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square1=q_Flux(n)
-              h_flux_square1=h_Stay(n+1)
+              h_flux_square1=h_Pond(n+1)
             endif
-            if(h_Stay(n+2).eq.0.0D0) then
+            if(h_Pond(n+2).eq.0.0D0) then
               q_flux_square2=0.0D0
               h_flux_square2=10.0D0                                   ! arbitrary none-zero number here
             else
               q_flux_square2=q_Flux(n+1)
-              h_flux_square2=h_Stay(n+2)
+              h_flux_square2=h_Pond(n+2)
             endif
                   
             q_Flux_temp(n)=q_Flux_Old(n)+
      &        (((q_flux_square1**2.0D0)/h_flux_square1
      &           -(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &       -g_accel*h_Stay(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &       -g_accel*h_Pond(n+1)*max(Slope_0_R-Slope_f,0.0D0))*step
             q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
                      
           endif
@@ -2140,73 +2169,73 @@ cccz now we discuss the right-most point, with flux q_flux(n=SurNodeIndex-1)
        
 cccz Finish the calculation for n=SurNodeIndex-1
 cccz or in other words, we have "n=SurNodeIndex-1" here, so you will not see "n+2"
-         if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
+         if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
 cccz water flow to the end point n=SurNodeIndex, need to calculate the momentun from n-2?
 cccz n=SurNodeIndex-1 is the local maxima, no water flux from left side 
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then 
-           if(h_Stay(n).eq.0.0D0) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then 
+           if(h_Pond(n).eq.0.0D0) then
              q_flux_square=0.0D0
              h_flux_square=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square=q_Flux(n)
-             h_flux_square=h_Stay(n)
+             h_flux_square=h_Pond(n)
            endif
            q_Flux_temp(n)=q_Flux_Old(n)+
      &       (-(q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &       +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &       +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
            q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
           else
 cccz n=SurNodeIndex-2 is higher, water flux from left side                   
-           if(h_Stay(n).eq.0.0D0) then
+           if(h_Pond(n).eq.0.0D0) then
              q_flux_square1=0.0D0
              h_flux_square1=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square1=q_Flux(n)
-             h_flux_square1=h_Stay(n)
+             h_flux_square1=h_Pond(n)
            endif    
-           if(h_Stay(n-1).eq.0.0D0) then
+           if(h_Pond(n-1).eq.0.0D0) then
              q_flux_square2=0.0D0
              h_flux_square2=10.0D0                                     ! arbitrary none-zero number here
            else
              q_flux_square2=q_Flux(n-1)
-             h_flux_square2=h_Stay(n-1)
+             h_flux_square2=h_Pond(n-1)
            endif
                   
            q_Flux_temp(n)=q_Flux_Old(n)+
      &       ((-(q_flux_square1**2.0D0)/h_flux_square1
      &           +(q_flux_square2**2.0D0)/h_flux_square2)/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0-h_Stay(n+1)**2.0D0)/ll(n) 
-     &       +g_accel*h_Stay(n)*max(Slope_0_R-Slope_f,0.0D0))*step
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0-h_Pond(n+1)**2.0D0)/ll(n) 
+     &       +g_accel*h_Pond(n)*max(Slope_0_R-Slope_f,0.0D0))*step
            q_Flux_temp(n)=max(q_Flux_temp(n),0.0D0)
           endif
 
 cccz in this case, runoff discharge on the right hand side occurs
 cccz this calculation should be processed based on the SV equation
-          if(h_Stay(n+1).eq.0.0D0) then
+          if(h_Pond(n+1).eq.0.0D0) then
             q_flux_runoffright=0.0D0
             h_flux_runoffright=10.0D0       ! arbitrary number here
           else
             q_flux_runoffright=RunoffRight
-            h_flux_runoffright=h_Stay(SurNodeIndex)
+            h_flux_runoffright=h_Pond(SurNodeIndex)
           endif    
-          if(h_Stay(n).eq.0.0D0) then
+          if(h_Pond(n).eq.0.0D0) then
             q_flux_square=0.0D0
             h_flux_square=10.0D0       ! arbitrary number here
           else
             q_flux_square=q_Flux(n)
-            h_flux_square=h_Stay(n)
+            h_flux_square=h_Pond(n)
           endif                  
 
           RunoffRight_temp=RunoffRight_old+
      &      ((-(q_flux_runoffright**2.0D0)/h_flux_runoffright
      &         +(q_flux_square**2.0D0)/h_flux_square)
      &         /width(SurfNodeSurfIndexH(SurNodeIndex))
-     &      +0.5D0*g_accel*(h_Stay(n)**2.0D0
-     &         -h_Stay(SurNodeIndex)**2.0D0)/ll(n) 
-     &      +g_accel*h_Stay(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
+     &      +0.5D0*g_accel*(h_Pond(n)**2.0D0
+     &         -h_Pond(SurNodeIndex)**2.0D0)/ll(n) 
+     &      +g_accel*h_Pond(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
      &         *step 
           RunoffRight_temp=max(RunoffRight_temp,0.0D0)
                              
@@ -2216,19 +2245,19 @@ cccz water flow to from Node SurNodeIndex -> SurNodeIndex-1
 cccz in this case, no right runoff discharge
 cccz also, a good news is there is no right-hand node, thus, no external momentum source
 
-          if(h_Stay(n+1).eq.0.0D0) then
+          if(h_Pond(n+1).eq.0.0D0) then
             q_flux_square=0.0D0
             h_flux_square=10.0D0       ! arbitrary number here
           else
             q_flux_square=q_Flux(n)
-            h_flux_square=h_Stay(SurNodeIndex)
+            h_flux_square=h_Pond(SurNodeIndex)
           endif
 
           q_Flux_temp(n)=q_Flux_Old(n)+
      &       ((q_flux_square**2.0D0)/h_flux_square/ll(n)
-     &       +0.5D0*g_accel*(h_Stay(n)**2.0D0
-     &          -h_Stay(SurNodeIndex)**2.0D0)/ll(n) 
-     &       -g_accel*h_Stay(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
+     &       +0.5D0*g_accel*(h_Pond(n)**2.0D0
+     &          -h_Pond(SurNodeIndex)**2.0D0)/ll(n) 
+     &       -g_accel*h_Pond(SurNodeIndex)*max(Slope_0_R-Slope_f,0.0D0))
      &          *step
           q_Flux_temp(n)=min(q_Flux_temp(n),0.0D0)
           RunoffRight_temp=0.0D0
@@ -2244,50 +2273,50 @@ cccz so after solving the SV equation, we need additional processes
         i=SurfNodeSurfIndexH(n)
         k=SurfNodeNodeIndexH(n)
         if(n.eq.1) then
-         h_Stay_temp(1)=h_Stay_Old(1)+step*
+         h_Pond_temp(1)=h_Pond_Old(1)+step*
      &     ((-q_Flux_temp(1)+RunoffLeft_temp)/width(i)+RunoffInten(1))
-         h_Stay_temp(1)=max(h_Stay_temp(1),0.0D0)
+         h_Pond_temp(1)=max(h_Pond_temp(1),0.0D0)
 
 cccz We do not allow the calculation for the left efflux        
-        if(h_Stay_temp(1).gt.CriticalH_R_Sur(1)) then
+        if(h_Pond_temp(1).gt.CriticalH_R_Sur(1)) then
           Efflux(1)=Efflux(1)
-     &      +(h_Stay_temp(1)-CriticalH_R_Sur(1))*width(i)/step
-          h_Stay_temp(1)=min(h_Stay_temp(1),CriticalH_R_Sur(1))
+     &      +(h_Pond_temp(1)-CriticalH_R_Sur(1))*width(i)/step
+          h_Pond_temp(1)=min(h_Pond_temp(1),CriticalH_R_Sur(1))
           RunoffLeft_temp=0.0D0
           RunoffLeft_Efflux=0.0D0
         endif 
          
 cccz for the interior nodes, the efflux could be left/right/outwards/inwards
         elseif(n.gt.1.and.n.lt.SurNodeIndex) then
-          h_Stay_temp(n)=h_Stay_Old(n)+step*
+          h_Pond_temp(n)=h_Pond_Old(n)+step*
      &      ((-q_Flux_temp(n)+q_Flux_temp(n-1))/width(i)+RunoffInten(n))
-          h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)     
+          h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)     
 
-          if((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
+          if((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
 cccz Previuos time step will not take care of EFFlux(n-1)
-           if((slopeCoord(n,2)+h_Stay(n)).le.
-     &        (slopeCoord(n+1,2)+h_Stay(n+1))) then
+           if((slopeCoord(n,2)+h_Pond(n)).le.
+     &        (slopeCoord(n+1,2)+h_Pond(n+1))) then
 
 cccz in this geometry, water will flow left in "n"             
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                Efflux(n-1)=Efflux(n-1)
-     &           -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n)) 
+     &           -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n)) 
              endif
 
 cccz in this geometry, water will flow outwards like "/\" 
 cccz but how the runoff partitioned to left/right sides
            else
-             if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+             if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz first calculate all avail runoff water
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
 cccz calculate left/right slope
-              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Stay(n-1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+              Slope_0_n_1=abs(((slopeCoord(n-1,2)+h_Pond(n-1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n-1,1)))
-              Slope_0_n=abs(((slopeCoord(n+1,2)+h_stay(n+1))
-     &           -(slopeCoord(n,2)+h_Stay(n)))
+              Slope_0_n=abs(((slopeCoord(n+1,2)+h_Pond(n+1))
+     &           -(slopeCoord(n,2)+h_Pond(n)))
      &           /(slopeCoord(n,1)-slopeCoord(n+1,1)))
 cccz use the slope to determine the fraction
               Fraction_n_1=Slope_0_n_1/(Slope_0_n_1+Slope_0_n)
@@ -2295,29 +2324,29 @@ cccz use the slope to determine the fraction
 cccz calculate the Efflux based on the fraction
               Efflux(n-1)=Efflux(n-1)-Fraction_n_1*Add_Flux
               Efflux(n)=Efflux(n)+Fraction_n*Add_Flux
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
              endif
            endif
-         elseif((slopeCoord(n,2)+h_Stay(n)).lt.
-     &     (slopeCoord(n-1,2)+h_Stay(n-1))) then
+         elseif((slopeCoord(n,2)+h_Pond(n)).lt.
+     &     (slopeCoord(n-1,2)+h_Pond(n-1))) then
 cccz The q_Flux(n-1) are taken cared by previous steps, then just calculate new q_Flux(n)
 cccz if and only if q_Flux(n)>0
 cccz i.e., calculate rightwards efflux on the rightside
-          if((slopeCoord(n,2)+h_Stay(n)).ge.
-     &      (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          if((slopeCoord(n,2)+h_Pond(n)).ge.
+     &      (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               Efflux(n)=Efflux(n)
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
             endif
 cccz here we deal with a special case -- a valley
 cccz if there is a valley, the efflux water will not go anywhere,
 cccz but we should record it and be prepared to add it as water input for the next iteration
           else
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              q_Flux_Node(n)=(h_Stay_temp(n)-CriticalH_R_Sur(n))
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              q_Flux_Node(n)=(h_Pond_temp(n)-CriticalH_R_Sur(n))
      &           *width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
             endif
           endif
 
@@ -2325,27 +2354,27 @@ cccz now the elevation of the water level @ Node n and Node n-1
 cccz was the same.
 
          else
-           if((slopeCoord(n,2)+h_Stay(n)).lt.
-     &       (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           if((slopeCoord(n,2)+h_Pond(n)).lt.
+     &       (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz the rightside is higher, momentum points leftwards
               Efflux(n-1)=Efflux(n-1)
-     &           -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))   
+     &           -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))   
             endif
-           elseif((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n+1,2)+h_Stay(n+1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+           elseif((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n+1,2)+h_Pond(n+1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
 cccz the rightside is lower, momentum points rightwards
               Efflux(n)=Efflux(n)
-     &          +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n)) 
+     &          +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step   
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n)) 
             endif
            else
 cccz totally flat  
 cccz first record the potential efflux quantity
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
-              Add_Flux=(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
+              Add_Flux=(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
 cccz need to refer the momentum from previous step
               if(Efflux_old(n-1).gt.0.0D0) then
                if(Efflux_old(n).ge.0.0D0) then
@@ -2371,30 +2400,30 @@ cccz follow the side with larger momentum
                   q_Flux_Node(n)=q_Flux_Node(n)+Add_Flux/3.0D0
                endif
               endif
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
              endif
            endif
           endif
                 
-cccz finally, we calcualte the h_stay for the right-most point
+cccz finally, we calcualte the h_Pond for the right-most point
          else
-          h_Stay_temp(n)=h_Stay_Old(n)+step*
+          h_Pond_temp(n)=h_Pond_Old(n)+step*
      &    ((-RunoffRight_temp+q_Flux_temp(n-1))/width(i)+RunoffInten(n))
-          h_Stay_temp(n)=max(h_Stay_temp(n),0.0D0)
+          h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
 cccz right runoff discharge case
-          if((slopeCoord(n,2)+h_Stay(n)).le.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          if((slopeCoord(n,2)+h_Pond(n)).le.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
                RunoffRight_Efflux=RunoffRight_Efflux
-     &           +(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-               h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))    
+     &           +(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+               h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))    
             endif
-          elseif((slopeCoord(n,2)+h_Stay(n)).gt.
-     &       (slopeCoord(n-1,2)+h_Stay(n-1))) then
-            if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          elseif((slopeCoord(n,2)+h_Pond(n)).gt.
+     &       (slopeCoord(n-1,2)+h_Pond(n-1))) then
+            if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
               Efflux(n-1)=Efflux(n-1)
-     &          -(h_Stay_temp(n)-CriticalH_R_Sur(n))*width(i)/step
-              h_Stay_temp(n)=min(h_Stay_temp(n),CriticalH_R_Sur(n))
+     &          -(h_Pond_temp(n)-CriticalH_R_Sur(n))*width(i)/step
+              h_Pond_temp(n)=min(h_Pond_temp(n),CriticalH_R_Sur(n))
               RunoffRight_temp=0.0D0
               RunoffRight_Efflux=0.0D0
             endif
@@ -2415,8 +2444,9 @@ cccz take average between the current iteration and previous iteration steps to 
        do n=1,SurNodeIndex
          q_Flux_temp(n)=q_Flux_temp(n)/iteration_Num+
      &     (iteration_Num-1)*q_Flux(n)/iteration_Num
-         h_Stay_temp(n)=h_Stay_temp(n)/iteration_Num+
-     &     (iteration_Num-1)*h_Stay(n)/iteration_Num
+         h_Pond_temp(n)=h_Pond_temp(n)/iteration_Num+
+     &     (iteration_Num-1)*h_Pond(n)/iteration_Num
+         h_Pond_temp(n)=max(h_Pond_temp(n),0.0D0)
        enddo
        RunoffRight_temp=RunoffRight_temp/iteration_Num+
      &   (iteration_Num-1)*RunoffRight/iteration_Num
@@ -2427,8 +2457,8 @@ cccz take average between the current iteration and previous iteration steps to 
         if(abs(q_Flux_temp(n)-q_Flux(n)).gt.0.01*abs(q_Flux(n))) then
           if(abs(q_Flux_temp(n)).gt.FluxLimit)  iteration_Flux=1
         endif
-        if(abs(h_Stay_temp(n)-h_Stay(n)).gt.0.01*abs(h_Stay(n))) then
-          if(abs(h_Stay_temp(n)).gt.HeadLimit)  iteration_Head=1
+        if(abs(h_Pond_temp(n)-h_Pond(n)).gt.0.01*abs(h_Pond(n))) then
+          if(abs(h_Pond_temp(n)).gt.HeadLimit)  iteration_Head=1
         endif
        enddo
           
@@ -2443,7 +2473,7 @@ cccz take average between the current iteration and previous iteration steps to 
        if (iteration_Flux.eq.1.or.iteration_Head.eq.1) then
         do n=1,SurNodeIndex
           q_Flux(n)=q_Flux_temp(n)
-          h_Stay(n)=h_Stay_temp(n)
+          h_Pond(n)=h_Pond_temp(n)
         enddo
           RunoffLeft=RunoffLeft_temp
           RunoffRight=RunoffRight_temp
@@ -2451,8 +2481,8 @@ cccz take average between the current iteration and previous iteration steps to 
        else
         do n=1,SurNodeIndex
           q_Flux(n)=q_Flux_temp(n)
-          h_Stay(n)=h_Stay_temp(n)
-          FurtherCheck_h_Stay(n)=1
+          h_Pond(n)=h_Pond_temp(n)
+          FurtherCheck_h_Pond(n)=1
         enddo
         RunoffLeft=RunoffLeft_temp
         RunoffRight=RunoffRight_temp
@@ -2481,33 +2511,34 @@ cccz for regular grid, the program can be ended here, after some arrangement
        do n=1,SurNodeIndex
         k=SurfNodeNodeIndexH(n)            ! for index in the whole node set
         i=SurfNodeSurfIndexH(n)            ! for index in the boundary node set
-        VarBW(i,1)=VarBW_Record(i,1)+q_Flux_Node(n)/width(i) 
-        VarBW(i,3)=VarBW_Record(i,2)-VarBW(i,1)                 
+        VarBW(i,1)=Varbw_Mulch(i,1)+q_Flux_Node(n)/width(i) 
+        VarBW(i,3)=Varbw_Mulch(i,2)-VarBW(i,1)                 
         Q(k)=-Width(i)*VarBW(i,3)                   
         If(Q(k).gt.0.0) then
          CodeW(k)=-4    
         endif
         if(Q(k).lt.Qact(k)) then
          Q_ave=max(Qact(k),0.0D0)
-         h_Stay_temp(n)=max(h_Stay(n)-max(Q_ave-Q(k),0.0D0)
+         h_Pond_temp(n)=max(h_Pond(n)-max(Q_ave-Q(k),0.0D0)
      &     *step/width(i),0.0D0)
-         VarBW(i,1)=VarBW(i,1)+(h_Stay(n)-h_Stay_temp(n))/step
-         Q(k)=Q(k)+(h_Stay(n)-h_Stay_temp(n))/step*width(i)
-         h_Stay(n)=h_Stay_temp(n)
-         if(h_Stay(n).gt.CriticalH_R) then
-          FurtherCheck_h_Stay(n)=1
+         VarBW(i,1)=VarBW(i,1)+(h_Pond(n)-h_Pond_temp(n))/step
+         Q(k)=Q(k)+(h_Pond(n)-h_Pond_temp(n))/step*width(i)
+         h_Pond(n)=max(h_Pond_temp(n),0.0D0)
+         if(h_Pond(n).gt.CriticalH_R) then
+            FurtherCheck_h_Pond(n)=1
          else
-          FurtherCheck_h_Stay(n)=0
+            FurtherCheck_h_Pond(n)=0
          endif
         else
-         FurtherCheck_h_Stay(n)=0                 
+         FurtherCheck_h_Pond(n)=0                 
         endif
 cccz we need this furthercheck because we need to adjust 
 cccz the ponded height based on the soil infiltrability
+
        enddo
           
-c need to further check h_Stay(n)
-c fix a good h_Stay value based on the topology of the domain
+c need to further check h_Pond(n)
+c fix a good h_Pond value based on the topology of the domain
        iteration_Num=0.0D0
 1206   do n=1,NumBPD
         Exchange_V_temp(n)=0.0D0
@@ -2515,10 +2546,10 @@ c fix a good h_Stay value based on the topology of the domain
        enddo
           
        do n=2,SurNodeIndex-1
-        if(FurtherCheck_h_Stay(n).eq.1) then
-          H_L=slopeCoord(n-1,2)+h_Stay(n-1)
-          H_M=slopeCoord(n,2)+h_Stay(n)
-          H_R=slopeCoord(n+1,2)+h_Stay(n+1)
+        if(FurtherCheck_h_Pond(n).eq.1) then
+          H_L=slopeCoord(n-1,2)+h_Pond(n-1)
+          H_M=slopeCoord(n,2)+h_Pond(n)
+          H_R=slopeCoord(n+1,2)+h_Pond(n+1)
           if(n.eq.2) then
             L_L=0.5*(slopeCoord(n,1)-slopeCoord(n-1,1))
           else
@@ -2534,14 +2565,14 @@ cccz this is a valley shape
           if(H_M.lt.H_L.and.H_M.lt.H_R) then
            Ava_Height=(H_R*L_R+H_L*L_L+H_M*L_M)/(L_R+L_L+L_M)
            Volume=max((Ava_Height-
-     &      (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &      (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
 cccz check avaliable water from both sides
-cccz ask a question, here try to use "min((h_Stay_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
-c            Ava_Volume_L=(h_Stay_temp(n-1)-CriticalH_R)*L_L
-c            Ava_Volume_R=(h_Stay_temp(n+1)-CriticalH_R)*L_R
-           Ava_Volume_L=min((h_Stay_temp(n-1)-CriticalH_R),
+cccz ask a question, here try to use "min((h_Pond_temp(n-1)-CriticalH_R),(H_L-Ava_Height))" in future
+c            Ava_Volume_L=(h_Pond_temp(n-1)-CriticalH_R)*L_L
+c            Ava_Volume_R=(h_Pond_temp(n+1)-CriticalH_R)*L_R
+           Ava_Volume_L=min((h_Pond_temp(n-1)-CriticalH_R),
      &      (H_L-Ava_Height))*L_L
-           Ava_Volume_R=min((h_Stay_temp(n+1)-CriticalH_R),
+           Ava_Volume_R=min((h_Pond_temp(n+1)-CriticalH_R),
      &      (H_R-Ava_Height))*L_R
            Ava_Volume=Ava_Volume_L+Ava_Volume_R
                   
@@ -2595,16 +2626,16 @@ cccz always choose the higher value
            endif
      
            Volume_L=max((Ava_Height_L-
-     &       (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &       (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
            Volume_L=min(Volume_L,
-     &       max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_L,
-     &       h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &       max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_L,
+     &       h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
      
            Volume_R=max((Ava_Height_R-
-     &       (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &       (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
            Volume_R=min(Volume_R,
-     &       max(min(slopeCoord(n+1,2)+h_Stay_temp(n+1)-Ava_Height_R,
-     &       h_Stay_temp(n+1)-CriticalH_R)*L_R,0.0D0))
+     &       max(min(slopeCoord(n+1,2)+h_Pond_temp(n+1)-Ava_Height_R,
+     &       h_Pond_temp(n+1)-CriticalH_R)*L_R,0.0D0))
         
            if(Check_Exchange_V(n-1).eq.0) then
              Exchange_V_temp(n-1)=-Volume_L
@@ -2640,16 +2671,16 @@ cccz always choose the higher value
              Ava_Height_L=Mean_Height
            endif
            Volume_R=max((Ava_Height_R-
-     &       (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &       (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
            Volume_R=min(Volume_R,
-     &       max(min(slopeCoord(n,2)+h_Stay_temp(n)-Ava_Height_R,
-     &       h_Stay_temp(n)-CriticalH_R)*L_M,0.0D0))
+     &       max(min(slopeCoord(n,2)+h_Pond_temp(n)-Ava_Height_R,
+     &       h_Pond_temp(n)-CriticalH_R)*L_M,0.0D0))
                   
            Volume_L=max((Ava_Height_L-
-     &       (slopeCoord(n,2)+h_Stay_temp(n)))*L_M,0.0D0)
+     &       (slopeCoord(n,2)+h_Pond_temp(n)))*L_M,0.0D0)
            Volume_L=min(Volume_L,
-     &       max(min(slopeCoord(n-1,2)+h_Stay_temp(n-1)-Ava_Height_L,
-     &       h_Stay_temp(n-1)-CriticalH_R)*L_L,0.0D0))
+     &       max(min(slopeCoord(n-1,2)+h_Pond_temp(n-1)-Ava_Height_L,
+     &       h_Pond_temp(n-1)-CriticalH_R)*L_L,0.0D0))
                        
            if(Check_Exchange_V(n-1).eq.0) then
              Exchange_V_temp(n-1)=Volume_L
@@ -2687,15 +2718,15 @@ cccz flat/peak case
           endif
 cccz water requirement                  
           Volume_L=max((Ava_Height_L-
-     &      (slopeCoord(n-1,2)+h_Stay_temp(n-1)))*L_L,0.0D0)
+     &      (slopeCoord(n-1,2)+h_Pond_temp(n-1)))*L_L,0.0D0)
           Volume_R=max((Ava_Height_R-
-     &      (slopeCoord(n+1,2)+h_Stay_temp(n+1)))*L_R,0.0D0)
+     &      (slopeCoord(n+1,2)+h_Pond_temp(n+1)))*L_R,0.0D0)
           Volume_T=Volume_L+Volume_R
 cccz water supply          
           Volume=min(Volume_T,
-     &      max(min(slopeCoord(n,2)+h_Stay_temp(n)-
+     &      max(min(slopeCoord(n,2)+h_Pond_temp(n)-
      &      min(Mean_Height_L,Mean_Height_R),      
-     &      h_Stay_temp(n)-CriticalH_R)*L_L,0.0D0))      
+     &      h_Pond_temp(n)-CriticalH_R)*L_L,0.0D0))      
 cccz water redistributed     
           if(Volume_T.eq.0.0D0) then
           else
@@ -2741,48 +2772,80 @@ cccz moreover, the edge points should not provide inwards water flux since it is
           L_M=0.5*(slopeCoord(n+1,1)-slopeCoord(n-1,1))
         endif
         if(n.eq.1) then
-          h_Stay_temp(n)=h_Stay_temp(n)-Exchange_V_temp(n)/L_M
+          h_Pond_temp(n)=h_Pond_temp(n)-Exchange_V_temp(n)/L_M
 cccz if "gt", the Exchange_V_temp(1)<0, and leftwards exchange occurs
-          if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
             RunoffLeft_Efflux=RunoffLeft_Efflux
-     &        -(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-            h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &        -(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+            h_Pond_temp(n)=CriticalH_R_Sur(n)
           endif
         elseif(n.eq.SurNodeIndex) then
-          h_Stay_temp(n)=h_Stay_temp(n)+Exchange_V_temp(n-1)/L_M
-          if(h_Stay_temp(n).gt.CriticalH_R_Sur(n)) then
+          h_Pond_temp(n)=h_Pond_temp(n)+Exchange_V_temp(n-1)/L_M
+          if(h_Pond_temp(n).gt.CriticalH_R_Sur(n)) then
             RunoffRight_Efflux=RunoffRight_Efflux
-     &        +(h_Stay_temp(n)-CriticalH_R_Sur(n))*L_M/step
-            h_Stay_temp(n)=CriticalH_R_Sur(n)
+     &        +(h_Pond_temp(n)-CriticalH_R_Sur(n))*L_M/step
+            h_Pond_temp(n)=CriticalH_R_Sur(n)
           endif
         else
-          h_Stay_temp(n)=h_Stay_temp(n)+
+          h_Pond_temp(n)=h_Pond_temp(n)+
      &      (Exchange_V_temp(n-1)-Exchange_V_temp(n))/L_M
         endif
-        error=max(error,abs(h_Stay_temp(n)-h_Stay(n)))
+        error=max(error,abs(h_Pond_temp(n)-h_Pond(n)))
        enddo
           
        iteration_Num=iteration_Num+1
           
        if((error.gt.0.01D0*CriticalH_R).and.(iteration_Num.lt.100)) then
          do n=1,SurNodeIndex  
-           h_Stay(n)=h_Stay_temp(n) 
+           h_Pond(n)=h_Pond_temp(n) 
            Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
          enddo
-         h_Stay(1)=CriticalH_R_Sur(1)
-         h_Stay(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
+         h_Pond(1)=CriticalH_R_Sur(1)
+         h_Pond(SurNodeIndex)=CriticalH_R_Sur(SurNodeIndex)
          goto 1206
        else
          do n=1,SurNodeIndex
           k=SurfNodeNodeIndexH(n)
-          h_Stay(n)=h_Stay_temp(n)
+          h_Pond(n)=h_Pond_temp(n)
+          h_Pond(n)=max(h_Pond_temp(n),0.0D0)
           Exchange_V(n)=Exchange_V(n)+Exchange_V_temp(n)
-          if(h_Stay(n).gt.CriticalH_R) then
+          if(h_Pond(n).gt.CriticalH_R) then
 cccz assign the boundary condition for infiltration
-            hNew(k)=CriticalH+h_Stay(n)                 
+            hNew(k)=CriticalH+h_Pond(n)                 
           endif
          enddo
+         endif
+         
+cccz we add a hard smoothing factor when the max ponded depth exists but very low (smaller then CriticalH_R)
+cccz this is just for flat surface now and we applied this in case when mulch exists (CriticalH_R can be relatively high)
+       MaxPondFlatSur=0.0D0
+       AvePondFlatSur=0.0D0
+       MaxFlatSurHnew=-100.0D0
+       do n=1,SurNodeIndex
+          kk=SurfNodeNodeIndexH(n)
+          MaxFlatSurHnew=max(hnew(kk),MaxFlatSurHnew)
+          MaxPondFlatSur=max(h_Pond(n),MaxPondFlatSur)
+       enddo
+        
+       if(MaxPondFlatSur.lt.CriticalH_R-0.0001D0) then
+        do n=1,SurNodeIndex
+         AvePondFlatSur=AvePondFlatSur
+     &     +h_Pond(n)*width(SurfNodeSurfIndexH(n))
+        enddo  
+        AvePondFlatSur=AvePondFlatSur/totalLength
+        do n=1,SurNodeIndex
+         if(n.eq.1) then
+           Exchange_V(n)=Exchange_V(n)
+     &       +(h_Pond(n)-AvePondFlatSur)*width(SurfNodeSurfIndexH(n))  ! rightwards is +, leftwards is -
+         elseif(n.eq.SurNodeIndex) then
+         else
+           Exchange_V(n)=Exchange_V(n)+(h_Pond(n)-AvePondFlatSur)
+     &       *width(SurfNodeSurfIndexH(n))+Exchange_V(n-1)
+         endif
+         h_Pond(n)=AvePondFlatSur
+        enddo             
        endif
+       
            
 cccz now we should have a overall idea of the three types of water flow, all in unit (cm^2/day)
 cccz "q_flux" is the most non-free flux which follow the SV equation
@@ -2793,9 +2856,25 @@ cccz finally, change the "exchange_V" (a volume) to a flux term
        do i=1,SurNodeIndex
          Exflux(n)=Exchange_V(n)/step
        enddo
-       goto 1300
- 
+
+cccz reset the boundary temperature condition
+       if(MaxFlatSurHnew.gt.CriticalH) then   ! then set the constant boundary condition
+         do i=1, SurNodeIndex
+           n=SurfNodeNodeIndexH(i)              
+           CodeT(n)=4                         ! assumption: surface runoff has air temp in another module 
+           CodeG(n)=0                         ! assumption: surface ponding induce zero-flux (impermeable) boundary condition 
+         enddo 
+       else  
+         do i=1, SurNodeIndex
+           n=SurfNodeNodeIndexH(i) 
+           CodeT(n)=TmprBCRecord(i)
+           CodeG(n)=GasBCRecord(i)
+         enddo 
+       endif
+
+1300  RunoffRight_Runoff_Loc_Record=RunoffRight
+      RunoffLeft_Runoff_Loc_Record=RunoffLeft 
        
-1300  return
+      return
       
       end

@@ -124,8 +124,7 @@ int CDevelopment::update(const TWeather& wthr)
 				cout << " Emergence: GDDsum " << GDDsum << " Growing season T " << T_grow << endl;
 				GDDsum = 0.0; //reset GDDsum from emergernce, SK
 				emerge_gdd = GDDsum; //gdd at emergence YY 4/2/09
-				//	corn->LvsAppeared = 1.0;
-				//LvsAppeared = 2;
+				
 			}
 		}
 		if (!tasselInitiation.done &&  emergence.done)
@@ -194,8 +193,7 @@ int CDevelopment::update(const TWeather& wthr)
 		//DT Sep 21, 2016 added a variable to indicate tasseling is done at 1 phyllocrhon from the last leaf appearing
 		if (tasselInitiation.done && (LvsAppeared >= (int)LvsInitiated))
 			//todo should move !silking.done to the if statement for silking
-//		 if (((tasselInitiation.done) && (!silking.done) && !DayLengthSensitive)
-//			 ||  ((LvsAppeared >= (int) LvsInitiated) && (!silking.done) && DayLengthSensitive))
+
 		{
 			if (!tasselFull.done)
 				progressToTasselEmerg += beta_fn(T_cur, Rmax_LTAR, T_opt, T_ceil); // Assume full tassel emergence occurs at total tip appeared + 1.5 phyllochrons

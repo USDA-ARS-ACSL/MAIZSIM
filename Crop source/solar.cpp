@@ -114,6 +114,7 @@ void CSolar::SetVal(int Day, double Time, double Lat,  double Longi, double Alti
 
 
 	 //by default consider both solar radiation and PFD available
+	SolRad0 = SolRad0 + 0.00001;  //prevent divide by zero issues later
 	SetPARFraction();    // uses tau to set PAR fraction (NIR and PAR)
     SolarRadiation=SolRad0;
     PAR=SolarRadiation*PARFraction;

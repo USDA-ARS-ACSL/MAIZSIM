@@ -106,7 +106,7 @@ void crop(struct
  		pSC = new CController(varFile.c_str(), GraphicFile.c_str(), LeafFile.c_str(), initInfo); //Consider putting file names in initInfo
 //  ***************************************************************************
 
-		NitrogenUptake=pSC->getPlant()->get_N()*PopSlab; //initialize nitrogen uptake with what is already in the plant
+		NitrogenUptake=pSC->getPlant()->get_N()*PopSlab; //initialize nitrogen uptake accumulator with what is already in the plant
 		//SK 8/20/10: this is curious but OK
 
 		SHOOTR->NDemandError=0;
@@ -127,9 +127,10 @@ void crop(struct
 		WaterUptake=WaterUptake+SHOOTR->AWUPS*time_public->Step;  //g water per slab taken up in an hour
 		NitrogenUptake=NitrogenUptake+SHOOTR->SIncrSink/1.0e6; //Cumulative N (mass, g (plant slab)-1) in this time step
 	}
-		
 // Note that SIncrSink has been multiplied by time step in the solute uptake routing
-// the 1000 scales from ug to mg.
+// the 1.0e6 scales from ug to g.
+
+
 		if(fabs(time_public->Time-time_public->tNext[ModNum-1])< fabs(0.001*time_public->Step))
 		{
 		//If the sowing date has come and there is not plant, let the program know so other calculations are not done
@@ -152,6 +153,7 @@ void crop(struct
 				wthr.DailyOutput=time_public->DailyOutput;
 				wthr.jday = Weather->JDAY;
 				wthr.time = time_public->Time-Weather->JDAY;
+				wthr.daytime = time_public->Time;
 				wthr.CO2 = Weather->CO2; 
 				if (Weather->CO2<=0) 
 				{

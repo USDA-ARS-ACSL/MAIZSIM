@@ -26,7 +26,7 @@ C
 c     
 C
 CYAP  No Plant = No Root Activity
-      If((NShoot.eq.0).OR.(LAI<0.0001)) Return
+      If((NShoot.eq.0).OR.(LAI.lt.0.0001)) Return
 CYAPEND
       
 
