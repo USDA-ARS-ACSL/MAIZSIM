@@ -658,7 +658,7 @@ void CPlant::C_allocation(const TWeather & w)
 	//scale = develop->get_phyllochronsFromTI() / (develop->get_youngestLeaf() - develop->get_LvsAtTI());
 	double t1 = develop->get_progressToAnthesis();
 	double t2 = develop->get_phyllochronsFromTI();
-	scale = min(1, scale);
+	scale = __min(1.0, scale);
 	//		if (w.time == 0.0) std::cout << scale << endl;
 
     C_supply = 0.0;  // daily mobilization of carbon
@@ -938,7 +938,7 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	//agefn=1.0;
 	double q10fn = pow(Q10MR,(w.airT - 20.0)/10.0); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
-	double stem_coef = min(1.0,droppedLeafmass / leafMass) ;
+	double stem_coef = __min(1.0,droppedLeafmass / leafMass) ;
 	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass-stem_coef*stemMass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)

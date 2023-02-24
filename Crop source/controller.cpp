@@ -42,7 +42,7 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	char* pathSymbol = (char*)calloc(133, sizeof(char));
 	const char *ext_dbg="dbg";
 	std::string stressFile = "plantstress.crp";
-	pathSymbol = "/\\"; //for both Linux and Windows
+	pathSymbol =(char*) "/\\"; //for both Linux and Windows
 	std::string basePath;
 	std::size_t found;
 	std::string cropFileAsString = cropFile;
@@ -632,9 +632,9 @@ void CController::outputToSummary()
 
 	}
 	MeanN = MeanN / myDevelop->get_LvsInitiated();
-	if (potentialArea > 0)
+	if (potentialArea > 0.0)
 	{
-		leafAreaRatio = max(0, actualArea / potentialArea);
+		leafAreaRatio = __max(0.0, actualArea / potentialArea);
 
 	}
 	else 

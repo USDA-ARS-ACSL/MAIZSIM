@@ -506,10 +506,10 @@ class CGasExchange
 		Photosynthesis(Ci);
 		if (abs(StomatalConductance) > eqlTolerance) 
 		{
-			newCi = max(1.0,CO2 - AssimilationNet*(sParms.SC_param/StomatalConductance+ sParms.BLC_param/BoundaryLayerConductance)*(Press/100.0));
+			newCi = __max(1.0,CO2 - AssimilationNet*(sParms.SC_param/StomatalConductance+ sParms.BLC_param/BoundaryLayerConductance)*(Press/100.0));
 		}
 		else
-			newCi = max(1.0,CO2 - AssimilationNet*(sParms.SC_param/eqlTolerance+ sParms.BLC_param/BoundaryLayerConductance)*(Press/100.0));
+			newCi = __max(1.0,CO2 - AssimilationNet*(sParms.SC_param/eqlTolerance+ sParms.BLC_param/BoundaryLayerConductance)*(Press/100.0));
 		return (newCi-Ci);
 	}
 
