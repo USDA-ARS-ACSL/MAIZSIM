@@ -62,6 +62,7 @@ build/
 [Bb]in/
 [Oo]bj/
 
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -101,6 +102,7 @@ ipch/
 *.opensdf
 *.sdf
 *.cachefile
+.vs/
 
 # Visual Studio profiler
 *.psess
@@ -260,5 +262,6 @@ Test_Ver9.1/2dsoil.exe
 *.suo
 *.dbg
 .vs
-2dsoil.exe
-crop.dll
+2dmaizsim.exe
+maizsim.dll
+/Soil Source/CopyToFOlder.bat
