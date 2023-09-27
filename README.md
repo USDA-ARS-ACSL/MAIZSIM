@@ -25,6 +25,7 @@ More documention is being prepared. See the "how to run model" file for informat
 See the ExcelInterface repository for an excel based interface and example input files.
 https://github.com/USDA-ARS-ACSL/ExcelInterface
 The most recent updates for the excel interface work with the most recent version of maizsim
+test for readme
 
 
 
