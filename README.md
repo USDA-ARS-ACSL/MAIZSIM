@@ -9,7 +9,7 @@ Dennis Timlin, David Fleisher, and V.R. Reddy of the USDA-ARS
 
 others who have collaborated include:
 Yang Yang, now at Dow Agrosciences
-Annette Dathe Norwegian University of Life Sciences
+Annette Dathe Cornell University, Ithaca, NY
 Jong-Ahn Chun APEC Climate Center, Korea
 
 MAIZSIM is a mechanistic model of maize growth, development and yield. It is written in C++ (crop) and FORTRAN (soil). 

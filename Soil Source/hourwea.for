@@ -496,8 +496,9 @@ cd   HSR is watts
         If ((DDIf.GT.0.0).OR.(DDIf.LT.0.0)) then
            WATTSM(IDAWN) = HSR(IDAWN)
            WATTSM(IDUSK) = HSR(IDUSK)
+
       ENDIf
-      
+
 c DT 10/12/2021 sometimes due to dst issues and weather station clocks,
 c  radiation between dawn and dusk  can be 0 so need to adjust WATTSM for this
        Do I = 1, IPERD

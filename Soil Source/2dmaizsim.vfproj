@@ -36,7 +36,7 @@
 		<File RelativePath="2DMAIZSIM.FOR"/>
 		<File RelativePath=".\AutoIrrigate.for">
 			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration></File>
+			<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration></File>
 		<File RelativePath=".\carbon_partitioning.FOR"/>
 		<File RelativePath="dateFunctions.for"/>
 		<File RelativePath=".\Drip.FOR"/>
