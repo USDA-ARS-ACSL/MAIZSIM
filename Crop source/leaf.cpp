@@ -4,7 +4,7 @@
 #include "initinfo.h"
 #include <cmath>
 #include <algorithm>
-#define MINUTESPERDAY (24*60);
+#define MINUTESPERDAY (24.0*60.0);
 using namespace std;
 /* LWPeffect adjusts leaf growth for water stress. The functin is defined here. The parameter psi_threshold_bars has two values, one for leaf growth
   * and one for sescence. 

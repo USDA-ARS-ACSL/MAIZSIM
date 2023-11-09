@@ -153,7 +153,6 @@ private:
 	double sowingDay;
 	double age;
 	double CH2O; // carbohydrate, also dry matter, g
-	double N; //Need to delete this - replaced by TotalNitrogen
 	double N_pool; //SK 8/20/10: Short-term N pool for remobilization, this should come mostly from senescing leaves and can be purged daily to active leaves, not implemented at the moment
 	double Q10MR; //Q10 for maintenance respiration
 	
@@ -182,15 +181,15 @@ private:
     double rootPart_old;
 	double leafPart;   //g per plant carbohydrate partitioned to leaf
 
-	double TotalNitrogen;  //This is the total nitrogen content of the plant in g plant-1
-	double HourlyNitrogenDemand;  // Nitrogen demand in g N plant-1
-	double CumulativeNitrogenDemand;  // cumulativeNitrogen demand in g N plant-1
-	double CumulativeNitrogenSoilUptake; // Nitrogen uptake from the soil g N plant-1
+	double TotalNitrogen;  //This is the total nitrogen content of the plant in mg plant-1
+	double HourlyNitrogenDemand;  // Nitrogen demand in mg N plant-1
+	double CumulativeNitrogenDemand;  // cumulativeNitrogen demand in mg N plant-1
+	double CumulativeNitrogenSoilUptake; // Nitrogen uptake from the soil mg N plant-1
 	double HourlyNitrogenSoilUptake;
 	double leaf_NFraction; //records the fraction of nitrogen in leaves YY
 	double leaf_N; //total nitrogen in the leaves of a plant YY (grams N per plant)
 	double leaf_N_content; //leaf nitrogen content (per unit square meter) of a plant YY
-	double OptimalLeafN;       //g N holds leaf N content that is optimal 
+	double OptimalLeafN;       //mg N holds leaf N content that is optimal 
 	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio
 
 
