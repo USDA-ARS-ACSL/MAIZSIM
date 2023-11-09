@@ -1,6 +1,7 @@
 c pot_ET is used to save the accumulated potential transpiration in the previous N steps
 c p_ET is used to save the difference between the accumulated transpiration in the 
 c previous N step and N+1 step; thus in fact it is the potential transpiration rate per time step
+c all output into the g05 file is now per cm2 - water is in mm
 C summary output variables
 !**                    cumRain is the sum of VarBw(,1) which is the rain that is input
 !**                   Actual infil is   Q(i) which is rain - et from varBW(i,3)
@@ -21,7 +22,7 @@ C summary output variables
       Real SeasonRainfall, SeasonPotenTranspiration,
      &     SeasonActualTranspiration, SeasonPotenSoilEvap,
      &     SeasonActualSoilEvap,SeasonActualInfil,
-     &     SumArrayTh
+     &     SumArrayTh, gridWidth
       Character*10 date, Stime
 cccz output for runoff module
       double precision SurInput_Flux,Surface_Flux,Bottom_Flux,
@@ -52,7 +53,7 @@ cccz output for runoff module
      &     ActualInfil,ActualInfil_02,ActualInfil_03,
      &     FluxGas(NumGD),Surface_Gas_Flux(NumGD),
      $     SumArrayTh(NumNPD), hourCount,
-     $     nitrogenFlux,Flux_drain
+     $     nitrogenFlux,Flux_drain, gridWidth
       Common /SurfaceWaterBalance/ 
      &     SurInput_Flux,Surface_Flux,Bottom_Flux,
      &     Runoff_Flux,Runoff_Terminal_Flux,
@@ -71,6 +72,13 @@ C
         NumMod=NumMod+1
         ModNum=NumMod
         tNext(ModNum) = time
+C calculate total width of surface and bottom boundary nodes
+C for scaling fluxes 
+C at this point we assume the that bottom and top boundaries have the same width
+         gridWidth=0.0
+         do i=1, nsurf
+          gridWidth=gridWidth+width(i)
+         end do 
 
 C*** FROM HourlyOut.for BEGIN   
         SumArrayTh=ThNew
@@ -122,11 +130,13 @@ C    For gas flux calculation
         FLuxGas=0.0
         Surface_Gas_Flux=0.0
         
-	  Open(81,file=NodeGraphics)
-	  open(82,file=ElemGraphics)  
-	  Open(83,file=SurfaceGraphics, recl=450)
-        Open(84,file=FluxGraphics)
-        Open(85,file=OrganicMatterGraphics,recl=300)
+C declare files for output
+        
+	  Open(81,file=NodeGraphics)                      !G03
+	  open(82,file=ElemGraphics)                      !G04
+	  Open(83,file=SurfaceGraphics, recl=450)         !G05
+        Open(84,file=FluxGraphics)                      !G06
+        Open(85,file=OrganicMatterGraphics,recl=300)    !G07
        open(99,file=MassBalanceRunoffFileOut, recl=250)
  
 c NodeGrpahics       
@@ -149,7 +159,7 @@ C G05 file  Surface Graphics
 
 c Flux Graphics       
        Write(84,20) "Date_time,", "Date,","Flux,","SoilEA,",
-     &   "RNS,", "WATTSM,","RNC,","WATPOT,","WATACT,",
+     &   "WATTSM,", "RNS,", "RNC,","WATPOT,","WATACT,",
      &    "WATRAT,", "UpwardLW,",
      &   "DifWat,","Cloud,","Shadow,","DIfInt,","Rowinc,", "PARInt,",
      &   "RADInt"
@@ -220,12 +230,12 @@ C  pressure head and flux is calculated CodeW >0 indicates head is set at 0 and 
       	 do i=1,NumBp
 	     n=KXB(i)
 	     
-C calculate N flux in drainage, only consider flow out of the domain (<0) units are gN (convert from ug)	     
+C calculate N flux in drainage, only consider flow out of the domain (<0) units are g N/cm2 (convert from ug)	     
 	     if ((CodeW(n).eq.(-7)).or.(CodeW(n).eq.(2))
      &             .or.(CodeW(n).eq.(1))) then
 	        Flux_drain=Flux_drain+Q(n)*step
               nitrogenflux=nitrogenflux+min(0.0,Q(n))
-     &             *conc(n,1)*step*NO3mass_2_Nmass/1.0e6 
+     &             *conc(n,1)*step*NO3mass_2_Nmass/1.0e6              ! g N/cm2
       
            endif
 c case for evaporation
@@ -359,57 +369,34 @@ cccz calculation is done, just do an assignment
 *  are cm of water in the width of the nodes per day. Thus these fluxes are not
 * multiplied by width
 
-cccz unit [water:width(cm)*flux(cm/day)*timestep(day)]/EOMult[0.5 or 1]/[population/distance(cm)]
+cccz unit [water:width(cm)*flux(cm/day)*timestep(day)]/gridWidth * 10 mm/cm
               PotentialSoilEvaporation=PotentialSoilEvaporation
-     &        /EOMult/poprow*100.0D0
-              ActualSoilEvap=ActualSoilEvap/EOMult/poprow*100.0D0
-              !ActualInfil=ActualInfil/EOMult/poprow*100
-              !FluxAct=FluxAct/EOMult/poprow*100
-              !Runoff=Runoff/EOMult/poprow*100
-              !CumRain=CumRain/EOMult/poprow*100
-              !bottomFlux=bottomFlux/EOMult/poprow*100
-              !(/RowSP/2) gets us per cm2 now for 10 minute period
-              !*6 gives us one hour
-cccz              ActualInfil=ActualInfil/(RowSP/2)*10*24
-cccz              FluxAct=FluxAct/(RowSP/2)*10*24
-cccz              Runoff=Runoff/(RowSP/2)*10*24
-cccz              CumRain=CumRain/(RowSP/2)*10*24
-cccz              bottomFlux=bottomFlux/(RowSP/2)*10*24    !cm/cm2/day
-
-      
-              FluxAct=FluxAct/EOMult/poprow*100.0D0
+     &        /gridWidth*10.0
+              ActualSoilEvap=ActualSoilEvap/gridWidth*10.0
+              FluxAct=FluxAct/gridWidth*10.0
               
 cccz the averaged process for actual infiltraiton
-              ActualInfil=ActualInfil/EOMult/poprow*100.0D0
-              ActualInfil_02=ActualInfil_02/EOMult/poprow*100.0D0
-              ActualInfil_03=ActualInfil_03/EOMult/poprow*100.0D0
+              ActualInfil=ActualInfil/gridWidth*10.0
+              ActualInfil_02=ActualInfil_02/gridWidth*10.0
+              ActualInfil_03=ActualInfil_03/gridWidth*10.0
               
 cccz the averaged process for runoff
-              !Runoff=Runoff/EOMult/poprow*100.0D0
-              Runoff_02=Runoff_02/EOMult/poprow*100.0D0
-              Runoff_03=Runoff_03/EOMult/poprow*100.0D0  
+              Runoff_02=Runoff_02/gridWidth*10.0
+              Runoff_03=Runoff_03/gridWidth*10.0  
 cccz
-              CumRain=CumRain/EOMult/poprow*100.0D0
-              Flux_drain=Flux_drain/EOMult/poprow*100.0D0   !cccz unit [water:width(cm)*flux(cm/day)*timestep(day)]/EOMult[0.5 or 1]/[population/distance(cm)]
+              CumRain=CumRain/gridWidth*10.0
+              Flux_drain=Flux_drain/gridWidth*10.0   !cccz unit [water:width(cm)*flux(cm/day)*timestep(day)]/gridWidth *10 mm/cm
               CumulativeFlux=CumulativeFlux+Flux_drain
 
-CDT distribute runoff back into Q This makes it uniform. implement this later
-
-!c         do n=1, NumBP
-!c           ROForInfil(n)=Runoff*Width(n)
-!c          end do
           
 * dt - value of awupss and pot_et are per half slab as calclated
-* in the water uptake code. EOMULT accounts for whether the slab
-* is a full or half (plant in the middle - full or edge -half)
-* multiply by 1/poprow * 100  to multiply be the amount of space between 
-* plants (cm) the scales the slab to the area corresponding to one
-* plant - hence the output is per plant
+* in the water uptake code. 
+* output is mm/cm2
 * 
 
        
-           CurrentTrans=(AWUPSS-ActualTrans1)/EOMult/poprow*100.0D0
-           p_ET=(potential_T-pot_ET)/EOMult/poprow*100.0D0
+           CurrentTrans=(AWUPSS-ActualTrans1)/gridWidth*10.0
+           p_ET=(potential_T-pot_ET)/gridWidth*10.0
 c pot_ET_EO is the EO summation from the previous time step.           
            p_ET_EO=potential_T_EO-pot_ET_EO          ! already per plant, summation of EO from hourly weather and wateruptake
                                                      ! pot_ET_EO is Potential_T_EO from the previous time step
@@ -423,7 +410,8 @@ C EO is the potential transpiration rate from Penman adjusted for plant cover, c
 c  potential_T_EO is the summation of EO which is soil surface evap from EO and the Penman equation.vi
 c EOR_p is a rough estimate of potential ET. p_ET is a better estimate using time step to 
 c  integrate rather than use an average
-           EOR_p=EOR*period/EOMult/poprow*100.0D0 ! EOR comes from ET_demand from plant
+c EOR is mm/cm2
+           EOR_p=EOR*period/gridWidth*10.0 ! EOR comes from ET_demand from plant
  
 
              
@@ -439,16 +427,14 @@ C
           SeasonPotenSoilEvap=SeasonPotenSoilEvap+
      &       PotentialSoilEvaporation
           SeasonActualSoilEvap=SeasonActualSoilEvap+ActualSoilEvap
-C        Nitrogen flux conversion from g per slab to g per plant   
-         nitrogenFlux= nitrogenFlux/EOMult/poprow*100.0D0
+C        Nitrogen flux conversion from g per slab to kg/ha   
+         nitrogenFlux= nitrogenFlux/gridWidth*10**5        !10^5= 10^4 m2/ha x 10^4 cm2/m2 / 10^3 g/kg
 C     Gas unit conversion to ugCo2/cm2
-          Surface_Gas_Flux=Surface_Gas_Flux/EOMult/poprow*100.0D0    ! Unit ugCo2 per plant area
+          Surface_Gas_Flux=Surface_Gas_Flux/gridWidth    ! Unit ugCo2 per plant area
           
          Write(83,10) t,Date,PotentialSoilEvaporation, 
      &               ActualSoilEvap,p_ET_EO,
      &              p_ET, CurrentTrans,CumRain,ActualInfil,FLuxAct,
-cccz DT: you changed the name "bottomflux" to "Flux_Drain"
-cccz     &              bottomFlux, Runoff,cover, PSIM, SeasonPotenSoilEvap,
      &              Flux_drain, nitrogenFlux, Runoff_02,cover, PSIM, 
      &              SeasonPotenSoilEvap,
      &              SeasonActualSoilEvap, SeasonPotenTranspiration,
@@ -536,7 +522,7 @@ C format 5 is water, 6 is roots Vy is the last on on this lin
      &     T152, A5,T165,A8,T176,A8 )   ! format for nodal data header
   6   Format (1x,A16,T20,A5,T36,A2,T46,A2,T56,A5,T65,A7,T78,A7, T90,A6,
      &        T102, A6, T112, A11, T124, A8, T136, A8)
- 10   Format (1x,F17.6,',', A15,',',9(F16.3, ','), F14.6, ',',
+ 10   Format (1x,F17.6,',', A15,',',9(F16.3, ','), F14.5, ',',
      &        11(F16.3, ','),F16.3)  !format for flux data
  13   Format (1x,F17.6,',',A15,',',15(F16.3, ','), F16.3)  ! format for second flux data [G06]
  20   Format (1x,24A16)              !format for flux header

@@ -120,24 +120,29 @@ csun: 2) using Q10 method
 
 csun gSink_root as [ug co2/cm3 air/day]
 csun RMassY(n) RMassM(n) root weigth in each cell g/cm^2
-csun alphaR: 0.032 mg 02.g-1.h-1 to 288ug Cho.g-1.day-1 to 115ug C g-1.day-1 This from VEEN, (1981)
-csun alphaR: 14.468 ug C.g-1.day-  This from Agro_IBIS
-csun alphaR: 800 ug C.g-1CH20.day- 320 ug C.g-1C.day at degree 10.
-csun Soilair(i):        [cm3air/cm3soil]
+
+csb  Unit of alphaR in the code is ugC/g CH2O/day 
+csun alphaR: 0.032 mg 02.g-1.h-1 to 288ug Cho.g-1.day-1 to 115 ugC/g CH2O/day This from VEEN, (1981)
+csun alphaR: 14.468 ug C.g-1.day-1  This from Agro_IBIS
+csun alphaR: 800  ugC/g CH2O/day. This is from Hybrid Maize model(Zhan et al., 2019)
+csb  alphaR: 1600 ugC/g CH2O/day. This is from Intercom Model (Kropff & Van Laar, 1993)
+csb  alphaR: Literature presents varying range of values for alphaR
+csb  alphaR: Needs calibration for the crop: All the above values are for Maize 
+
+csun Soilair(i):[cm3air/cm3soil]
 csun Tmpr(n) soil temperature
 csun Q10MR oomis and Amthor (1999) Crop Sci 39:1584-1596
-
 Csun need to get the air porosity through ThNew(NumNPD) 
 csun 2.65 is used as a rule of thumb based on the average bulk density of rock with no pore space.
 	
-       alphaR = 3000
+       alphaR = 1100                              !Calibrated value for Maize crop
 	 Q10MR =2.0
        Do i=1,NumNP
 csun young root respiration
-         gSink_rootY(i,1)=((RMassY(i))*alphaR*44/(12))*
-     &   (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10))
+         gSink_rootY(i,1)=((RMassY(i))*alphaR*44.0/(12.0))*
+     &   (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10.0))
 csun mature root respiration,assume half root respiration rate of young roots 	
-	   gSink_rootM(i,1)=((RMassM(i))*alphaR*0.5*44.0/(12))*
+	   gSink_rootM(i,1)=((RMassM(i))*alphaR*0.5*44.0/(12.0))*
      &    (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10.0))
 	  
 	   gSink_root(i,1) = gSink_rootM(i,1) +	gSink_rootY(i,1)

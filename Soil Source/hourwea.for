@@ -85,15 +85,14 @@ c inputs hourly data
       
       Parameter (PERIOD =1./24.)
       integer jday,m,DayOfYear,CurYear,Modnum, ThisYear,
-     &         isol
-      double precision St,t
+     &         isol, HOUR, iperd
+      double precision St,t, GAMMA_psy
       real Interval, HRAIN,HSR,HTEMP, HTEMPY,HWIND,Rel_Humid,
      &     BEERS 
       character*10 date
-      integer HOUR
       Common /weather/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
      &     HWIND(24), Rel_Humid(24),isol,Date1,ModNum,
-     &     Interval, TWET(24),TDRY(14), AVP(24), Gamma(24),
+     &     Interval, TWET(24),TDRY(24), AVP(24), GAMMA_psy(24),
      &     SVPW(24),TMIN, TMAX,BEERS(24)
       
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
@@ -101,7 +100,7 @@ c inputs hourly data
      &           SOLALT(24),SOLAZI(24),
      &           HTM(24)
       Dimension xS(NumBPD),iS(NumBPD),kS(NumBPD)
-      double precision GAMMA_psy(24)
+
       Data SDERP/0.3964E-0,0.3631E1,0.3838E-1,0.7659E-1,0.0000E0,
      & -0.2297E2,-0.3885E0,-0.1587E-0,-0.1021E-1/,PI /3.1415926/,
      &  TPI /6.2831852/,DEGRAD/0.017453293/,IPERD/24/
@@ -263,7 +262,7 @@ C
 C
 C FIND CORRECT DAY IN WEATHER FILE
 C
-      Open (5,file=WeatherFile,status='old',ERR=10)
+      Open (5,file=WeatherFile,status='old',ERR=9)
       im=im+1
       il=il+1
       Read (5,*,ERR=10)
@@ -271,7 +270,12 @@ C
       il=il+1
       Read (5,*,ERR=10)
 1111  il=il+1
-      Read (5,*,ERR=10) iDum, date, iDum
+      Read (5,*,ERR=10,iostat=IOSTAT) iDum, date, idum
+      if (iostat<0) then
+        write(*,*) 'Premature end of weather file'
+        stop
+      end if
+
       MDAY=julday(date)
 cdt changed from LE to LT since jday was always gt. time
       If (MDAY.LT.JDFRST) GO TO 1111
@@ -309,7 +313,12 @@ c
         Do m=1,24
           il=il+1
 C          Read(5,*,ERR=10) JDAY,HOUR, DATE1, (CLIMAT(i),i=1,NCD)
-          Read(5,*,ERR=10) JDAY, date, HOUR,  (CLIMAT(i),i=1,NCD)
+          Read(5,*,ERR=10,iostat=IOSTAT) JDAY, date, HOUR,  
+     &      (CLIMAT(i),i=1,NCD)
+            if (iostat<0) then
+              write(*,*) 'Premature end of weather file'
+              stop
+            endif
            JDAY=julday(date)
 c    SInce some routines need the day of the calendar year we need a variable to hold this
 C    since the julian day is referenced to a time longer in the past
@@ -496,9 +505,8 @@ cd   HSR is watts
         If ((DDIf.GT.0.0).OR.(DDIf.LT.0.0)) then
            WATTSM(IDAWN) = HSR(IDAWN)
            WATTSM(IDUSK) = HSR(IDUSK)
-
       ENDIf
-
+      
 c DT 10/12/2021 sometimes due to dst issues and weather station clocks,
 c  radiation between dawn and dusk  can be 0 so need to adjust WATTSM for this
        Do I = 1, IPERD
@@ -539,7 +547,7 @@ cdt added msw6 to if statement here
          If (MSW1.NE.1.and.MSW6.eq.0) then
             Do i=1,iperd
               AVP(i) = 0.61*EXP((17.27*TMIN)/(TMIN + 237.3))
-              GAMMA(i) = 0.0645
+              GAMMA_psy(i) = 0.0645
             enddo
 
           Else
@@ -554,20 +562,22 @@ C    http://www.pmel.org/HandBook/HBpage21.htm see this site for more info
 C    on using Dewpoint to calculate RH
 C     
                Do i=1, iperd
-                  SVPW(i) = 0.61*EXP((17.27*TWET(i))/(TWET(i) + 237.3))
+                  SVPW(i) = 0.61*EXP((17.27*TWET(i))
+     &              /(TWET(i) + 237.3))
 C
 C  CALCULATE THE HUMIDITY RATIO, D31, LATENT HEAT OF EVAPORATION,
 C  D32 AND THE PSYCHROMETRIC "CONSTANT"
 C
                   D31 = 0.622*(SVPW(i)/(101.3 - SVPW(i)))
                   D32 = 2500.8 - (2.37*TWET(i))
-                  GAMMA(i) = 0.62*(1.006 + (1.846*D31))
+                  GAMMA_psy(i) = 0.62*(1.006 + (1.846*D31))
      &                /((0.622 + D31)*(0.622 + D31)*D32)*101.3
 C
 C  CALCULATE ACTUAL WATER VAPOR PRESSURE
 C note that Teton's eqn is used for SVPW below
 C
-                  AVP(i) = SVPW(i) - (GAMMA(i)*(TDRY(i) - TWET(i)))
+                  AVP(i) = SVPW(i) - (GAMMA_psy(i)*(TDRY(i) 
+     &             - TWET(i)))
                enddo
            Endif !MSW1.eq.1
 
@@ -575,10 +585,11 @@ CDT
            if(MSW6.eq.1) then
               Do i=1,iperd
                 TMean=(TMax+TMin)/2.0
-                SVPW(i)= 0.61078*EXP((17.27*Tair(i))/(Tair(i) + 237.3))
+                SVPW(i)= 0.61078*EXP((17.27*Tair(i))
+     &              /(Tair(i) + 237.3))
                 D31 = 0.622*(SVPW(i)/(101.3 - SVPW(i)))
                 D32 = 2500.8 - (2.37*Tair(i))
-                GAMMA(i) = 0.62*(1.006 + (1.846*D31))
+                GAMMA_psy(i) = 0.62*(1.006 + (1.846*D31))
      &            /((0.622 + D31)*(0.622 + D31)*D32)*101.3
                 AVP(i)= Rel_Humid(i)*SVPW(i)
                enddo
@@ -884,14 +895,15 @@ C windspeed (u) was km/day here we use km/hour so you divide 1/160 by 24
 C gives you the .149
               D12 = max(1.0,2.0 - (2.0*COVER))
               If (D12.GE.1.0) D12 = 1.0
-              ESO = ((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
+              ESO = ((DEL(ITIME)/GAMMA_psy(ITIME)*RNS*3600.0/(2500.8
      &     - (2.3668*TAIR(ITIME))))
      &     + (VPD(ITIME)*109.375*(1.0 + (0.149*HWIND(ITIME)*D12))))
-     &      /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
-            fac1=((DEL(ITIME)/GAMMA(ITIME)*RNS*3600.0/(2500.8
-     &     - (2.3668*TAIR(ITIME))))) /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+     &      /((DEL(ITIME)/GAMMA_psy(ITIME)) + 1.0)
+            fac1=((DEL(ITIME)/GAMMA_psy(ITIME)*RNS*3600.0/(2500.8
+     &     - (2.3668*TAIR(ITIME))))) 
+     &       /((DEL(ITIME)/GAMMA_psy(ITIME)) + 1.0)
             fac2=(VPD(ITIME)*109.375*(1.0 + (0.149*HWIND(ITIME)*D12)))
-     &            /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+     &            /((DEL(ITIME)/GAMMA_psy(ITIME)) + 1.0)
 
 c   IF THE NODE IS EXPOSED THEN
 c
@@ -953,10 +965,10 @@ C
 C   CALCULATE POTENTIAL TRANSPIRATION RATE (g/m2/hour) FOR CROP ALLOWING FOR
 C   INCOMPLETE GROUND COVER
 C
-        EPO = ((DEL(ITIME)/GAMMA(ITIME)*RNC*3600.0/(2500.8
+        EPO = ((DEL(ITIME)/GAMMA_psy(ITIME)*RNC*3600.0/(2500.8
      &   - (2.3668*TAIR(ITIME))))
      &   + (VPD(ITIME)*109.375*(ROUGH +(0.149*WINDL))))
-     &   /((DEL(ITIME)/GAMMA(ITIME)) + 1.0)
+     &   /((DEL(ITIME)/GAMMA_psy(ITIME)) + 1.0)
 C
 C   CODE ADDED TO PREVENT DIVISION BY o
 C
@@ -1193,7 +1205,12 @@ cccz assign the new wind speed
 c      
       RETURN
 10    call errmes(im,il)
-      write(*,*) "Error in Weather File"
+      write(*,*) "Error in Weather File- either no more data or 
+     &  error in one of the records"
+      Stop
+ 9    Call ErrMes(im,il)
+      write(*,*) "cannot find weather file"
+      stop
       END
 C
      

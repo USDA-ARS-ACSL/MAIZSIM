@@ -3,7 +3,8 @@
       Include 'puweath.ins'
       Include 'puplant.ins'
 	Character*10 Sowing, Ending, Date4,Date1  ! date1 is dummy for beginDay until we modify the itnerface
-	Character*255 RootName,T1,T2
+	Character*256 RootName,T1,T2
+      Character*256 extract_path, path,logFile
       Character*80 Indates,test
       integer iapos, Quote_COUNT, begindate
       
@@ -17,41 +18,75 @@ c     for writing frequency to output
       cContentRootY=0.40
       nContentRootM=0.012
       nContentRootY=0.19
+      im=1
+      logFile=""
       open(9,file=RunFile,status='old', ERR=10)
-	read(9,5)WeatherFile
-	read(9,5)TimeFile
-	read(9,5)BiologyFile
-	read(9,5)ClimateFile
-	read(9,5)NitrogenFile
-	read(9,5)SoluteFile
-      read(9,5)ParamGasFile
-	read(9,5)SoilFile
-      read(9,5)MulchFile
-	read(9,5)ManagementFile
-      read(9,5)DripFile
-	read(9,5)WaterFile
-	read(9,5)WaterBoundaryFile
-	read(9,5)InitialsFile
-	read(9,5)VarietyFile
-	read(9,5)GeometryFile
-      read(9,5)NodeGeomFile   
-      read(9,5)MassBalanceFile
-	read(9,5)PlantGraphics
-      read(9,5)LeafGraphics 	
-       read(9,5)NodeGraphics   
+	read(9,5,err=6)WeatherFile
+      im=im+1
+	read(9,5,err=6)TimeFile
+         im=im+1
+	read(9,5,err=6)BiologyFile
+         im=im+1
+	read(9,5,err=6)ClimateFile
+         im=im+1
+	read(9,5,err=6)NitrogenFile
+         im=im+1
+	read(9,5,err=6)SoluteFile
+         im=im+1
+      read(9,5,err=6)ParamGasFile
+         im=im+1
+	read(9,5,err=6)SoilFile
+         im=im+1
+      read(9,5,err=6)MulchFile
+         im=im+1
+	read(9,5,err=6)ManagementFile
+         im=im+1
+      read(9,5,err=6)IrrigationFile
+         im=im+1
+      read(9,5,err=6)DripFile
+         im=im+1
+	read(9,5,err=6)WaterFile
+         im=im+1
+	read(9,5,err=6)WaterBoundaryFile
+         im=im+1
+	read(9,5,err=6)InitialsFile
+         im=im+1
+	read(9,5,err=6)VarietyFile
+         im=im+1
+	read(9,5,err=6)GeometryFile
+         im=im+1
+      read(9,5,err=6)NodeGeomFile   
+         im=im+1
+      read(9,5,err=6)MassBalanceFile
+         im=im+1
+	read(9,5,err=6)PlantGraphics
+         im=im+1
+      read(9,5,err=6)LeafGraphics 	
+         im=im+1
+       read(9,5,err=6)NodeGraphics   
+          im=im+1
 C15    Continue 
       read(9,5)ElemGraphics
+         im=im+1
 C25    Continue
       read(9,5)SurfaceGraphics
+         im=im+1
 C35    Continue
       read(9,5)FluxGraphics
+         im=im+1
       read(9,5)OrganicMatterGraphics
+         im=im+1
 C45    Continue
-      read(9,'(A132)')MassBalanceFileOut
-      read(9,'(A132)')MassBalanceRunoffFileOut
-      read(9,'(A132)')MassBalanceMulchFileOut
+      read(9,'(A132)',err=6)MassBalanceFileOut
+         im=im+1
+      read(9,'(A132)',err=6)MassBalanceRunoffFileOut
+         im=im+1
+      read(9,'(A132)',err=6)MassBalanceMulchFileOut
+         im=im+1
 	close(9)
-      Open(4,file='2DSOIL03.LOG')
+      Path=extract_path(PlantGraphics)
+      logFile=trim(Path)//'2DSOIL03.LOG'
+      Open(4,file=logFile)
 c   end of temporary block
 c  These 4 variables are for the iterative solver Orthomin
       ECNVRG=1.0d-6
@@ -59,23 +94,33 @@ c  These 4 variables are for the iterative solver Orthomin
 	RCNVRG=1.0d-6
 	MaxItO=200
 	AutoIrrigateF=0
+      im=1
 c    Open and read initials file	
       Open(41, file=InitialsFile, status='old',err=9)
 	  read(41,*,err=8)
+        im=im+1
 	  read(41,*,err=8)
+         im=im+1
 	  read(41,*,err=8) PopRow,RowSP, PopArea, rowAng, 
      &           xBStem, yBStem, CEC, EOMult
+      im=im+1
         read(41,*,err=8)
+         im=im+1
         read(41,*,err=8) LATUDE, Longitude, Altitude
+         im=im+1
         read(41,*,err=8)  
+         im=im+1
 cdt 4/2015 fixed error here, variable was AutoIrrigate, added the 'F'        
 cccz change here according to "GAS branch"
 c        read(41,*,err=8) AutoIrrigateF
         read(41,*,err=8) AutoIrrAmt
+         im=im+1
         if (AutoIrrAmt.GT.0)  AutoIrrigateF=1
         
         read(41,*,err=8) 
+         im=im+1
         read(41,'(A80)',err=8) inDates
+         im=im+1
         beginDate=0
         date1='00/00/0000'
         write(test, '(A80)') inDates
@@ -89,8 +134,11 @@ c        read(41,*,err=8) AutoIrrigateF
           endif
   
         read(41,*,err=8)
+         im=im+1
         read(41,*,err=8)
+         im=im+1
         read(41,*,err=8) OutputSoilNo, OutPutSoilYes
+         im=im+1
        Close(41)
         if (OutPutSoilNo+OutPutSoilYes.gt.1) then
            Write(*,*) 'error in soil output flag'
@@ -137,7 +185,6 @@ c dt
       NvarBT=0
       NvarBG=0
       NShoot=0
-      im=0
     
         KXB(:)=0
         Width(:)=0.
@@ -154,7 +201,9 @@ c dt
       tatm=1.E+31
  5    format(A256)     
       Return
- 8    Write(*,*) 'Error in initials file'
+ 6    Write(*,*) 'Error in Run File on line:', im     
+      goto 11
+ 8    Write(*,*) 'Error in initials file on line:',im
       goto 11     
  9    Write(*,*) 'initials file not found'
       goto 11     
@@ -176,6 +225,27 @@ c dt
       return
       end
       
-      
+       function extract_path(filename)
+       character *256 filename, path, extract_path
+       integer :: i, len
+
+       len = len_trim(filename)
+       path = ""
+    ! Find the last occurrence of the directory separator '\'
+       
+       do i = len, 1, -1
+          if ((filename(i:i) == '\').OR.(filename(i:i) == '/')) then
+              path = filename(1:i)
+              if (filename(i:i) == '/') then   ! if windows
+                  path=path // '/'
+               else 
+                 path=path // '\'               ! if linux
+              end if
+             exit
+          end if
+       end do
+
+       extract_path = path
+       end function extract_path
        
         
