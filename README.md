@@ -10,7 +10,13 @@ Dennis Timlin, David Fleisher, and V.R. Reddy of the USDA-ARS
 others who have collaborated include:
 Yang Yang, now at Dow Agrosciences
 Annette Dathe Cornell University, Ithaca, NY
+ diffusive root model
 Jong-Ahn Chun APEC Climate Center, Korea
+ CO2 and water
+Sahila Beegum, Univ of Nebraska
+ gas transport and respiration
+Wenguang Sun, Colorado State Univ.
+ gas transport and respiration
 
 MAIZSIM is a mechanistic model of maize growth, development and yield. It is written in C++ (crop) and FORTRAN (soil). 
 
