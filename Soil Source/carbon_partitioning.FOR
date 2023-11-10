@@ -74,7 +74,6 @@ C
       Do n=1,NumNP
         YRL(n)=0.0D0                          ! length of young root in soil cell cm (old version)
         RGCF(n)=0.0D0                         ! root growth reduction factor
-        RUTDEN(n)=0.0D0                       ! length density of old root in soil cell cm/cm^2 (old version)
         iFavRoot(n)=0.0D0
 cccz start to move the nodeArea to GRID_BND file
 cccz        nodeArea(n)=0.0D0
@@ -428,6 +427,8 @@ c when LAI !=0, then the total resistance equals to resistance in the soil plus
 c resistance of the xylum; here the xylum resistance is adopted as a constant: 6.67*1-E-3 molH2O m-2(leaf) s-1 MPa-1
 c to convert this value into the resistance value for a slab, we have to divide it by LAI and the area of the slab and 
 c convert MPa into bar, this is how we have 19.26//(LAI*rowsp)
+c WUPM is rate of water uptake by mature roots g/day
+c WUPN water uptake by new roots
             IF(LAI.EQ.0.0) Then
               WUPM(n) = (((PSIS(n) - PSILT)*nodeArea(n)
      &         *RDenM(n))/(SR(n) + RRRM + RVR(n)))
@@ -454,6 +455,8 @@ c convert MPa into bar, this is how we have 19.26//(LAI*rowsp)
              END IF       
 
 C  NOTE 10.17
+c WUPMS total water uptake by mature roots
+c WUPSI sum of water potential * rate of extraction in node
              WUPMS = WUPMS +(WUPM(n) + WUPN(n))
              WUPSI = WUPSI +(PSIS(n)*(WUPM(n) + WUPN(n)))
               
@@ -466,9 +469,9 @@ C  RATE DURING PAST PERIOD. START WITH SOIL CELL WHERE CONDITIONS
 C  ARE MOST FAVORABLE FOR GROWTH
 C
 
-      PCRTS = 0.       ! potential root carbon use  g day-1
-      WUPTS = 0.       ! new root water uptake carbon all to root   g day-1
-      WUPRS = 0.
+      PCRTS = 0.       ! potential total root carbon use  g day-1 could include pcrq
+      WUPTS = 0.       ! new root water uptake when all carbon goes to the root   g day-1
+      WUPRS = 0.       !rate if water uptake when shoot growth potential has been satisfied.
       SW10 = 0
       DO 90, n=1,NumNP
         n1=iFavRoot(n)
@@ -480,7 +483,7 @@ C   DETERMINE TOTAL WATER UPTAKE BY ALL NEW ROOTS AND WEIGHTED
 C   AVERAGE SOIL WATER POTENTIAL WHEN:
 C   I. ROOTS GET ALL THE CARBON TRANSLOCATED
 C
-        WUPT(n1)=0.0
+        WUPT(n1)=0.0    ! rate of water uptake when water potential prevents shoot growth
         IF(LAI.EQ.0.0) Then
         WUPT(n1) = (((PSIS(n1) - PSILT)*DRL(n1))
      &   /(SR(n1) + RRRY + RVR(n1)))

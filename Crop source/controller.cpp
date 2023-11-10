@@ -383,7 +383,9 @@ int CController::run(const TWeather & wthr) //todo pass gas exchange parameters 
 		MaxRootDepth=        wthr.MaxRootDepth;
 		AvailableWater=      wthr.ThetaAvail;
 		outputToCropFile();
+#ifndef _INTERFACE
 		outputToLeafFile();
+#endif
 		outputToSummary();
 #ifndef _DEBUG_FILE
 				if (plant->get_develop()->Germinated()) outputToDebug();
@@ -452,7 +454,7 @@ void CController::outputToCropFile()
 			
 				<< setw(8) << setprecision(4) << plant->get_Pn() << comma   //g Carbo per plant per hour
 				<< setw(8) << setprecision(4) << plant->get_Pg() << comma
-				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() << comma //dt 03/2011 added to better calc mass balance g carbon per plant per hour
+				<< setw(8) << setprecision(4) << plant->get_MaintenanceRespiration() << comma //dt 03/2011 added to better calc mass balance g biomass per plant per hour
 				<< setw(8) << setprecision(4) << av_gs << comma  //return average stomatal conductance Yang 10/31/06
 #ifndef _INTERFACE
 				<< setw(12) << setprecision(3) << plant->get_sunlit_LAI() << comma

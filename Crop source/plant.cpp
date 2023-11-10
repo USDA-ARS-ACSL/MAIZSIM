@@ -586,7 +586,7 @@ void CPlant::calcGasExchange(const TWeather & weather, const TGasExSpeciesParam&
 	//psi_l = (sunlit->get_psi()*sunlitLAI + shaded->get_psi()*shadedLAI)/LAI;
 	this->VPD = sunlit->get_VPD();
 	// photosynthesis_gross is umol CO2 m-2 leaf s-1
-	// in the following we convert to g C plant-1 per hour
+	// in the following we convert to g CO2 plant-1 per hour
 	assimilate = (photosynthesis_gross*CO2_MW/1.0e6)*(60.0*initInfo.timeStep)/initInfo.plantDensity; // grams CO2 per plant per hour
 	photosynthesis_gross=photosynthesis_gross*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
 	photosynthesis_net=  photosynthesis_net*CH2O_MW/1.0e6*(60.0*initInfo.timeStep)/initInfo.plantDensity; //grams carbo per plant per hour
@@ -939,7 +939,8 @@ void CPlant::calcMaintRespiration(const TWeather & w)
 	double q10fn = pow(Q10MR,(w.airT - 20.0)/10.0); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
 	                                            // total mass. Implement later after testing
 	double stem_coef = __min(1.0,droppedLeafmass / leafMass) ;
-	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass-stem_coef*stemMass))*dt;// gCH2O dt-1, agefn effect removed. 11/17/14. SK.
+	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass-stem_coef*stemMass))*dt;// gCH2O dt-1, agefn effect remove age function added
+	                                                                                         // as a proportion of green area DT.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
 // this function calculates an estimate of the Red to Far red light ratio from sunlit and shaded ET. This 

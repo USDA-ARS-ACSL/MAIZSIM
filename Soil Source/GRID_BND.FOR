@@ -167,7 +167,7 @@ C
 C
 C  Area of elements and bandwidth MBand
 C
-      lOrt=.false.
+      lOrt=.true.
       lConst=.true.
       MBand=1
       xMul=1.
@@ -224,11 +224,8 @@ cccz do the computaiton of nodeArea here, moved from the carbon_partitioning
       
       
       MBand=MBand+1
-      if(MBand.gt.MBandD.or.(2*MBand-1.gt.MBandD)) lOrt=.true.
-	
+      	
       If(.not.lConst) IJ=NumNP
-CDT note SWMS_2D used 200   (lChem.and. -> this went before 2 and after .or)
-      if(MBand.gt.10.or.NumNP.gt.200) lOrt=.true.
 C
 C  Numbers of boundary nodes where boundary conditions are not constant
 C

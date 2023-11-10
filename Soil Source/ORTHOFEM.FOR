@@ -166,13 +166,16 @@
 *     Determine independent adjacency within each element
 *     version for SWMS_2D
 
-      do 12 i=1,NumNP
-        IADN(i)=0
-        IADD(i)=0
-        do 11 j=1,MaxNB
-          IAD(j,i)=0
-11      continue
-12    continue
+      IADN = 0
+      IADD = 0
+      IAD  = 0
+!      do 12 i=1,NumNP
+!        IADN(i)=0
+!        IADD(i)=0
+!        do 11 j=1,MaxNB
+!          IAD(j,i)=0
+!11      continue
+!12    continue
 
       do 14 e=1,NumEl
         NCorn=4
@@ -394,7 +397,7 @@ C GR
 
       SUBROUTINE ORTHOMIN (R,C,GT,NN,MAXNB,MAXNN,IAD,IADN,IADD,B,VRV,
      !                     RES,RQI,RQ,Q,QI,RQIDOT,ECNVRG,RCNVRG,ACNVRG,
-     !                     NORTH,MNORTH,MAXIT)
+     !                     NORTH,MNORTH,MAXIT, modNum)
 
 *     ORTHOMIN OR CONJUGATE GRADIENT ACCELERATION/SOLUTION
 
@@ -405,6 +408,7 @@ C GR
 *     REQUIRES SUBROUTINES LUSOLV,MATM2,SAXPYK,SCOPY,SCOPYK 
 
       IMPLICIT REAL*8 (A-H,O-Z)
+      integer modnum
       DIMENSION R(MAXNB,NN),C(NN),GT(NN),IAD(MAXNB,NN),IADN(NN),
      !          IADD(NN),B(MAXNB,NN),VRV(NN),RES(NN),RQI(MAXNN,MNORTH),
      !          RQ(NN),Q(NN),RQIDOT(MNORTH),QI(MAXNN,MNORTH)
@@ -542,6 +546,7 @@ C GR
 
       WRITE (* ,602) MAXIT,RESMAX,XRATIO,DXNORM
       WRITE (70,602) MAXIT,RESMAX,XRATIO,DXNORM
+      write (*,*) 'modNum=',modNum
 
  602  FORMAT (///5X,'ORTHOMIN TERMINATES -- TOO MANY ITERATIONS',
      *          /8X,'MAXIT  = ',I5,
@@ -574,7 +579,7 @@ C GR
       DIMENSION IAD(MAXNB,NN),IADN(NN),IADD(NN),B(MAXNB,NN),VRV(NN)
 
 *     LOWER INVERSION
-
+    
       DO 20 I=1,NN
         SUM = VRV(I)
         K = IADD(I)
@@ -582,9 +587,9 @@ C GR
           INODE = IAD(J,I)
           SUM = SUM - B(J,I)*VRV(INODE)
    30   CONTINUE
-
+   
         VRV(I) = B(K,I)*SUM
-
+   
    20 CONTINUE
 
 *     UPPER INVERSION
@@ -637,30 +642,43 @@ C GR
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION R(NN),B(NN)
 
-      SDOT = 0.0D0
-      DO 100 L=1,NN
-        SDOT = SDOT + R(L)*B(L)
-100   CONTINUE
+      SDOT= SUM(R * B)
+!      SDOT = 0.0D0
+!      DO 100 L=1,NN
+!        SDOT = SDOT + R(L)*B(L)
+!100   CONTINUE
 
       RETURN
       END
 
 ************************************************************************
 
-      FUNCTION SDOTK (NN,K,R,B,MAXNN,MNORTH)
+!      FUNCTION SDOTK2 (NN,K,R,B,MAXNN,MNORTH)
+!
+!*     OBTAIN DOT PRODUCT OF R AND B
+!
+!      IMPLICIT REAL*8 (A-H,O-Z)
+!      INTEGER MaxNN, MNORTH    
+!      DIMENSION R(MAXNN,MNORTH),B(NN)
+!
+!      SDOTK2 = 0.0D0
+!      DO 100 L=1,NN
+!        SDOTK2 = SDOTK2 + R(L,K)*B(L)
+!100   CONTINUE
+!
+!      RETURN
+!      END
+      
+      FUNCTION SDOTK(NN, K, R, B,MAXNN, MNORTH) 
 
-*     OBTAIN DOT PRODUCT OF R AND B
+      IMPLICIT NONE
 
-      IMPLICIT REAL*8 (A-H,O-Z)
-      DIMENSION R(MAXNN,MNORTH),B(NN)
+      INTEGER :: NN, K, MAXNN, MNORTH       
+      REAL*8 :: SDOTK, R(NN, *), B(NN)
 
-      SDOTK = 0.0D0
-      DO 100 L=1,NN
-        SDOTK = SDOTK + R(L,K)*B(L)
-100   CONTINUE
+      SDOTK = SUM(R(:, K) * B)
 
-      RETURN
-      END
+      END FUNCTION SDOTK
 
 ************************************************************************
 
@@ -672,10 +690,11 @@ C GR
       DIMENSION R(NN)
 
       SNRM = 0.0D0
-      DO 100 L=1,NN
-        TEMP = DABS(R(L))
-        IF (TEMP.GT.SNRM) SNRM = TEMP
-100   CONTINUE
+      SNRM = MAXVAL(DABS(R))
+ !     DO 100 L=1,NN
+ !       TEMP = DABS(R(L))
+ !     IF (TEMP.GT.SNRM) SNRM = TEMP
+ !100   CONTINUE
 
       RETURN
       END
@@ -689,29 +708,37 @@ C GR
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION FX(MAXNN,MNORTH),FY(NN)
 
-      IF (NN.GT.0) THEN
-        DO 100 I=1,NN
-           FY(I) = SA*FX(I,K) + FY(I)
-100     CONTINUE
-      ENDIF
+       IF (NN > 0) THEN
+          FY(1:NN) = SA * FX(1:NN, K) + FY(1:NN)
+        ENDIF
+
+!      IF (NN.GT.0) THEN
+!        DO 100 I=1,NN
+!           FY(I) = SA*FX(I,K) + FY(I)
+!100     CONTINUE
+!      ENDIF
 
       RETURN
       END
 
 ************************************************************************
-
       SUBROUTINE SCOPY (NN,FX,FY)
 
 *     COPY VECTOR FX INTO VECTOR FY
 
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION FX(NN),FY(NN)
-
-      IF (NN.GT.0) THEN
-        DO 100 I=1,NN
-           FY(I) = FX(I)
-100     CONTINUE
-      ENDIF
+      
+       IF (NN.GT.0) THEN
+         FY=FX
+       ENDIF
+      
+!
+!      IF (NN.GT.0) THEN
+!        DO 100 I=1,NN
+!           FY(I) = FX(I)
+!100     CONTINUE
+!      ENDIF
 
       RETURN
       END
@@ -721,15 +748,17 @@ C GR
       SUBROUTINE SCOPYK (N,K,FX,FY,MAXNN,MNORTH)
 
 *     COPY VECTOR FX INTO VECTOR FY
-
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION FX(N),FY(MAXNN,MNORTH)
 
-      IF (N.GT.0) THEN
-        DO 100 I=1,N
-           FY(I,K) = FX(I)
-100     CONTINUE
-      ENDIF
+       IF (N > 0) THEN
+         FY(1:N, K) = FX(1:N)
+       ENDIF
+!      IF (N.GT.0) THEN
+!            DO 100 I=1,N
+!           FY(I,K) = FX(I)
+!100     CONTINUE
+!      ENDIF
 
       RETURN
       END

@@ -78,11 +78,11 @@ C**                                                                   **
       
       Parameter (PERIOD =1./24.)
       integer jday, m, DayofYear,CurYear, ModNum,ThisYear
-      Common /weather/ il,im,isol,ModNum, TMIN, TMAX,Gamma,
+      Common /weather/ il,im,isol,ModNum, TMIN, TMAX,Gamma_psy,
      &   BEERS(24)
       
       double precision St,t
-      real gamma
+      real gamma_psy
       character*10 date
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
      &          SARANG(24),
@@ -237,7 +237,12 @@ C
       il=il+1
       Read (5,*,ERR=10)
 1111  il=il+1
-      Read (5,*,ERR=10) iDum, date
+      Read (5,*,ERR=10,iostat=IOSTAT) iDum, date
+      if (iostat<0) then
+         write(*,*) 'Premature end of weather file'
+         stop
+      end if
+      
       MDAY=julday(date)
 cdt changed from LE to LT since jday was always gt. time
       If (MDAY.LT.JDFRST) GO TO 1111
@@ -267,7 +272,11 @@ c
         il=il-1
         BACKSPACE(5)
         il=il+1
-        Read(5,*,ERR=10) JDum,date,(CLIMAT(i),i=1,NCD)
+        Read(5,*,ERR=10, iostat=IOSTAT) JDum,date,(CLIMAT(i),i=1,NCD)
+        if (iostat<0) then
+           write(*,*) 'Premature end of weather file'
+           stop
+        end if
            JDAY=Julday(date)
 c    SInce some routines need the day of the calendar year we need a variable to hold this
 C    since the julian day is referenced to a time longer in the past
@@ -451,7 +460,12 @@ C
 C  READ NEXT DAY'S DATA FROM WEATHER FILE ***
 C
         il=il+1
-        Read (5,*,ERR=10) MDAY, date,(CLIMAT(i),i=1,NCD)
+        Read (5,*,ERR=10,iostat=IOSTAT) MDAY, date,(CLIMAT(i),i=1,NCD)
+        if (iostat<0) then
+          write(*,*) 'Premature end of weather file'
+          stop
+        endif
+
 c       Minimum tomorrow temperature
         MDAY=Julday(date)
         If (MDAY.LT.JDLAST) then
@@ -540,7 +554,7 @@ cdt added msw6 to if statement here
 
         If (MSW1.NE.1.and.MSW6.eq.0) then
           AVP = 0.61*EXP((17.27*TMIN)/(TMIN + 237.3))
-          GAMMA = 0.0645
+          GAMMA_psy = 0.0645
         Else
 cdt
            if(MSW1.eq.1) then      
@@ -555,12 +569,12 @@ C  D32 AND THE PSYCHROMETRIC "CONSTANT"
 C
           D31 = 0.622*(SVPW/(101.3 - SVPW))
           D32 = 2500.8 - (2.37*TWET)
-          GAMMA = 0.62*(1.006 + (1.846*D31))
+          GAMMA_psy = 0.62*(1.006 + (1.846*D31))
      &   /((0.622 + D31)*(0.622 + D31)*D32)*101.3
 C
 C  CALCULATE ACTUAL WATER VAPOR PRESSURE
 C
-          AVP = SVPW - (GAMMA*(TDRY - TWET))
+          AVP = SVPW - (GAMMA_psy*(TDRY - TWET))
 C _todo   Calculate Relative humidity here if it is not input
         Endif !if MSW!.eq.1
 
@@ -576,7 +590,7 @@ C Also calculate TMean
 
                 D31 = 0.622*(SVPW/(101.3 - SVPW))
                 D32 = 2500.8 - (2.37*TMean)
-                GAMMA = 0.62*(1.006 + (1.846*D31))
+                GAMMA_psy = 0.62*(1.006 + (1.846*D31))
      &          /((0.622 + D31)*(0.622 + D31)*D32)*101.3
                 AVP= Rel_Humid*SVPW
           endif   ! end MSW6.eq.1
@@ -891,10 +905,10 @@ C gives you the .149
 C See eqn 5.11 of http://mepas.pnnl.gov/mepas/formulations/source_term/5_0/5_13/5_13.html
               D12 = max(1.0,2.0-(2.0*COVER))
               If (D12.GE.1.0) D12 = 1.0
-              ESO = ((DEL(ITIME)/GAMMA*RNS*3600.0/(2500.8
+              ESO = ((DEL(ITIME)/GAMMA_psy*RNS*3600.0/(2500.8
      &     - (2.3668*TAIR(ITIME))))
      &     + (VPD(ITIME)*109.375*(1.0 + (0.149*WIND*D12))))
-     &      /((DEL(ITIME)/GAMMA) + 1.0)
+     &      /((DEL(ITIME)/GAMMA_psy) + 1.0)
 
 c
 c  IF THE NODE IS EXPOSED THEN
@@ -961,10 +975,10 @@ C
 C   CALCULATE POTENTIAL TRANSPIRATION RATE FOR CROP ALLOWING FOR
 C   INCOMPLETE GROUND COVER units are grams per m2 per hour
 C
-        EPO = ((DEL(ITIME)/GAMMA*RNC*3600.0/(2500.8
+        EPO = ((DEL(ITIME)/GAMMA_psy*RNC*3600.0/(2500.8
      &   - (2.3668*TAIR(ITIME))))
      &   + (VPD(ITIME)*109.375*(ROUGH +(0.149*WINDL))))
-     &   /((DEL(ITIME)/GAMMA) + 1.0)
+     &   /((DEL(ITIME)/GAMMA_psy) + 1.0)
 C
 C   CODE ADDED TO PREVENT DIVISION BY o
 C
@@ -988,18 +1002,6 @@ c................... Precipitation and irrigation
       k=CodeW(n)
       If(K.eq.4.or.K.eq.-4) then
          VarBW(i,1)=RINT(ITIME)
-         
-cccz         
-c        if(x(n).eq.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*4.77D0   ! turn this on when do RFRH "compact soil mulch example"
-c              VarBW(i,1)=VarBW(i,1)*14.0D0   ! turn this on when do RFRH "plastic film mulch example"
-c        endif
-c        if(x(n).lt.30.0D0) then
-c              VarBW(i,1)=VarBW(i,1)*0.73D0   ! turn this on when do RFRH "compact soil mulch example"
-c        endif
-        
-cccz 
-         
        If(NumSol.ne.0) then
           do j=1,NumSol
 cdt was varbs(n,j)
@@ -1044,12 +1046,11 @@ c  AND THEIR LATERAL COORDINATES
 c
       Do 95 i=1,ic
         PSh=FSh(i,xBSTEM,SHADE,xS,ic)
-        n_sur=kS(i)
-        n=KXB(n_sur)
+        n=kS(i)
         k=codeT(n)
-        Varbt(n_sur,4)=0.0
-        VarBT(n_sur,3)=0.0
-        VarBT(n_sur,2)=0.0
+        Varbt(kS(i),4)=0.0
+        VarBT(kS(i),3)=0.0
+        VarBT(kS(i),2)=0.0
 
         If (k.eq.-4) then
 C     if node is exposed         
@@ -1061,50 +1062,50 @@ C     if node is exposed
 * RNS*3600*24/10000 is total energy going to soil in J day-1 cm-2
 C           FELWR=max(0.0,(tmpr(i)-TairN)*40.6)
 c           If (VarBW(i,2).ge.0.0.and.RNS.gt.0.0) then
-                VarBT(n_sur,4)=RNS*3600.0*24.0/10000.0
+                VarBT(kS(i),4)=RNS*3600.0*24.0/10000.0
 
 *  calculate convected heat  if soil is warmer than air
 * FELWR should be zero when TAirN is warmer than soil
-              if(tmpr(n).GT.TAirN) then
-                VarBT(n_sur,2)=+FCSH+FELWR
-                VarBT(n_sur,3)=VarBT(n_sur,2)*TAirN
+              if(tmpr(kS(i)).GT.TAirN) then
+                VarBT(kS(i),2)=+FCSH+FELWR
+                VarBT(kS(i),3)=VarBT(kS(i),2)*TAirN
               endif
 C See if sensible heat transport works here in canopy              
               TFac=((0.058+1.7e-4*TAirN)+
      !            (0.052*EXP(.058*TAirN)))*0.004184*3600.0*24.0
-               VarBT(n_sur,2)=VarBT(n_sur,2)+TFac
-               VarBT(n_sur,3)=VarBT(n_sur,3)+TFac*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)+TFac
+               VarBT(kS(i),3)=VarBT(kS(i),3)+TFac*TairN
 
          else
                     
 *  the amount of heat added to the soil
 *     is determined by air temperature.
 *  units are millcal cm-2 sec-1 C-1
-               VarBT(n_sur,2)=((0.058+1.7e-4*TAirN)+
+               VarBT(kS(i),2)=((0.058+1.7e-4*TAirN)+
      !                  (0.052*EXP(.058*TAirN)))
 * the first term is thermal conductivity of the air. 
 * the second term is the conductivity of water vapor
 * Change units to Joules cm-2 d-1
 
-               VarBT(n_sur,2)=VarBT(n_sur,2)*0.004184*3600.0*24.0
-               VarBT(n_sur,3)=VarBT(n_sur,2)*TairN
+               VarBT(kS(i),2)=VarBT(kS(i),2)*0.004184*3600.0*24.0
+               VarBT(kS(i),3)=VarBT(kS(i),2)*TairN
 
 Cdt and a part for radiative transfer               
-               if(tmpr(n).GT.TAirN) then
-                 VarBT(n_sur,2)=VarBT(n_sur,2)+(FCSH+FELWR)
-                 VarBT(n_sur,3)=VarBT(n_sur,3)+(FCSH+FELWR)*TAirN
+               if(tmpr(kS(i)).GT.TAirN) then
+                 VarBT(kS(i),2)=VarBT(kS(i),2)+(FCSH+FELWR)
+                 VarBT(kS(i),3)=VarBT(kS(i),3)+(FCSH+FELWR)*TAirN
                   endif
 c assume 5% of radiation reaches soil surface through canopy              
               fact=1.0-BEERS(ITIME)
               if (fact.LE.0) fact=0
               if (fact.GT.1.0) fact=1.0
-              VarBT(n_sur,4)=fact*RNS*3600.0*24.0/10000.0
+              VarBT(kS(i),4)=fact*RNS*3600.0*24.0/10000.0
               
 *  units are now J cm-2 d-1
 * end if for crop canopy
           Endif
  
-          VarBT(n_sur,1)=TAirN
+          VarBT(kS(i),1)=TAirN
         Endif
 95    Continue
 C ...............End of heat balance

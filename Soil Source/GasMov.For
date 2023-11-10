@@ -87,7 +87,7 @@ c
           B(i) =0.                            ! Coefficient vector
           Gc(i)=0.
           Sc(i)=0.
-          g_1(1,jjj)=g(i,jjj) 
+          g_1(i,jjj)=g(i,jjj) 
           If(lOrt) B1(i)=g(i,jjj)             ! Nodal gas concentration in ug/cm3 air
           If(epsi.lt.0.001D0) then
               if(lOrt) newjjj = IADD(i)
@@ -273,7 +273,7 @@ c  Solve the global matrix equation for transport
              call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,
      !	            IADN,IADD,A1,VRV,
      !                RES,RQI,RQ,QQ,QI,RQIDOT,ECNVRG,RCNVRG,ACNVRG,4,
-     !                MNorth,MaxItO)
+     !                MNorth,MaxItO,4)
 
         Else
 c  Implicit formulation

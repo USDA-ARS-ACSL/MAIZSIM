@@ -28,10 +28,6 @@
 C       
 C SetSurfaceD --  reading daily weather
 C SetSurfaceH --  reading hourly weather
-       if (time.gt.38838.00) then
-        iii=1
-        endif
-        !write(*,*) time
       if ((HourlyWeather+DailyWeather.gt.1).or.
      !   ((HourlyWeather+DailyWeather).eq.0))then
               Write (*,*) "error in weather file type"
@@ -41,6 +37,7 @@ C SetSurfaceH --  reading hourly weather
       Call SetTDB()
       Call AutoIrrigate()
       Call Management()
+      Call Irrigation()
 	Call TillageProcess
 c	Call Drip()
 

@@ -482,7 +482,7 @@ c
         call ILU (A,NumNP,MBandD,IAD,IADN,IADD,A1)
         call OrthoMin(A,B1,B,NumNP,MBandD,NumNPD,IAD,IADN,IADD,A1,VRV,
      !                RES,RQI,RQ,QQ,QI,RQIDOT,ECNVRG,RCNVRG,ACNVRG,0,
-     !                MNorth,MaxItO)
+     !                MNorth,MaxItO,1)
 	endif
       if (.not.lOrt) then 
 c*   Reduction

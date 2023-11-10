@@ -128,11 +128,13 @@
 
 //elements
  struct ElementCommon{
-	       int    MatNumE[NumElD];
+	      
 	       float Sink[NumNPD], cSink[NumSD][NumNPD],
                  gSink[NumGD][NumNPD],tSink[NumNPD], 
-                 RTWT[NumElD],RUTDEN[NumNPD];
-		   
+                 RTWT[NumNPD], 
+			     RMassM[NumNPD],RDenM[NumNPD],
+			     RMassY[NumNPD], RDenY[NumNPD] ;
+		    int    MatNumE[NumElD];
  };
 
  //boundary
@@ -174,7 +176,7 @@
 	           char WeatherFile[256], TimeFile[256], BiologyFile[256],
                ClimateFile[256], NitrogenFile[256], SoluteFile[256],
                ParamGasFile[256],SoilFile[256], 
-               ManagementFile[256], DripFile[256],
+               ManagementFile[256],IrrigationFile[256],DripFile[256],
                WaterFile[256], WaterBoundaryFile[256], 
                GraphicsFile[256], InitialsFile[256],VarietyFile[256],
 			   NodeGraphics[256],ElemGraphics[256],NodeGeomFile[256],

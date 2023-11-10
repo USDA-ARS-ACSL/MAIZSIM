@@ -26,7 +26,13 @@ C
 c     
 C
 CYAP  No Plant = No Root Activity
-      If((NShoot.eq.0).OR.(LAI.lt.0.0001)) Return
+CDt setting all water sinks to 0 after this point. if another water 
+c   sink source is added later, this will have to be modified. now 
+c   we assume all water uptake is only by the plants.
+      If((NShoot.eq.0).OR.(LAI.lt.0.0001)) then
+        Sink(:)=0.0
+        Return 
+      endif
 CYAPEND
       
 

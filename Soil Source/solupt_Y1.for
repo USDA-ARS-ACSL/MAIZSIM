@@ -95,7 +95,10 @@ c     $     young     old    young     old      sum       sumSink'
 103		format(a) 
       Endif
       
-      If (NShoot.eq.0) return
+      If (NShoot.eq.0) then
+          csink(:,1) =0.0
+          return
+       endif
       
       if(ITIME.EQ.1) iflag =  1
       SIncrSink = 0.0
