@@ -50,7 +50,7 @@ local.properties
 # User-specific files
 *.user
 *.sln.docstates
-*.u2d
+**/*.u2d
 
 # Build results
 
