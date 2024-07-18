@@ -3,7 +3,7 @@
 //#using <mscorlib.dll>
 
 CEar::CEar(void)
-:COrgan(), totalKernels(0), seedWeight(0),sheathWeight(0),cobWeight(0)
+	:COrgan(), totalKernels(0), seedWeight(0), sheathWeight(0), cobWeight(0), grainWeight(0)
 {
 }
 

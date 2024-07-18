@@ -81,7 +81,7 @@ public:
 	bool Emerged() {return emergence.done;}
 	bool TasselInitiated() {return tasselInitiation.done;}
 	bool Tasseled() { return tasselFull.done;}
-	bool Flowered() {return anthesis.done;}
+	bool Flowered() {return anthesis.done;} //not used yet - may be a repeat of silked
 	bool Silked() {return silking.done;}
 	bool GrainFillBegan() {return beginGrainFill.done;}
 	bool Matured() {return maturity.done;}

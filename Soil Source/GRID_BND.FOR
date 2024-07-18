@@ -18,8 +18,9 @@ cccz some parameter (constant) in the Pubsurface.ins
       NH4mass_2_Nmass=14.0067D0/18.039D0
       
 csb: following are for converting the ppm to ugco2/cm3 air. This value needs to be added for all the gases      
-      ppm_to_ugGasCm3air(1)=509.6                            !See below text: convert the atm CO2 in [ppm]  to [ug co2/cm3 air] 
-      ppm_to_ugGasCm3air(2)=700.6                            !See below text: convert the atm O2 in [ppm]  to [ug O2/cm3 air]      
+      ugGasCm3air_to_ppm(1)=509.6                            !See below text: convert the atm CO2 in [ppm]  to [ug co2/cm3 air] 
+      ugGasCm3air_to_ppm(2)=700.6                            !See below text: convert the atm O2 in [ppm]  to [ug O2/cm3 air]      
+      ugGasCm3air_to_ppm(3)=508.6                            !See below text: convert the atm N2O in [ppm]  to [ug N2O/cm3 air]
 
 !Unit conversion of [ppm] to [micro gram co2/ cm3 of air]
 !1 ppm [parts per million on a volume basis]= 1 umol CO2/mol of air
@@ -31,16 +32,16 @@ csb: following are for converting the ppm to ugco2/cm3 air. This value needs to 
 !1ppm=(1/509.6) ug CO2/cm3 air    
       
 !For oxygen 
-!1umol O2= 32 ug O2
-!1ppm=4.46*10-5*32  ug O2/cm3 air =1428.57 ug O2 per cm3 air
+!1umol O2= 32 ug o2
+!1ppm=4.46*10-5*32  ug O2/cm3 air
 !1ppm=(1/700.6) ug O2/cm3 air 
-
+      
+!For N2O 
+!1umol N2O= 44.08 ug N2O
+!1ppm=4.46*10-5*44.08  ug N2O/cm3 air
+!1ppm=(1/508.6) ug N2O/cm3 air 
 csb: Gas transfer coefficient: surface gas flux change per unit gas content in the soil air at the soil surface (cm/day)
-Csb: This value will be different for different gases
-      GasTransfCoeff(1)=11920.
-      GasTransfCoeff(2)=15400.      
-      
-      
+
       
       im=20
       il=0
@@ -221,7 +222,7 @@ cccz do the computaiton of nodeArea here, moved from the carbon_partitioning
               nodeArea(k)=nodeArea(k)+Area(e)/4.0D0 
           Endif
       Enddo
-      
+
       
       MBand=MBand+1
       	
@@ -241,8 +242,17 @@ C
         NVarBG=0                                  ! For now since we take the boundary CO2 from the weather file itself
       Enddo
 
+C calculate total width of surface and bottom boundary nodes
+C for scaling fluxes 
+C at this point we assume the that bottom and top boundaries have the same width
+      gridWidth=0.0
+      do i=1, nsurf
+         gridWidth=gridWidth+width(i)
+      end do 
+      
+      
         NumSol=1
-        NumG=2                                    ! For now, only 2 gas is read (co2 and o2), this should be added as a input variable before reading the intial gas concentrations
+
         im=450
         il=0
       Open(41,File=NodeGeomFile,ERR=10)
@@ -270,7 +280,7 @@ cccz ---------------------------------------------------------------------------
           il=il+1
           Read(41,*,ERR=10)i,Nh(i),Ch(i),NL(i),CL(i),Nm(i),Cm(i),NNH4(i)
      &      ,(Conc(i,jjj),jjj=1,NumSol),Tmpr(i),hNew(i),
-     &      (g(i,jjj),jjj=1,NumG), RTWT(i)                         ! g(i,jjj):Read the initial co2 concentration in the soil
+     &      (g(i,jjj),jjj=1,NumG), RTWT(i)                         ! g(i,jjj):Read the initial CO2, O2 and N2O concentration in the soil
           Ch_old(i)=Ch(i)
           Nh_old(i)=Nh(i)
           CL_old(i)=CL(i)
@@ -304,7 +314,7 @@ cccz ---------------------------------------------------------------------------
       
       Do j=1,NumNP
           Do jjj=1,NumG
-                  g(j,jjj)= g(j,jjj)/ppm_to_ugGasCm3air(jjj)   !jjj=1, CO2 gas; jjj=2, O2 gas convert the initial concentration of CO2 or O2 in [ppm]  to [ug co2 or O2 /cm3 air]               
+                  g(j,jjj)= g(j,jjj)/ugGasCm3air_to_ppm(jjj) !jjj=1,2,3: CO2,O2, N2O:  gas convert the initial concentration of CO2 or O2 or N2O in [ppm]  to [ug co2 or O2 /cm3 air]               
           end do
       end do
 

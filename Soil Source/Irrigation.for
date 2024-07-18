@@ -29,6 +29,8 @@ c
           ! Reading the irrigation details
           Open(40,file=IrrigationFile,err=20)
           Read(40,*,Err=20)
+15        Read (40,'(A132)') InString
+          if (InString(1:14).ne.'[Sprinkler]') goto 15
           Read(40,*,Err=20)
           Read(40,*,Err=20)
           Read(40,*,Err=20) AvgIrrRate    ! Average irrigation rate [cm/hour]

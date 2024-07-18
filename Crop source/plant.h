@@ -37,7 +37,7 @@ public:
 	double get_mass() { return mass; }
 	double get_age() { return age; }
 	double get_CH2O() { return CH2O; }
-	double get_N() { return TotalNitrogen; } //Total N in plant mg plant-1
+	double get_TotalN() { return TotalNitrogen; } //Total N in plant mg plant-1
 	double get_Pg() { return photosynthesis_gross; }
 	double get_Pn() { return photosynthesis_net; }
 	double get_assimilate() { return assimilate; }
@@ -53,6 +53,7 @@ public:
 	double get_earMass() { return earMass; }
 	double get_cobMass() { return cobMass; }
 	double get_sheathMass() { return sheathMass; }
+	double get_grainMass() { return grainMass; }
 	double get_shootMass() { return shootMass; }
 	double get_rootMass() { return rootMass; }
 	double get_shootPart() { return shootPart; }
@@ -65,6 +66,7 @@ public:
 	double get_LeafArea() { return leafArea; }
 	double get_LeafN() { return leaf_N; }
 	double get_LeafNFraction() { return leaf_NFraction; }
+	double get_Leaf_N_Content() { return leaf_N_content; }
 	double get_HourlyNitrogenDemand() { return HourlyNitrogenDemand; }
 	double get_CumulativeNitrogenDemand() { return CumulativeNitrogenDemand; }
 	double get_HourlyNitrogenSoilUptake() { return HourlyNitrogenSoilUptake; }
@@ -91,7 +93,7 @@ public:
 	void set_age(double x) {age=x;}
 	void set_CH2O();
 	void set_Q10MR(double x) { Q10MR = x; }
-	void set_N(double x) {TotalNitrogen= x;} // Units are grams. Was scaled from mg in crop.cpp
+	void set_TotalN(double x) {TotalNitrogen= x;} // Units are grams per plant. Was scaled from mg in crop.cpp
 	void set_HourlyNitrogenDemand (double x) {HourlyNitrogenDemand=x;}
 	void set_CumulativeNitrogenDemand (double x) {CumulativeNitrogenDemand=x;}
 	void set_HourlyNitrogenSoilUptake(double x) {HourlyNitrogenSoilUptake=x;}
@@ -120,6 +122,7 @@ public:
 	void C_allocation(const TWeather&);
 	void calcRed_FRedRatio(const TWeather&);
 	void writeNote(const TWeather &);
+	void calcLeafN_Content();
     
 	
 
@@ -148,7 +151,7 @@ private:
 	double C_supply;
 	double N_effectOnKernal;  //N effect on kernel development - to slow it down
 	double C_ReserveLeaf;  //holds extra C in leaf - allows SLA to change
-	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass, cobMass, sheathMass; // this is redundant, but for convenience of access
+	double mass, seedMass,stemMass, leafMass, shootMass, rootMass, seedRootMass, earMass, activeLeafMass, droppedLeafmass, cobMass, sheathMass, grainMass; // this is redundant, but for convenience of access
 	double maintRespiration;
 	double sowingDay;
 	double age;
@@ -156,17 +159,17 @@ private:
 	double N_pool; //SK 8/20/10: Short-term N pool for remobilization, this should come mostly from senescing leaves and can be purged daily to active leaves, not implemented at the moment
 	double Q10MR; //Q10 for maintenance respiration
 	
-	double leafArea, droppedLfArea;
-	double currentDroppedLfArea;
+	double leafArea, droppedLfArea; // leaf area, m2 per plant
+	double currentDroppedLfArea; //leaf area dropped in the current time step
 	double previousDroppedlfArea;
-	double greenLeafArea,actualGreenLeafArea;
-	double senescentLeafArea;
-	double potentialLeafArea;
-	double potentialLeafAreaIncrease; //Increase in leaf area without carbon limitation YY
-	double PotentialLeafCarbonDemand; //Carbon demand for potential leaf growth without carbon limitation YY
+	double greenLeafArea,actualGreenLeafArea; //green leaf area, m2 per plant
+	double senescentLeafArea; // senescent leaf area, m2 per plant
+	double potentialLeafArea; // potential leaf area, m2 per plant with no stresses
+	double potentialLeafAreaIncrease; //Increase in leaf area without carbon limitation YY m-2 per plant
+	double PotentialLeafCarbonDemand; //Carbon demand for potential leaf growth without carbon limitation m-2 YY
 	
-	double photosynthesis_gross; // gros photosynthesis, umolCO2 m-2 s-1
-	double photosynthesis_net; // gros photosynthesis, umolCO2 m-2 s-1
+	double photosynthesis_gross; // gross photosynthesis, umolCO2 m-2 s-1
+	double photosynthesis_net; // gross photosynthesis, umolCO2 m-2 s-1
 	double assimilate; //assimilation flux, g CO2 per plant per timestep
 	double transpiration, transpirationOld; //current and previous values of transpiration - g per plant per hr
 	double VPD;
@@ -181,17 +184,17 @@ private:
     double rootPart_old;
 	double leafPart;   //g per plant carbohydrate partitioned to leaf
 
-	double TotalNitrogen;  //This is the total nitrogen content of the plant in mg plant-1
-	double HourlyNitrogenDemand;  // Nitrogen demand in mg N plant-1
-	double CumulativeNitrogenDemand;  // cumulativeNitrogen demand in mg N plant-1
-	double CumulativeNitrogenSoilUptake; // Nitrogen uptake from the soil mg N plant-1
-	double HourlyNitrogenSoilUptake;
+	double TotalNitrogen;  //This is the total nitrogen content of the plant in g plant-1
+	
+	double CumulativeNitrogenDemand;  // cumulativeNitrogen demand in g N plant-1
+	double CumulativeNitrogenSoilUptake; // cumulative Nitrogen uptake from the soil g N plant-1
+	double HourlyNitrogenSoilUptake;   // Nitrogen uptake from the soil g N plant-1 hour-1
+	double HourlyNitrogenDemand;  // Nitrogen demand in g N plant-1 hour-1
 	double leaf_NFraction; //records the fraction of nitrogen in leaves YY
 	double leaf_N; //total nitrogen in the leaves of a plant YY (grams N per plant)
 	double leaf_N_content; //leaf nitrogen content (per unit square meter) of a plant YY
-	double OptimalLeafN;       //mg N holds leaf N content that is optimal 
-	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio
-
+	double OptimalLeafN;       //g N holds leaf N content that is optimal not used now
+	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio g n per g biomass
 
 	
 	double emerge_gdd;//records thermal time needed for plant to emergy YY

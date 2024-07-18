@@ -173,6 +173,7 @@ c dt
 	gSink_OM=0.
 	gSink_rootY=0.
 	gSink_rootM=0.
+      gSink_N2O=0.
       
 
 * 
@@ -185,6 +186,7 @@ c dt
       NvarBT=0
       NvarBG=0
       NShoot=0
+      NumG=3                                    ! For now, only 3 gas is read (co2, o2, N2O)
     
         KXB(:)=0
         Width(:)=0.

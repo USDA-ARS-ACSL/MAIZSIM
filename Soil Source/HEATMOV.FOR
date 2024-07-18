@@ -54,7 +54,7 @@ c
 C      GR 1 line   
       newjjj = MBand
       Do 13 i=1,NumNP
-      
+C for the internal nodes A holds the heat capacity of the soil and the heat capacity of the water      
         Ac(i)= -(HCS(i)+cWat*(ThOld(i)*Alf+EPSI_Heat*Thnew(i)))
         Ds(i)=0.
         Fc(i)=0.
@@ -212,6 +212,9 @@ C     GR
 C
 C     Boundary conditions
 C
+      if (time> 38852.41) then
+        iii=1
+        endif
       Do 114 i=1,NumNP
       If(CodeT(i).ne.0) then
         Do 111 j=1,NumBP
@@ -235,28 +238,27 @@ c evaporation proceeds at a rate less than potential and extra
 c heat goes into the soil
 c The difference is the heat of vaporization value of the water
 c not evaporated.
-                 If(Q(i).le.0.0) then
+                 If(Q(i).lt.0.0) then
                     Qn=VarBT(j,4)*width(j)-abs(Q(i))*
      &                  (2500.8-2.3668*VarBT(j,1))
                   else
                     If(Q(i).ge.0) then
-                        Qn=VarBT(j,4)+VarBW(j,2) 
-     &                     *cWat
-c     &                     *(2500.8-2.3668*VarBT(j,1))
-cccz try this one
-c                   Qn=VarBT(j,4)-VarBW(j,2)*(2500.8-2.3668*VarBT(j,1))
-                        Qn=Qn*width(j) !goes with above take out width above, units are J day-1
-                     endif
-                endif
+c Z addition - account for the heat of vaporization of the part of the infiltrating water that evaporates
+                    Qn=VarBT(j,4)-VarBW(j,2)*(2500.8-2.3668*VarBT(j,1))
+                    Qn=Qn*width(j) !units are J day-1
+                     endif ! end of if Q(i) ge 0
+                endif ! end of if Q(i) le 0
 c Ph and Qh are two components of convected heat, Qh has air temperature
-c   incorporated into it.
-                Qh=VarBT(j,3)*Width(j)+Qn
-                Ph=VarBT(j,2)*Width(j)
-              Endif
-            Endif
+c   incorporated into it. there is no convection in the case of ponded water
+                if (hnew(i).le.0.000) then
+                  Qh=VarBT(j,3)*Width(j)+Qn
+                  Ph=VarBT(j,2)*Width(j)
+                Endif
+              Endif ! end of if CodeT(i) eq -6
+            Endif ! end of if CodeT(i) gt 0
             goto 112
-          Endif
-111     Continue
+          Endif ! end of if KXB(j) eq i
+111     Continue ! end of loop on boundary points
 *     Dirichlet boundary condition
 112     If(tKod.eq.1) then
           If(lOrt) then
@@ -272,12 +274,12 @@ c   incorporated into it.
         Endif
 *     Cauchy boundary condition
         If(tKod.eq.3) then
-          B(i)=B(i)+(alf*Ph*tmpr(i)-Qh)
+          B(i)=B(i)-(Qh-alf*Ph*tmpr(i))
 	    if(lOrt) newjjj=IADD(i)
           A(newjjj,i)=A(newjjj,i)-EPSI_Heat*Ph
         End if
-      End if
-114   Continue
+      End if ! end of if codeT(i) ne 0
+114   Continue ! end of loop on nodes
 c   pond   on the soil-atmosphere surface
 cMisha 18/9 2006
 c dt 3/31/2011 I added width to the A and B matrices
@@ -286,12 +288,23 @@ C  SURFACE POND FOR TRANSPORT
           n=KXB(i)
           k=CodeW(n)
          If (iabs(k).eq.4) then		
+C in the case of ponded infiltration, the amount of water that infiltrated (in cm) is the difference in head
+C between the two time steps times the width of the element (total amount for the element)
+C The units of A() is J/day/C and the units aof B() is J/day 
+C then when you get the solution from B/A the units are Temperature (C)
+
 			HNEWS=DMAX1(hNew(N),0.0D0)
 		    HOLDS=DMAX1(hold(N),0.0D0)
 		    newjjj=1	
-		    if(lOrt) newjjj=IADD(n)             
-              A(newjjj,n)=A(newjjj,n)+HNEWS/dt*cWat
-              B(n)=B(n)+tmpr(n)*HOLDS/dt*cWat
+		    if(lOrt) newjjj=IADD(n)   
+              if (((HNEWS.GT.0.0).AND.(HOLDS.GT.0.0))
+     &            .AND.(QAct(n).GT.0.0)) then
+                   qtemp=(hnews-holds)/dt*width(i)
+                   A(newjjj,n)=A(newjjj,n)-EPSI_Heat*
+     &                QAct(n)*cwat*width(i)
+                   B(n)=B(n)-(varBT(i,1)- tmpr(n)*alf)*
+     &                QAct(n)*cWat*width(i)
+              endif
           END IF
  313	  CONTINUE	 
 C
@@ -368,11 +381,13 @@ cSolve
         Tmpr(i)=sngl(B(i))
       Enddo      
 *       
-      Do i=1,NumNP
-        VxOld(i)=Vx(i)
-        VzOld(i)=Vz(i)
-        ThOld(i)=ThNew(i)
-      Enddo
+      
+      
+        VxOld(:)=Vx(:)
+        VzOld(:)=Vz(:)
+        ThOld(:)=ThNew(:)
+        Hold(:)=Hnew(:)
+      
       
       Return
       End

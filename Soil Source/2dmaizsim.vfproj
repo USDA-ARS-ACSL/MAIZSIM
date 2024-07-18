@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/>
 	</Platforms>
 	<Configurations>
-		<Configuration Name="Debug|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
+		<Configuration Name="Debug|Win32" UseCompiler="ifortCompiler" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" PreprocessorDefinitions="_DEBUG" WarnTruncateSource="true" LocalSavedScalarsZero="true" InitArrays="true" FloatingPointStackCheck="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" NullPointerCheck="true" ArrayShapeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug" WarnArgMismatch="true"/>
 			<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386 " OutputFile="$(OUTDIR)/$(TargetName)$(TargetExt)" Version="3.0" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" AssemblyDebug="linkAssemblyDebugFull" SubSystem="subSystemConsole" AdditionalDependencies="&quot;$(SolutionDir)Crop Source\Debug\maizsim.lib&quot;"/>
 			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
@@ -15,7 +15,7 @@
 			<Tool Name="VFPostBuildEventTool"/>
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
-		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
+		<Configuration Name="Release|Win32" UseCompiler="ifortCompiler" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
 			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
 			<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies=" &quot;$(SolutionDir)Crop Source\Release\maizsim.lib&quot;"/>
 			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
@@ -29,52 +29,62 @@
 	</Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="*.ins;h;hpp;hxx;hm;inl;fi;fd">
-		<File RelativePath="NITVAR.INS"/>
-		<File RelativePath="public.ins"/>
-		<File RelativePath="PUPLANT.INS"/>
-		<File RelativePath=".\PuSurface.ins"/>
-		<File RelativePath="PUWEATH.INS"/></Filter>
+			<File RelativePath="NITVAR.INS"/>
+			<File RelativePath="public.ins"/>
+			<File RelativePath="PUPLANT.INS"/>
+			<File RelativePath=".\PuSurface.ins"/>
+			<File RelativePath="PUWEATH.INS"/>
+		</Filter>
 		<Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
-		<File RelativePath=".\maizsim.rc"/></Filter>
+			<File RelativePath=".\maizsim.rc"/>
+		</Filter>
 		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
-		<File RelativePath="2DMAIZSIM.FOR"/>
-		<File RelativePath=".\AutoIrrigate.for">
-			<FileConfiguration Name="Debug|Win32">
-			<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/></FileConfiguration></File>
-		<File RelativePath=".\carbon_partitioning.FOR"/>
-		<File RelativePath="dateFunctions.for"/>
-		<File RelativePath=".\Drip.FOR"/>
-		<File RelativePath="ERRMES.FOR"/>
-		<File RelativePath="Ex14-5.for"/>
-		<File RelativePath=".\GASMOV.FOR"/>
-		<File RelativePath="GRID_BND.FOR"/>
-		<File RelativePath="HEATMOV.FOR"/>
-		<File RelativePath="hourwea.for"/>
-		<File RelativePath="Init.for"/>
-		<File RelativePath=".\Irrigation.for"/>
-		<File RelativePath="MASSBLW.FOR"/>
-		<File RelativePath="MNGMB.FOR"/>
-		<File RelativePath=".\Mulch_Decomp.for"/>
-		<File RelativePath="N_Massbl.for"/>
-		<File RelativePath="ORTHOFEM.FOR"/>
-		<File RelativePath="OUTPUT.FOR"/>
-		<File RelativePath=".\root_diff_new.for"/>
-		<File RelativePath=".\root_grow_c.FOR"/>
-		<File RelativePath="SETMAT01.FOR"/>
-		<File RelativePath=".\SetMatMulch.for"/>
-		<File RelativePath="SETSUR02.FOR"/>
-		<File RelativePath="SETTDB.FOR"/>
-		<File RelativePath="soilnden.for"/>
-		<File RelativePath=".\solmov.for"/>
-		<File RelativePath=".\solupt_Y1.for"/>
-		<File RelativePath=".\SurfaceMulchProcess.for">
-			<FileConfiguration Name="Debug|Win32">
-			<Tool Name="VFFortranCompilerTool" SourceFileFormat="fileFormatDefault" FixedFormLineLength="fixedLength72"/></FileConfiguration></File>
-		<File RelativePath=".\surfaceWaterBalanceAdjustment.for"/>
-		<File RelativePath="SYNCHRON.FOR"/>
-		<File RelativePath=".\Tillage.for"/>
-		<File RelativePath=".\wateruptake.FOR"/>
-		<File RelativePath=".\Watmov.for"/></Filter>
+			<File RelativePath="2DMAIZSIM.FOR"/>
+			<File RelativePath=".\AutoIrrigate.for">
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VFFortranCompilerTool" AssemblerOutput="asmListingNone"/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath=".\carbon_partitioning.FOR"/>
+			<File RelativePath="dateFunctions.for"/>
+			<File RelativePath=".\Drip.FOR"/>
+			<File RelativePath="ERRMES.FOR"/>
+			<File RelativePath="Ex14-5.for"/>
+			<File RelativePath=".\GASMOV.FOR">
+			</File>
+			<File RelativePath="GRID_BND.FOR"/>
+			<File RelativePath="HEATMOV.FOR"/>
+			<File RelativePath="hourwea.for"/>
+			<File RelativePath="Init.for"/>
+			<File RelativePath=".\Irrigation.for"/>
+			<File RelativePath="MASSBLW.FOR"/>
+			<File RelativePath="MNGMB.FOR"/>
+			<File RelativePath=".\Mulch_Decomp.for"/>
+			<File RelativePath="N_Massbl.for"/>
+			<File RelativePath="ORTHOFEM.FOR"/>
+			<File RelativePath="OUTPUT.FOR"/>
+			<File RelativePath=".\PondingByFlux.for"/>
+			<File RelativePath=".\PondingByHead.for"/>
+			<File RelativePath=".\root_diff_new.for"/>
+			<File RelativePath=".\root_grow_c.FOR"/>
+			<File RelativePath="SETMAT01.FOR"/>
+			<File RelativePath=".\SetMatMulch.for"/>
+			<File RelativePath="SETSUR02.FOR"/>
+			<File RelativePath="SETTDB.FOR"/>
+			<File RelativePath="soilnden.for"/>
+			<File RelativePath=".\solmov.for"/>
+			<File RelativePath=".\solupt_Y1.for"/>
+			<File RelativePath=".\SurfaceMulchProcess.for">
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VFFortranCompilerTool" SourceFileFormat="fileFormatDefault" FixedFormLineLength="fixedLength72"/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath=".\surfaceWaterBalanceAdjustment.for"/>
+			<File RelativePath="SYNCHRON.FOR"/>
+			<File RelativePath=".\Tillage.for"/>
+			<File RelativePath=".\wateruptake.FOR"/>
+			<File RelativePath=".\Watmov.for"/>
+		</Filter>
 	</Files>
 	<Globals/>
 </VisualStudioProject>

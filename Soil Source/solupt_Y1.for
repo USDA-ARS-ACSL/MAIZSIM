@@ -130,8 +130,8 @@ c     $     young     old    young     old      sum       sumSink'
 	   ConstI(2)=ConstI(1)/2.0
 	 ! change to 0 and wait for crop to be executed before
 	 ! recalculating
-	   NDemandError=0.0
-	   cumulativeNDemandError=0.0
+	 !  NDemandError=0.0
+	 !  cumulativeNDemandError=0.0
 	   EndIf
 C calculate nutrigen root uptake    
 	 if (iSink.gt.0) Call massRootflux

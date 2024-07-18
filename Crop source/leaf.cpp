@@ -32,9 +32,7 @@ CLeaf::CLeaf(int n, CDevelopment * dv): COrgan()
 	old_leaf = 0; //record leaf area in the last time step
 
 				  // parameters
-    N_content = 3.0; //no N stress 
-	//WLRATIO = 0.106; // leaf lamina width to length ratio
-	//A_LW = 0.75; // leaf area coeff with respect to L*W
+    N_content = 3.0; //no N stress should be percent
 	stayGreen = dv->get_stayGreen();
 	LM_min = dv->get_LM_min();
 	Q10LeafSenescence = dv->get_Q10LeafSenescence();

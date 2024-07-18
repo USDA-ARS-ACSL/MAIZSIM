@@ -140,15 +140,22 @@ csun 2.65 is used as a rule of thumb based on the average bulk density of rock w
        Do i=1,NumNP
 csun young root respiration
          gSink_rootY(i,1)=((RMassY(i))*alphaR*44.0/(12.0))*
-     &   (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10.0))
+     &   (Q10MR**((Tmpr(i) - 10.0)/10.0))
 csun mature root respiration,assume half root respiration rate of young roots 	
 	   gSink_rootM(i,1)=((RMassM(i))*alphaR*0.5*44.0/(12.0))*
-     &    (1/soilair(i))*(Q10MR**((Tmpr(i) - 10.0)/10.0))
+     &    (Q10MR**((Tmpr(i) - 10.0)/10.0))
 	  
-	   gSink_root(i,1) = gSink_rootM(i,1) +	gSink_rootY(i,1)
-	   
-	 Enddo	  
+	   gSink_root(i,1) = (gSink_rootM(i,1) +gSink_rootY(i,1))
+	   gSink_root(i,2) = gSink_root(i,1)/44.0*32.0 ! calculate moles of O2 consumed - 1 mole CO2=1 mole O2
+                                                      ! /44 converts from g to moles of CO2 and *32.0 converts moles of O2 to ug O2
+         gSink_root(i,1) = gSink_root(i,1)*amax1(1/soilair(i),0.0) ! convert to ug CO2 cm-3 air. (i,1) refers to co2 gas
+	   gSink_root(i,2) = gSink_root(i,2)*amax1(1/soilair(i),0.0) ! convert to ug CO2 cm-3 air. (i,2) refers to o2 gas
+         
+         Enddo	  
 	 	
+
+
+
 c   Actual growth
 
 25    format (F12.6,1x,i6,2x,6G12.3,1x,2i5)

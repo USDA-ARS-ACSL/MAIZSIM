@@ -15,13 +15,14 @@ c   will be transferred.
 	  Double precision Starter, TimeStep
       
       Real BlkDn, FracSind, FracClay, FracOM, hCritS,hCritA
-	  Real nodeArea
+	  Real nodeArea, gridWidth
       Integer CodeW,CodeS,CodeT,CodeG,errPlant
 	  Integer MaxItO, OutPutSoilNo, OutPutSoilYes  
       Logical*1 lOrt
       Integer DailyOutput, HourlyOutput,RunFlag,  
      !  DailyWeather,HourlyWeather,ITIME, IDAWN, IDUSK,
-     !  beginDay, sowingDay, endDay,year
+     !  beginDay, sowingDay, endDay,year, ponding,
+     !  PondingByHead, PondingByFlux
      
         character WeatherFile*256, TimeFile*256, BiologyFile*256,
      !          ClimateFile*256, NitrogenFile*256, SoluteFile*256,
@@ -45,8 +46,8 @@ c   will be transferred.
      !       MatNumN(NumNPD),hNew(NumNPD),ThNew(NumNPD), Vx(NumNPD),  
      !       Vz(NumNPD),Q(NumNPD), Conc(NumNPD,NumSD), 
      !       g(NumNPD,NumGD), Tmpr(NumNPD), Con(NumNPD),TcsXX(NumNPD),
-     !       RO(NumNPD), hNew_org(NumNPD),QAct(NumNPD),ThetaAvail, 
-     !       ThetaFull, ThAvail(NumNPD),ThFull(NMAtD),  lOrt,
+     !       RO(NumNPD), hNew_org(NumNPD),QAct(NumNPD),ThetaAvailRZ, 
+     !       ThetaFullRZ, ThAvail(NumNPD),ThFull(NMAtD),  lOrt,
      !       QGas(NumNPD,NumGD),ThetaAir(NumNPD)
       Common /elem_public/Sink(NumNPD), 
      !       cSink(NumNPD,NumSD),gSink(NumNPD,NumGD),tSink(NumNPD),
@@ -55,7 +56,7 @@ c   will be transferred.
      !       RMassY(NumNPD), RDenY(NumNPD), 
      !       MatNumE(NumElD),gSink_OM(NumNPD,NumGD),
      !       gSink_root(NumNPD,NumGD),gSink_rootY(NumNPD,NumGD),
-     !       gSink_rootM(NumNPD,NumGD)
+     !       gSink_rootM(NumNPD,NumGD),gSink_N2O(NumNPD,NumGD)
       Common /bound_public/ NumBP, NSurf, NVarBW,NVarBS,NVarBT,NVarBG,
      !       NumSurfDat, NSeep, NSP(NSeepD), NP(NSeepD,NumSPD),
      !       NDrain,NDR(NDrainD),ND(NDrainD,NumDR),
@@ -64,7 +65,8 @@ c   will be transferred.
      !       PCodeW(NumNPD),Width(NumBPD),
      !       VarBW(NumBPD,3),
      !       VarBS(NumBPD,NumSD),VarBT(NumBPD,4),
-     !       VarBG(NumBPD,NumGD,3),EO,Tpot
+     !       VarBG(NumBPD,NumGD,3),EO,Tpot,gridWidth,
+     !       pondingByHead, pondingByFlux
       Common /time_public/tNext(NumModD),dtMx(4),Time,Step,dtOpt, 
      !        dtMin, dMul1, dMul2,  tTDB(4), Tfin,tAtm, Tinit,
      !        lInput,Iter,DailyOutput,HourlyOutput,RunFlag,
@@ -104,5 +106,5 @@ c the following blocks are not passed to the crop model
      !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD),
      !           soilair(NumNPD),thSat(NMatD),ThAMin(NMatD),ThATr(NMatD)
 	  
-      Common /ConversionFactors_parameters/ppm_to_ugGasCm3air(NumGD), 
+      Common /ConversionFactors_parameters/ugGasCm3air_to_ppm(NumGD), 
      !           GasTransfCoeff(NumGD)
