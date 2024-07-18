@@ -272,7 +272,7 @@ C
 C   CALCULATE PROPORTIONIAL REDUCTION OF ROOT GROWTH CAUSED BY
 C   PARTIAL PRESSURE OF SOIL OXYGEN
 C
-        RGCF3= oxyStress(g(n,2)*ppm_to_ugGasCm3air(2)/10000.)
+        RGCF3= oxyStress(g(n,2)*ugGasCm3air_to_ppm(2)/10000.)
         
         t1=(RGCF3.lt.1.0)
         

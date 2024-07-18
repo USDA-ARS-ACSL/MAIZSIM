@@ -258,3 +258,5 @@ Test_Ver9.1/2dsoil.exe
 maizsim.dll
 /Soil Source/CopyToFOlder.bat
 
+/Crop source/$tf1/properties.tf1
+/Soil Source/2dsoil.u2d

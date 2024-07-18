@@ -172,7 +172,7 @@ C calculate available water content
         If (theta(i).lt.TLowerLimit(M)) Then 
           ThAvail(i)=0;     
           else 
-            ThAvail(i)=Amin1((theta(i)-TLowerLimit(M)),TUpperLimit(M))
+            ThAvail(i)=Amin1(theta(i),TUpperLimit(M))
      &                       -TLowerLimit(M)
             ThAvail(i)=Amax1(ThAvail(i),0.0)
          End If          

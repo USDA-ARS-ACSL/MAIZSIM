@@ -1638,7 +1638,7 @@ cccz upwards radiation (W/m^2*1cm or 1m)
 c        qLeft=SurfNodeNodeIndexH(i)
 c        qRight=SurfNodeNodeIndexH(i+1)
         longEmissionSoil=epsilon_s*sigma*
-     &   ((Tmpr_Sur(n)+273.15D0)**4.0D0)
+     &   ((Tmpr_Sur(i)+273.15D0)**4.0D0)
         longRadUp(1,i)=longEmissionSoil
         do kk=2,mulchLayer+1
          longRadUp(kk,i)=longEmissionSoil*(1.0D0-DeltaRlong)
@@ -1665,7 +1665,7 @@ c        qRight=SurfNodeNodeIndexH(i+1)
 c        qLeft=SurfNodeNodeIndexH(i)
 c        qRight=SurfNodeNodeIndexH(i+1)
         longEmissionSoil=epsilon_s*sigma*                             !cccz also use 'epsilon_s=1.0D0' for water cause water is considered as a blackbody
-     &   ((Tmpr_Sur(n)+273.15D0)**4.0D0)    !c??? assume that the surface ponded water has the same temp as surface soil,
+     &   ((Tmpr_Sur(i)+273.15D0)**4.0D0)    !c??? assume that the surface ponded water has the same temp as surface soil,
         longRadUp(SubmergeIndex,i)=longEmissionSoil
         do kk=SubmergeIndex+1,mulchLayer+1
          longRadUp(kk,i)=longEmissionSoil*(1.0D0-DeltaRlong)
@@ -1689,7 +1689,7 @@ c        qRight=SurfNodeNodeIndexH(i+1)
 c        qLeft=SurfNodeNodeIndexH(i)
 c        qRight=SurfNodeNodeIndexH(i+1)
         longEmissionSoil=epsilon_s*sigma*                             !cccz also use 'epsilon_s=1.0D0' for water cause water is considered as a blackbody
-     &    ((Tmpr_Sur(n)+273.15D0)**4.0D0)   !c??? assume that the surface ponded water has the same temp as surface soil,
+     &    ((Tmpr_Sur(i)+273.15D0)**4.0D0)   !c??? assume that the surface ponded water has the same temp as surface soil,
         longRadUp(mulchLayer+1,i)=longEmissionSoil
         do kk=1,mulchLayer
           longRadUp(kk,i)=0.0D0
@@ -4620,54 +4620,7 @@ c    for each time segment during the iteration, use the same scheme showed foll
        enddo  
       enddo
       
-cccz old code
-c      do n=1,SurNodeIndex-1
-c       if(n.eq.1) then
-c         kSurL=SurfNodeSurfIndexH(n)
-c         Local_VarBW1=RainFallInput_temp(1,n)/10000.0D0
-c         Local_VarBW2=-g_Vapor(kk,n)/10000.0D0
-c         Local_VarBW3=Local_VarBW2-Local_VarBW1
-c         VarBW1_temp(n)=VarBW1_temp(n)+Local_VarBW1*LocalStep
-c         VarBW2_temp(n)=VarBW2_temp(n)+Local_VarBW2*LocalStep
-c         VarBW3_temp(n)=VarBW3_temp(n)+Local_VarBW3*LocalStep
-c         Q_temp(n)=Q_temp(n)+(-Width(kSurL)*Local_VarBW3)*LocalStep
-c       elseif(n.eq.(SurNodeIndex-1)) then
-c         kSurL=SurfNodeSurfIndexH(n)
-c         kSurR=SurfNodeSurfIndexH(n+1)
-c         Local_VarBW1=(RainFallInput_temp(1,n-1)*widthPerMulchUnit(n-1)
-c     &    +RainFallInput_temp(1,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))/10000.0D0
-c         Local_VarBW2=-(g_Vapor(kk,n-1)*widthPerMulchUnit(n-1)
-c     &    +g_Vapor(kk,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))/10000.0D0
-c         Local_VarBW3=Local_VarBW2-Local_VarBW1
-c         VarBW1_temp(n)=VarBW1_temp(n)+Local_VarBW1*LocalStep
-c         VarBW2_temp(n)=VarBW2_temp(n)+Local_VarBW2*LocalStep
-c         VarBW3_temp(n)=VarBW3_temp(n)+Local_VarBW3*LocalStep
-c         Q_temp(n)=Q_temp(n)+(-Width(kSurL)*Local_VarBW3)*LocalStep
-c         Local_VarBW1=RainFallInput_temp(1,n)/10000.0D0
-c         Local_VarBW2=-g_Vapor(kk,n)/10000.0D0
-c         Local_VarBW3=Local_VarBW2-Local_VarBW1
-c         VarBW1_temp(n+1)=VarBW1_temp(n+1)+Local_VarBW1*LocalStep
-c         VarBW2_temp(n+1)=VarBW2_temp(n+1)+Local_VarBW2*LocalStep
-c         VarBW3_temp(n+1)=VarBW3_temp(n+1)+Local_VarBW3*LocalStep
-c         Q_temp(n+1)=Q_temp(n+1)+(-Width(kSurR)*Local_VarBW3)*LocalStep
-c       else
-c         kSurL=SurfNodeSurfIndexH(n)
-c         Local_VarBW1=(RainFallInput_temp(1,n-1)*widthPerMulchUnit(n-1)
-c     &    +RainFallInput_temp(1,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))/10000.0D0
-c         Local_VarBW2=-(g_Vapor(kk,n-1)*widthPerMulchUnit(n-1)
-c     &    +g_Vapor(kk,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))/10000.0D0
-c         Local_VarBW3=Local_VarBW2-VarBW(kSurL,1)
-c         VarBW1_temp(n)=VarBW1_temp(n)+Local_VarBW1*LocalStep
-c         VarBW2_temp(n)=VarBW2_temp(n)+Local_VarBW2*LocalStep
-c         VarBW3_temp(n)=VarBW3_temp(n)+Local_VarBW3*LocalStep
-c         Q_temp(n)=Q_temp(n)+(-Width(kSurL)*Local_VarBW3)*LocalStep
-c       endif 
-c      enddo
-      
+     
     
       if(PerOccupation.eq.2.0D0) then
        kk=SubmergeIndex+1

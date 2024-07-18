@@ -27,8 +27,10 @@ c second new comment
         Read(40,*,ERR=10)
         Do i=1,NMat
            il=il+1
+           
            Read(40,*,ERR=10) m,kh0(m),kL0(m),km0(m),kn0(m),kd0(m),
      &      fe(m),fh(m),r0(m),rL(m),rm(m),fa(m),nq(m),cs(m)
+           
 	  Enddo    
 
         Close(40)
@@ -81,6 +83,10 @@ C calculate mean of current concentration and concentration from past time step
 cccz note the unit is "ug N per g soil"
           Aux=(BNO3+NNO3_Old(i))/2.
           kd=kd0(m)*ed*et*Aux/(Aux+cs(m))
+Csb:kd is the potential denitrification rate
+Csb:ed is the water content correction factor
+Cs is the Michaelis-Menten constant. 
+
 C  Carbon (P) and nitrogen (Q) fluxes
           P1 =    kh * (Ch_old(i)+BCh)/2.  ! rate is given as ug C per cm3 of area 
           Q1 =    kh * (Nh_old(i)+BNh)/2.  !N from humus pool to Nitrate pool (NH4)
@@ -183,9 +189,14 @@ csun Step:[day]
 csun Soilair(i):        [cm3air/cm3 volume]
 Csun  the release of C from organic matter (: ug C /cm3 soil day-1) to (ug CO2 cm-3 air)
 cDT removed BlkDn, it is not needed. 
-	   gsink_OM(i,1)=AMAX1(((P1+P3+P13-P45-P1415)*
-     &         44/(12))*(1/soilair(i)),0.0)
-     				 
+	   gSink_OM(i,1)=(P1+P3+P13-P45-P1415)*
+     &         44.0/(12.0)                    ! calculate moles of CO2 produced
+         gSink_OM(i,2)=-gSink_OM(i,1)/44.0*32.0      ! calculate moles of O2 consumed - 1 mole CO2=1 mole O2
+                                                 ! /44 converts from g to moles of CO2 and *32.0 converts moles of O2 to ug O2
+                                          ! negative sign indicates O2 consumption
+         gSink_OM(i,1)=gSink_OM(i,1)*amax1(1/soilair(i),0.0) ! convert to ug CO2 cm-3 air
+         gSink_OM(i,2)=gSink_OM(i,2)*amax1(1/soilair(i),0.0) ! convert to ug O2 cm-3 air
+         
 
 C End of iterations
           Ch(i) = BCh
@@ -251,7 +262,7 @@ C this information now comes from SetMat01 and is in public.ins
         Read(40,*,ERR=10)
         im=im+1
         il=il+1
-        Read(40,*,ERR=10) dThH,dThL,es,Th_m
+        Read(40,*,ERR=10) dThH,dThL,es,Th_m  !moisture dependent paramters
         im=im+1
         il=il+1
         Read(40,*,ERR=10)
@@ -260,7 +271,7 @@ C this information now comes from SetMat01 and is in public.ins
         Read(40,*,ERR=10)
         im=im+1
         il=il+1
-        Read(40,*,ERR=10) tb,QT
+        Read(40,*,ERR=10) tb,QT               !Temperature depenedence
         im=im+1
         il=il+1
         Read(40,*,ERR=10)
@@ -269,7 +280,7 @@ C this information now comes from SetMat01 and is in public.ins
         Read(40,*,ERR=10)
         im=im+1
         il=il+1
-        Read(40,*,ERR=10) dThD,Th_d
+        Read(40,*,ERR=10) dThD,Th_d           !Denitrification on water content
         Close(40)
         Return
       else
@@ -287,7 +298,7 @@ C this information now comes from SetMat01 and is in public.ins
         else
           ew=1.
         endif
-        eT=QT**((T-tb)/10.)
+        eT=QT**((T-tb)/10.)               !eT and ed controls denitrification
         ThD=TUpperLimit(m)-dThD
         if(Theta.GT.ThD) then
           ed=((Theta-ThD)/(TUpperLimit(m)-ThD))**Th_d

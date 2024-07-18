@@ -32,7 +32,7 @@ cccz  Double precision CriticalH, CriticalH_R
      !                isat(NumBPD),FreeD
       If (lInput.eq.0) goto 11  
         FreeD=.true.
-        CriticalH=-0.01D0
+        CriticalH=5.1D0
 c       CriticalH_R=0.01D0
   
         hOld(:) = hNew(:)
@@ -57,7 +57,7 @@ c       CriticalH_R=0.01D0
       im=im+1
       il=il+1
       Read(40,*,ERR=10) MaxIt,TolTh,TolH,
-     !                  hCritA,hCritS,dtMx(1),hTab1,hTabN,EPSI_Heat,
+     !                  hCritA,CriticalH,dtMx(1),hTab1,hTabN,EPSI_Heat,
      !                   EPSI_Solute
         close(40) 
 
@@ -128,7 +128,7 @@ cccz directly take the sink and nodearea
          Sc(:)=NodeArea(:)
     
 C calculate total available water in root zone.      
-      ThetaFull=0.0
+      ThetaFullRZ=0.0
       Do n=1,NumEl
 		   NUS=4
 		   if(KX(n,3).eq.KX(n,4)) NUS=3
@@ -154,7 +154,7 @@ c*         Loop on subelements
 			 if (rtwt(i).le.1.0e-6) ThAWi=0.0
 			 if (rtwt(j).le.1.0e-6) ThAWj=0.0
 			 if (rtwt(l).le.1.0e-6) ThAWl=0.0
-			 ThetaFull=ThetaFull+AE*(ThAWi+ThAWj+ThAWl)/3.
+			 ThetaFullRZ=ThetaFullRZ+AE*(ThAWi+ThAWj+ThAWl)/3.
 		   Enddo
 		Enddo
 
@@ -397,10 +397,10 @@ c
               hNew(n)=hCritA
                Goto 3131
             Endif
-            If (hNew(n).ge.hCritS) then
-              CodeW(n)=4
-              hNew(n)=hCritS
-            Endif
+c            If (hNew(n).ge.hCritS) then
+c              CodeW(n)=4
+c              hNew(n)=hCritS
+c           Endif
          Endif
 3131     continue
 c
@@ -657,7 +657,7 @@ cdt - calculate actual boundary fluxes to see what we have
       
 cdt - calculate available water content in root zone
 
-      ThetaAvail=0.0
+      ThetaAvailRZ=0.0
       Do n=1,NumEl
 		   NUS=4
 		   if(KX(n,3).eq.KX(n,4)) NUS=3
@@ -681,7 +681,7 @@ c*         Loop on subelements
 			 if (rtwt(i).ge.1e-6) Thi=ThAvail(i)
 			 if (rtwt(j).ge.1e-6) Thj=ThAvail(j)
 			 if (rtwt(l).ge.1e-6) Thl=Thavail(l)
-			 ThetaAvail=ThetaAvail+AE*(Thi+Thj+Thl)/3.
+			 ThetaAvailRZ=ThetaAvailRZ+AE*(Thi+Thj+Thl)/3.
 		   Enddo
 
 		   
@@ -692,13 +692,13 @@ c*         Loop on subelements
 
 cccz start to calculate the runoff
 cccz this is the water source part, i.e., the exfiltration from soil surface
-       Do n=1,SurNodeIndex
-        k=SurfNodeNodeIndexH(n)
-        i=SurfNodeSurfIndexH(n)
-        if (hnew(k).ge.CriticalH) then
-          RO(k)=max(Q(k)-Qact(k),0.0D0)
-          hNew(k)=CriticalH+h_Pond(n)         ! cccz could be CriticalH_R, but we force it to 
-          hOld(k)=hNew(k)
+c only calculate this when the surface nodes are atmospheric boundary nodes
+      do k=1, NumBp
+        i=KXB(k)
+        if (((hnew(i).ge.CriticalH)).and.(abs(codeW(i)).eq.4)) then
+          RO(i)=max(Q(i)-Qact(i),0.0D0)
+          hNew(i)=CriticalH+h_Pond(k)         ! cccz could be CriticalH_R, but we force it to 
+          hOld(i)=hNew(i)
         endif
        Enddo         
 cccz turn this on for Ex_4 plastic mulching

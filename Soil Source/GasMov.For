@@ -113,12 +113,18 @@ cSB The sink should be determined for both CO2 and o2 gas
 cSB Sink for O2 is developed by considering a stoichiometric relationship with co2 as the O2 is the source of the oxygen in co2
         Do i=1,NumNP
           if (jjj.eq.1) gSink(i,jjj)  = gSink_root(i,1) + gSink_OM(i,1)
-cSB 1 ug co2=32/44 ug o2
-cSB gSink for CO2 currently=x [ugCO2/cm3air/day]
-cSB So gSink for O2= - 32/44 x [ugO2/cm3air/day]          
-          if (jjj.eq.2) gSink(i,jjj)  = -(32./44.)*
-     !         (gSink_root(i,1) + gSink_OM(i,1))
 
+cSB gSink (i,2): (i,2) refers to o2 gas
+cSB gSink (i,2): sum the o2 sink from root and microbial respiration
+cSB gSink_root(i,2), gsink_OM(i,2): these are estimated in the Rootgrow() and SoilNitrogen() [ug o2/cm3 air/day]
+cSB gSink(i,jjj) [ug o2/cm3 air/day]
+
+          if (jjj.eq.2) gSink(i,jjj)= -(gSink_root(i,jjj)+ 
+     !     gsink_OM(i,jjj))
+          if (jjj.eq.3) gSink(i,jjj)  = gSink_N2O(i,1)  !check this 
+
+
+                    
            Gc(i)= gSink(i,jjj)                                   ![ug co2/cm3 air/day]  
         Enddo
           
@@ -252,7 +258,7 @@ C
 
 *     Cauchy boundary condition
             If(gKod.eq.3) then                    !CodeG <0
-              B(i)=B(i)+(alf*Pg*g(i,jjj)-Qg)     
+              B(i)=B(i)-(Qg-alf*Pg*g(i,jjj))     
               if(lOrt) newjjj=IADD(i)
           A(newjjj,i)=A(newjjj,i)-EPSI*Pg           
             Endif
