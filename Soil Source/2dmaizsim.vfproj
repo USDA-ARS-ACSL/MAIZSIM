@@ -50,7 +50,8 @@
 			<File RelativePath=".\Drip.FOR"/>
 			<File RelativePath="ERRMES.FOR"/>
 			<File RelativePath="Ex14-5.for"/>
-			<File RelativePath=".\GASMOV.FOR"/>
+			<File RelativePath=".\GASMOV.FOR">
+			</File>
 			<File RelativePath="GRID_BND.FOR"/>
 			<File RelativePath="HEATMOV.FOR"/>
 			<File RelativePath="hourwea.for"/>
@@ -62,6 +63,8 @@
 			<File RelativePath="N_Massbl.for"/>
 			<File RelativePath="ORTHOFEM.FOR"/>
 			<File RelativePath="OUTPUT.FOR"/>
+			<File RelativePath=".\PondingByFlux.for"/>
+			<File RelativePath=".\PondingByHead.for"/>
 			<File RelativePath=".\root_diff_new.for"/>
 			<File RelativePath=".\root_grow_c.FOR"/>
 			<File RelativePath="SETMAT01.FOR"/>
