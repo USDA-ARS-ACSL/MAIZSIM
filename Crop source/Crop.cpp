@@ -106,7 +106,7 @@ void crop(struct
  		pSC = new CController(varFile.c_str(), GraphicFile.c_str(), LeafFile.c_str(), initInfo); //Consider putting file names in initInfo
 //  ***************************************************************************
 
-		NitrogenUptake=pSC->getPlant()->get_N()*PopSlab; //initialize nitrogen uptake accumulator with what is already in the plant
+		NitrogenUptake=pSC->getPlant()->get_TotalN()*PopSlab; //initialize nitrogen uptake accumulator with what is already in the plant
 		//SK 8/20/10: this is curious but OK
 
 		SHOOTR->NDemandError=0;
@@ -124,8 +124,11 @@ void crop(struct
 	//SK:  Running the crop module step by step
 	if (module_public->NShoot>0)
 	{
-		WaterUptake=WaterUptake+SHOOTR->AWUPS*time_public->Step;  //g water per slab taken up in an hour
-		NitrogenUptake=NitrogenUptake+SHOOTR->SIncrSink/1.0e6; //Cumulative N (mass, g (plant slab)-1) in this time step
+		WaterUptake=WaterUptake+SHOOTR->AWUPS*time_public->Step;  //g water per slab taken up to this time
+		NitrogenUptake=NitrogenUptake+SHOOTR->SIncrSink/1.0e6; //Cumulative N (mass, g per slab in this time step 
+		                                              //- 1.0e6 converts from ug to g) time step is accounted for in
+		                                              //the solute uptake module
+
 	}
 // Note that SIncrSink has been multiplied by time step in the solute uptake routing
 // the 1.0e6 scales from ug to g.
@@ -160,6 +163,7 @@ void crop(struct
 				//	wthr.CO2=initInfo.CO2;         //Can set CO2 in initials for specific simulations where CO2 is constant
 				//}
 				wthr.airT = Weather->TAIR[time_public-> iTime-1];
+				wthr.canopyT = pSC->getPlant()->get_tmpr();
 				wthr.PFD = Weather->par[time_public->iTime-1]*4.6; // conversion from PAR in Wm-2 to umol s-1 m-2
 				wthr.solRad = Weather->WATTSM[time_public->iTime-1]; //one hour Total Radiation incident at soil surface (Wm-2)
 				Es = (0.611*exp(17.502*wthr.airT/(240.97+wthr.airT))); // saturated vapor pressure at airT
@@ -201,7 +205,7 @@ void crop(struct
 				wthr.TotalRootWeight=SHOOTR->TotalRootWeight/PopSlab;
 				wthr.MaxRootDepth=SHOOTR->MaxRootDepth;
 				// Available water is cm per profile - should be divided by PopSlab
-				wthr.ThetaAvail=node_public->ThetaAvail/PopSlab;
+				wthr.ThetaAvailRZ=node_public->ThetaAvailRZ/PopSlab;
 				
 				
 				if (NitrogenUptake >0 ) 
@@ -213,7 +217,7 @@ void crop(struct
 					//SK 8/20/10: Here seems to be the only place where totalN of the plant is set. NitrogenUptake is initiated from get_N at the begining of the timestep so OK. 
 
 
-                    pSC->getPlant()->set_N(NitrogenUptake/PopSlab);  // Units are converted from g slab-1 to g plant -1 YY
+                    pSC->getPlant()->set_TotalN(NitrogenUptake/PopSlab);  // Units are converted from g slab-1 to g plant -1 YY
 // need to look at loss of N in the dropped leaf (plant N goes negative?)				                                                         
 					//pSC->getPlant()->set_N(NitrogenUptake/PopSlab-pSC->getPlant()->get_droppedLfArea()*SLNmin);
 				   
@@ -373,24 +377,24 @@ void crop(struct
 
 				*/
 
-             	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio
-				
+             	double NitrogenRatio;     //optimal N ratio according to N Dilution ratio as g N/ g dry matter
+				double p_func;
 				if (shoot_weightPerM2<100)
 				{
-					NitrogenRatio = N_min/100; //when shoot weight is lower than 100 g m-2, then nitrogen concentration is assumed to by .0410 g/g
+					NitrogenRatio = N_min/100.0; //when shoot weight is lower than 100 g m-2, then nitrogen concentration is assumed to by .0410 g/g
 				}
 				else
 				{
-					
-                    NitrogenRatio = N_min/100.0 *pow(shoot_weightPerM2,(1.0-N_shape)); //sqrt(shoot_weightPerM2); //Calcualte above ground potential N concentration 
+					p_func = pow(shoot_weightPerM2, (- N_shape));
+                    NitrogenRatio = N_min *pow(shoot_weightPerM2,(-N_shape))/10.0; //sqrt(shoot_weightPerM2); //Calcualte above ground potential N concentration 
 				//concentration as a function of aboveground biomass (Greenwood et al., 1990; Lindquist et al., 2007) YY
 				}
-                pSC->getPlant()->set_NitrogenRatio(NitrogenRatio/10.0);
+                pSC->getPlant()->set_NitrogenRatio(NitrogenRatio);
 			  //	double d=075;  //d: shape coefficient in the logistic function to simulate cumulative N uptake (Equation 9 in Lindquist et al. 2007)
 				U_N = 0.359*d/4.0; //U_N maximum observed N uptake rate (g N m-2 ground d-1) (Lindquist et al, 2007) YY
 			    //The unit of U_N is g N m-2 ground d-1
 
-				U_M = q_n*massIncrease*24.0; //U_M maximum uptake rate as limited by maximum N fraction per unit (Equation 2 in Lindquist et al., 2007)
+				U_M = q_n*massIncrease; //U_M maximum uptake rate as limited by maximum N fraction per unit (Equation 2 in Lindquist et al., 2007)
 				//	double q_n = 0.032; //q_n the maximum ratio of daily N uptake to measured daily growth rate (g N g-1) (Lindquist et al., 2007)
                 //unit of U_M is also g N m-2 ground d-1; however, the unit of massIncrease is g m-2/step (here one hour). 
 				//Here in the simulation, the default length of one step is an hour; so, we have to scale it up to one
@@ -399,38 +403,49 @@ void crop(struct
 				if (shoot_weightPerM2<100.0) //if shoot weight<100 (g m-2) then U_P is calculated this way 
 				{
 			
-					U_P = (N_min/100.0)*massIncrease*24.0; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
+					U_P = (N_min/100.0)*massIncrease; // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
 				}
 				else //otherwise, it is calculated like this (Equation 6, Lindquist et al., 2007) YY
 				{
-					U_P = ((1.0-N_shape)*N_min*10.0/100.0)*pow(shoot_weightPerM2,-N_shape)*massIncrease*24.0;
+					U_P = ((1.0-N_shape)*N_min/10.0)*pow(shoot_weightPerM2,-N_shape)*massIncrease;
 				}
                 //unit of U_P is also g N m-2 ground d-1; however, the unit of massIncrease is g/step. Here
 				//in the simulation, the default length of one step is an hour; so, we have to scale it up to one
 				//day by multiplying it by 24
-
-				U_D = N_min*10/100*pow(shoot_weightPerM2,-N_shape)-pSC->getPlant()->get_N()*(pSC->getInitInfo().plantDensity/(100.0*100.0));
+				double t1 = N_min * 10.0/100.0 * pow(shoot_weightPerM2, -N_shape) * shoot_weightPerM2;
+				double t2 = pSC->getPlant()->get_TotalN() * pSC->getInitInfo().plantDensity;
+				//U_D = t1 - t2;
+				double t3 = pSC->getPlant()->get_TotalN();
+				U_D = N_min*10.0/100.0*pow(shoot_weightPerM2,-N_shape)*shoot_weightPerM2-pSC->getPlant()->get_TotalN()*pSC->getInitInfo().plantDensity;
+				U_D=max(U_D,0.0)/24.0;
+				//Since U_D is the difference between potential and actual amount of N in existing biomass
+				// potentially the plant must take this up in a day if it could to meet the differenc. Thus it has implicit units of 
+				// per day
 				//U_D U uptake rate (g N m-2 d-1) as limited by the difference between potential and actual amount of N 
 				//in existing biomass, equation 3 in Lindquist et al. 2007)
-				//the returned value from get_N() is in g N/plant. It has to be converted to g/m-2 ground
-				//that's why the actual n content is mulitpled by pSC->getIniInfo().plantDensity/(100*100) YY
+				//the returned value from get_TotalN() is in g N/plant. It has to be converted to g/m-2 ground
+				//that's why the actual n content is mulitpled by pSC->getIniInfo().plantDensity YY
 
 				// set up accounting of N here.
 				// first hourly//Actual and needed N uptake in the last hour per plant per day
-                double HourlyActualNFromSoil =(NitrogenUptake-NitrogenUptakeOld)/PopSlab; //houly rate per day
-				double HourlyNitrogenDemand= max(U_P, 0.)/pSC->getInitInfo().plantDensity/24.0; //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
+				//U_P is g N m-2, 
+				// NitrogenUptake is g per slab, HourlyActualNFromSoil is grams per plant need to convert to g N m-2 to 
+				//be consistent with other U_# variables.
+				double HourlyActualNFromSoil = (NitrogenUptake - NitrogenUptakeOld)/PopSlab * pSC->getInitInfo().plantDensity*24.0;
+				double HourlyNitrogenDemand= max(min(U_P, U_M,U_N, U_D),0.0); //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
                 pSC->getPlant()->set_HourlyNitrogenSoilUptake(HourlyActualNFromSoil);
 				pSC->getPlant()->set_HourlyNitrogenDemand(HourlyNitrogenDemand);
 
                 // now do cumulative amounts
-				CumulativeNitrogenDemand+=HourlyNitrogenDemand; // grams plant-1 day-1
-                pSC->getPlant()->set_CumulativeNitrogenDemand(CumulativeNitrogenDemand); //units are g plant day-1  
+				CumulativeNitrogenDemand+=HourlyNitrogenDemand; // grams m-2 day-1
+				// send these to plant model as grams plant-1 day-1
+                pSC->getPlant()->set_CumulativeNitrogenDemand(CumulativeNitrogenDemand/pSC->getInitInfo().plantDensity); //units are g plant day-1  
 				pSC->getPlant()->set_CumulativeNitrogenSoilUptake(NitrogenUptake/PopSlab);
 
 
 				double OldNDemand;
-				OldNDemand=SHOOTR->nitroDemand/PopSlab/1e6/24;
-				SHOOTR->nitroDemand = (float)HourlyNitrogenDemand*(float)PopSlab*1.0e6*24.0; //Pass the nitrogen demand into 2dsoil YY
+				OldNDemand = SHOOTR->nitroDemand / PopSlab /1.0e6;
+				SHOOTR->nitroDemand = (float)HourlyNitrogenDemand*(float)PopSlab*1.0e6 * 24.0; //Pass the nitrogen demand into 2dsoil YY
 				                                                               //Units are ug slab-1
 				old_shoot_weightPerM2 = shoot_weightPerM2; //Save the value of the above_ground biomass of this time-step
 				NitrogenUptakeOld=NitrogenUptake; // save the cumulative N uptake from this time step;

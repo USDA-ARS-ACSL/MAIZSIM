@@ -43,16 +43,19 @@ CPlant::CPlant(const TInitInfo& info, TGasExSpeciesParam& photoparam)
 	// initialize plant part sizes //
 	shootPart = 0.60;
 	rootPart = 0.40;
-	earMass=droppedLeafmass=rootMass=cobMass=sheathMass=0.0;
+	earMass=droppedLeafmass=rootMass=cobMass=sheathMass=grainMass=0.0;
 	shootMass=seedMass*(1.0-rootPart);
 	rootMass=seedMass-shootMass;  // need to distribute this in a few seed elements. at about 1.059e-4 wt/L =780 cm
 	leafMass = activeLeafMass=0.90*shootMass;
 	stemMass=0.10*shootMass;
 	shootPart_old = shootPart; rootPart_old = rootPart;
-    TotalNitrogen = 0.275*3.4/100.0; //assume nitrogen concentration at the beginning is 3.4% of the total weight of the seed
-	// need to check with Yang. This doesn't look correct
+    TotalNitrogen = seedMass*4.1/100.0; //assume nitrogen concentration at the beginning is 4.1% of the total weight of the seed
+	                //units are grams per plant
     leaf_N = 0;
 	leaf_NFraction = 0;
+	leaf_N_content = 0;
+	NitrogenRatio = 0.0;
+	OptimalLeafN = 0.0;
 	N_pool = 0.0;
 	CumulativeNitrogenDemand=0;
 	HourlyNitrogenDemand=0;
@@ -109,8 +112,7 @@ void CPlant::update(const TWeather & weather)
 	int TotalGrowingLeaves = 0;
 	int TotalDroppedLeaves = 0;
 	int TotalMatureLeaves = 0;
-	double PlantNitrogenContent;
-	double percentN;
+
 	if (develop->Emerged())
 	{
 		calcRed_FRedRatio(weather);
@@ -120,34 +122,7 @@ void CPlant::update(const TWeather & weather)
 	
 	
 	finalNodeNumber = develop->get_youngestLeaf();
-	//SK: get N fraction allocated to leaves, this code is just moved from the end of the procedure, this may be taken out to become a separate fn
-	{
-	    //Calculate faction of nitrogen in leaves (leaf NFraction) as a function of thermal time from emergence
-	    //Equation from Lindquist et al. 2007 YY
-		//SK 08/20/10: TotalNitrogen doesn't seem to be updated at all anywhere else since initialized from the seed content
-		//SK: I see this is set in crop.cpp ln 253 from NUptake from 2dsoil
-		//but this appears to be the amount gained from the soil for the time step; so how does it represent totalNitrogen of a plant?
-
-       double thermal_time = develop->get_GDDsum()-emerge_gdd;//record thermal time from emergency YY
-
-	    //Calculate faction of nitrogen in leaves (leaf NFraction) as a function of thermal time from emergence
-	    //Equation from Lindquist et al. 2007 YY
-	    leaf_NFraction = 0.79688-0.00023747*thermal_time-0.000000086145*thermal_time*thermal_time;
-		if (leaf_NFraction <=0)
-		{
-			leaf_NFraction = 0;//fraction of leaf n in total shoot n can't be smaller than zero. YY
-		}
-		leaf_N = leaf_NFraction*this->get_N(); //calculate total nitrogen amount in the leaves YY units are grams N in all the leaves
-		leaf_N_content = leaf_N/(this->greenLeafArea/10000+0.01); //SK 8/22/10: set avg greenleaf N content before update in g/m2; 
-		PlantNitrogenContent=this->get_N();
-		percentN=this->get_N()/shootMass;
-		double Ratio=0;
-		if (NitrogenRatio>0)
-			{
-		      Ratio= percentN/NitrogenRatio;
-			}
-	}
-
+	
 	
 	if (!develop->Germinated())
 	{
@@ -286,7 +261,7 @@ void CPlant::update(const TWeather & weather)
 			                                                //shoot biomass and Nitrogen are in g
 			if (TotalNitrogen>temp)  //need to adjust demand or else there will be mass balance problems
 			{
-				this->set_N(temp);
+				this->set_TotalN(temp);
 			}
 		}
 
@@ -296,7 +271,7 @@ void CPlant::update(const TWeather & weather)
     	calcPotentialLeafArea();
 		calcGreenLeafArea();
 		calcActualGreenLeafArea();
-		leaf_N_content = leaf_N/(this->greenLeafArea/10000); //Calculate leaf nitrogen content of per unit area; 
+		calcLeafN_Content(); //Calculate leaf nitrogen content of per unit area; 
 		calcLeafArea();
 		//leaf_N_content = leaf_N/this->actualGreenLeafArea; //Calculate leaf nitrogen content of per unit area; 
 		//defining leaf nitrogen content this way, we did not consider the difference in leaf nitrogen content
@@ -313,7 +288,7 @@ void CPlant::update(const TWeather & weather)
 		previousDroppedlfArea = droppedLfArea;
 		//when less than 5% of total leaf area is green, physiological maturity is reached. SK
 		//see http://www.agry.purdue.edu/ext/corn/news/timeless/TopLeafDeath.html
-		if ((greenLeafArea <= 0.05*leafArea) && !develop->maturity.done) 
+		if ((greenLeafArea <= 0.01*leafArea) && !develop->maturity.done) 
 		{
 			develop->maturity.done = true;
 			develop->maturity.daytime = weather.daytime;
@@ -382,9 +357,9 @@ double agefn=1;
     earMass = this->get_ear()->get_mass();
 	sheathMass= this->get_ear()->get_sheathMass();
 	cobMass= this->get_ear()->get_cobMass();
+	grainMass= this->get_ear()->get_grainMass();
    // need to iterate here to set leaf mass
 	leafMass=calcTotalLeafMass();
-	leafMass = this->get_leafMass();
 	activeLeafMass = calcActiveLeafMass();
 	droppedLeafmass=calcDroppedLeafMass();
 	rootMass = this->get_roots()->get_mass();
@@ -622,6 +597,9 @@ void CPlant::C_allocation(const TWeather & w)
 // a valve function is necessary because assimilates from CPool cannot be dumped instantanesly to parts
 // this may be used for implementing feedback inhibition due to high sugar content in the leaves
 // The following is based on Grant (1989) AJ 81:563-571 Simulation of Carbon Assimilation and Partitioning in Maize
+// TODO: need to add section for if silking is done in order to simulate effects of temperature and water stress on pollination
+// grainfill begin can be used to determine if pollination is done.
+
 {
    double b1=2.325152587; // Normalized (0 to 1) temperature response fn parameters, Pasian and Lieth (1990)
                         // Lieth and Pasian Scientifica Hortuculturae 46:109-128 1991
@@ -844,12 +822,12 @@ void CPlant::C_allocation(const TWeather & w)
 	   {
 		   C_pool_root +=__max(0,rootPart_old-w.pcrs);
 		   shootPart_real = shootPart;
-		   rootPart_real = rootPart-__max(0,rootPart_old-w.pcrs); //subtract out carbon sent to the root pool
+		   rootPart_real = rootPart - __max(0, rootPart_old - w.pcrs); //subtract out carbon sent to the root pool
 		   flag = 0;
 	   }
 
 	   rootPart_old = rootPart;
-	   grainPart = shootPart_real*1.0;
+	   grainPart = shootPart_real * 1.0;
    }
 
    else
@@ -857,59 +835,59 @@ void CPlant::C_allocation(const TWeather & w)
 
    }
    double stemPart = sheathPart + stalkPart; //TODO: sheath and stalk haven't been separated in this model
-                                             //reservePart needs to be added later
+   //reservePart needs to be added later
    double earPart = grainPart + cobPart + huskPart;
-   double sum= stemPart+earPart + leafPart;
-// here we can allocate leaf part among leaves
+   double sum = stemPart + earPart + leafPart;
+   // here we can allocate leaf part among leaves
    CLeaf* leaf;
- 
 
-// Partition carbon to leaves relative to growth rate
-// now need to find increment of Carbo to add to each leaf
-// update leaf's mass
-// first find the number of growing leaves. This is saved as a variable in the [0] nodal unit
-   double LeafPartSum=leafPart;
+
+   // Partition carbon to leaves relative to growth rate
+   // now need to find increment of Carbo to add to each leaf
+   // update leaf's mass
+   // first find the number of growing leaves. This is saved as a variable in the [0] nodal unit
+   double LeafPartSum = leafPart;
    double PCarboDemandPerLeaf;
-   
-   for (int i = develop->get_LvsInitiated(); i >=1  ; i--)
+
+   for (int i = develop->get_LvsInitiated(); i >= 1; i--)
    {
 	   //need to find demand first
-	   leaf= nodalUnit[i].get_leaf();  
+	   leaf = nodalUnit[i].get_leaf();
 	   double totLA;
 
-	    if (nodalUnit[i].isInitiated()&& LeafPartSum >= 0.0)
-		{
-			
-			
+	   if (nodalUnit[i].isInitiated() && LeafPartSum >= 0.0)
+	   {
 
-			if (!leaf->isDead())
-			{
-			
-                totLA = calcPotentialLeafArea();
-				PCarboDemandPerLeaf=__max(0.0, leaf->get_potentialArea()/totLA*leafPart); //Adjusting C allocation based on leaf size if not aging. 
-				                                                                          // doing it based on current growth rate is more mechanistic 
-				                                                                          //but seems to have issue now. To revisit. SK
-                                                                             
-				if (LeafPartSum >= PCarboDemandPerLeaf)
+
+
+		   if (!leaf->isDead())
+		   {
+
+			   totLA = calcPotentialLeafArea();
+			   PCarboDemandPerLeaf = __max(0.0, leaf->get_potentialArea() / totLA * leafPart); //Adjusting C allocation based on leaf size if not aging. 
+			   // doing it based on current growth rate is more mechanistic 
+			   //but seems to have issue now. To revisit. SK
+
+			   if (LeafPartSum >= PCarboDemandPerLeaf)
 			   {
-					leaf->import_CH2O(PCarboDemandPerLeaf);
-					LeafPartSum-=PCarboDemandPerLeaf;
+				   leaf->import_CH2O(PCarboDemandPerLeaf);
+				   LeafPartSum -= PCarboDemandPerLeaf;
 			   }
 			   else
 			   {
-					leaf->import_CH2O(__min(LeafPartSum, PCarboDemandPerLeaf));
-					LeafPartSum=0.0;
+				   leaf->import_CH2O(__min(LeafPartSum, PCarboDemandPerLeaf));
+				   LeafPartSum = 0.0;
 			   }
 
-			}
-		}
+		   }
+	   }
    }
- 
+
    //cout <<"leafPartSum: " <<LeafPartSum <<"LeafPart: " <<leafPart<<endl;
 
    this->get_roots()->set_ActualCarboIncrement(rootPart_real);
    this->get_nodalUnit()->get_stem()->import_CH2O(stemPart);
-//   this->get_nodalUnit()->get_leaf()->import_CH2O(leafPart);
+   //   this->get_nodalUnit()->get_leaf()->import_CH2O(leafPart);
    this->C_reserve += reservePart; // everything is carbohydrate now
    // before emergence root weight has been initialized. Just dump this carbon for now.
    if (develop->Emerged()) this->get_roots()->import_CH2O(rootPart_real);
@@ -920,26 +898,30 @@ void CPlant::C_allocation(const TWeather & w)
 
 
    double partSum = stemPart + earPart + leafPart; // checking the balance if sums up to shootPart
-//   if (w.time == 0.5) std::cout << "adding CH2O: " << grainPart << " to grain " << endl;
-//   if (w.time == 0.5) std::cout << "Sum of part coeff is " << partSum << " and shoot CH2O is " << shootPart <<  endl;
-    //cout <<C_pool << " " << C_ReserveLeaf <<endl;
+   //   if (w.time == 0.5) std::cout << "adding CH2O: " << grainPart << " to grain " << endl;
+   //   if (w.time == 0.5) std::cout << "Sum of part coeff is " << partSum << " and shoot CH2O is " << shootPart <<  endl;
+	   //cout <<C_pool << " " << C_ReserveLeaf <<endl;
 }
 
 
-void CPlant::calcMaintRespiration(const TWeather & w)
+void CPlant::calcMaintRespiration(const TWeather& w)
 // based on McCree's paradigm, See McCree(1988), Amthor (2000), Goudriaan and van Laar (1994)
 // units very important here, be explicit whether dealing with gC, gCH2O, or gCO2
-  {
-    double dt = initInfo.timeStep/(24.0*60.0);
-//	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
+{
+	double dt = initInfo.timeStep / (24.0 * 60.0);
+	//	const double maintCoeff = 0.015; // gCH2O g-1DM day-1 at 20C for young plants, Goudriaan and van Laar (1994) Wageningen textbook p 54, 60-61
 	const double maintCoeff = 0.018;// too high?
-	double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
+	//double agefn = (greenLeafArea+1.0)/(leafArea+1.0); // as more leaves senesce maint cost should go down, added 1 to both denom and numer to avoid division by zero. 
+	//double agefn = ((leafMass-droppedLeafmass)/leafMass);
+	double agefn = 1.0; //no basis at the moment to change this. just keep track of respiring biomass
 	//no maint cost for dead materials but needs to be more mechanistic, SK
-	//agefn=1.0;
-	double q10fn = pow(Q10MR,(w.airT - 20.0)/10.0); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
-	                                            // total mass. Implement later after testing
-	double stem_coef = __min(1.0,droppedLeafmass / leafMass) ;
-	maintRespiration = q10fn*maintCoeff*agefn*((mass-droppedLeafmass-stem_coef*stemMass))*dt;// gCH2O dt-1, agefn effect remove age function added
+	double q10fn = pow(Q10MR, (w.airT - 20.0) / 10.0); // should be soil temperature or leaf or combination of use as --> (-stemMass*stem_coef) to reduce
+	// total mass. Implement later after testing
+	// tried canopy temperature - was slightly better for yield with Iowa data
+   // still uncertain how stable it is
+	double stem_coef = __max(0.0, __min(1.0, (1.4 + develop->GrainFillBegan()*0.6) * droppedLeafmass / leafMass)); // this is a proportion of stem mass that is alive
+		maintRespiration = q10fn*maintCoeff*((agefn*(shootMass-droppedLeafmass-stemMass-cobMass)+(1.0-stem_coef)*stemMass))*dt;// gCH2O dt-1, agefn effect remove age function added
+	//cout << "maintRespiration: " << maintRespiration << "stem_coef: " << stem_coef << endl;
 	                                                                                         // as a proportion of green area DT.
 }
 void CPlant::calcRed_FRedRatio(const TWeather &weather)
@@ -998,4 +980,38 @@ void CPlant::writeNote(const TWeather & w)
 	}
 	//note.swap(oStr.str());
 	note = oStr.str();
+}
+
+void CPlant::calcLeafN_Content()
+//SK: get N fraction allocated to leaves, this code is just moved from the end of the procedure, this may be taken out to become a separate fn
+{
+	//Calculate faction of nitrogen in leaves (leaf NFraction) as a function of thermal time from emergence
+	//Equation from Lindquist et al. 2007 YY
+	//SK 08/20/10: TotalNitrogen doesn't seem to be updated at all anywhere else since initialized from the seed content
+	//SK: I see this is set in crop.cpp ln 253 from NUptake from 2dsoil
+	//but this appears to be the amount gained from the soil for the time step; so how does it represent totalNitrogen of a plant?
+
+	
+	double PlantNitrogenContent;
+	double percentN;
+	double Ratio = 0;
+	double thermal_time = develop->get_GDDsum() - emerge_gdd;//record thermal time from emergency YY
+	//Calculate faction of nitrogen in leaves (leaf NFraction) as a function of thermal time from emergence
+	//Equation from Lindquist et al. 2007 YY
+   // 
+   // but this is only a fraction and needs total N to get leaf N
+	leaf_NFraction = 0.79688 - 0.00023747 * thermal_time - 0.000000086145 * thermal_time * thermal_time;
+	if (leaf_NFraction <= 0)
+	{
+		leaf_NFraction = 0;//fraction of leaf n in total shoot n can't be smaller than zero. YY
+	}
+	leaf_N = leaf_NFraction * this->get_TotalN(); //calculate total nitrogen amount in the leaves YY units are grams N in all the leaves
+	leaf_N_content = leaf_N / ((this->greenLeafArea + .001) / 10000); //SK 8/22/10: set avg greenleaf N content before update in g/m2; 
+	PlantNitrogenContent = this->get_TotalN();
+	percentN = this->get_TotalN() / shootMass;
+
+	if (NitrogenRatio > 0)
+	{
+		Ratio = percentN / NitrogenRatio;
+	}
 }

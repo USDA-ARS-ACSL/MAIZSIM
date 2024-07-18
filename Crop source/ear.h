@@ -12,6 +12,7 @@ public:
 	void import_grainWeight(double);
 	double get_sheathMass() { return sheathWeight; }
 	double get_cobMass() { return cobWeight; }
+	double get_grainMass() { return grainWeight; }
 private:
 	unsigned int totalKernels;
 	double seedWeight;

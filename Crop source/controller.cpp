@@ -196,6 +196,7 @@ void CController::initialize()
 #ifndef _INTERFACE
 			<< setw(8) << "sheathDM,"
 			<< setw(8) << "cobDM,"
+			<< setw(8) << "grainDM,"
 #endif
 			<< setw(10) << "TotLeafDM,"
 			<< setw(10) << "DrpLfDM,"
@@ -381,7 +382,7 @@ int CController::run(const TWeather & wthr) //todo pass gas exchange parameters 
 		plant->update(weather[iCur]);
 		RootWeightFrom2DSOIL=wthr.TotalRootWeight;
 		MaxRootDepth=        wthr.MaxRootDepth;
-		AvailableWater=      wthr.ThetaAvail;
+		AvailableWater=      wthr.ThetaAvailRZ;
 		outputToCropFile();
 #ifndef _INTERFACE
 		outputToLeafFile();
@@ -469,7 +470,7 @@ void CController::outputToCropFile()
 				<< setw(12) << setprecision(4) << plant->get_shaded_gs() << comma
 #endif
 			    << setw(9) << setprecision(3) << vpd << comma
-				<< setw(10) << setprecision(4) << plant->get_N() << comma
+				<< setw(10) << setprecision(4) << plant->get_Leaf_N_Content() << comma
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma
 				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake() << comma
 				<< setw(10) << setprecision(4) << plant->get_LeafN() << comma //return mass of N in leaves YY
@@ -481,6 +482,7 @@ void CController::outputToCropFile()
 #ifndef _INTERFACE
 				<< setw(8) << setprecision(2) << plant->get_sheathMass() << comma
 				<< setw(8) << setprecision(2) << plant->get_cobMass() << comma
+				<< setw(8) << setprecision(3) << plant->get_grainMass() << comma
 #endif
 				<< setw(8) << setprecision(2) << plant->get_leafMass() << comma
 				<< setw(8) << setprecision(2) << plant->get_DroppedLeafMass() << comma
