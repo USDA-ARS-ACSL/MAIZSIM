@@ -64,17 +64,22 @@ c
       If (Irrig_times.GT.0) then   !skip if no  irrigation (i.e., IrrigationApplied == 0)
         If (Abs(time-tApplIrrig(IrrigationApplied)).lt.0.001*Step) then !if day of irrigiation
          jj=IrrigationApplied
-         DtIrrig=Amount_Irrig_Applied(jj)/10./AvgIrrRate*PERIOD   !gives number of hours in a day with irrigation [/10.0 to convert mm to cm]
+! dtIrrig is time in days to it takes for this amount to rain using the average hourly rainfall rate (IR)
+! check to see if this amount will be reached in the current hour
+! if it is too much for the hour, then the excess is carried over to the next hour
+         
+         
+         DtIrrig=Amount_Irrig_Applied(jj)/10./AvgIrrRate  !gives number of hours in a day with irrigation [/10.0 to convert mm to cm]
          i=1
          precision_threshold=0.0001
         Do While (DtIrrig > precision_threshold)
-           If((DtIrrig).gt.PERIOD) then            !period is 1/24
+           If((DtIrrig).gt.PERIOD*24.0) then            !period is 1/24
             IrrigRate(i)=AvgIrrRate             !cm/hour
-            DtIrrig=DtIrrig-PERIOD             !how many more hours of irrigation is pending
+            DtIrrig=DtIrrig-PERIOD*24             !how many more hours of irrigation is pending
             HoursIrrigated=HoursIrrigated+1
            Else                        !if dtIrrig=Period or < period
                                       ! WG
-            IrrigRate(i)=DtIrrig*AvgIrrRate/PERIOD     !hour/daycm/hour /(1hour/24)= cm/hour
+            IrrigRate(i)=DtIrrig*AvgIrrRate/(PERIOD*24.0)     !hour/daycm/hour /(1hour/24)= cm/hour
             DtIrrig=0.0                !no more irrigation
             HoursIrrigated=HoursIrrigated+1
             tNext(ModNum)=tApplIrrig(jj)+IrrgStartHour*period

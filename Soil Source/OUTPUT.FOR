@@ -183,38 +183,7 @@ cccz initialize the mulch output file (analogy to the soil output g03)
      &     MulchNodeTmpr(n)
        enddo
        
-C calculate the full amount of water in the domain
-        MaxY=maxVal(Y) 
-        ThetaFull=0.0
-        Do n=1,NumEl
-		   NUS=4
-		   if(KX(n,3).eq.KX(n,4)) NUS=3
-		   Sum1=0.
-		   Sum2=0.
-c*         Loop on subelements
-		   do k=1,NUS-2
-			 i=KX(n,1)
-			 j=KX(n,k+1)
-			 l=KX(n,k+2)
-			 Ci=x(l)-x(j)
-			 Cj=x(i)-x(l)
-			 Ck=x(j)-x(i)
-			 Bi=y(j)-y(l)
-			 Bj=y(l)-y(i)
-			 Bk=y(i)-y(j)
-			 AE=(Ck*Bj-Cj*Bk)/2.
-			 m=MatNumN(i)
-			 thAWi=ThFull(MatNumN(i))
-			 thAWl=ThFull(MatNumN(l))
-			 thAWj=ThFull(MatNumN(j))
-               if ((MaxY-y(i)).le.100.0
-     &          .and.(MaxY-y(j)).le.100.0
-     &           .and.(MaxY-y(l)).le.100.0)  then
-               
-			   ThetaFull=ThetaFull+AE*(ThAWi+ThAWj+ThAWl)/3.
-               EndIf
-		   Enddo
-		Enddo
+
 
 cccz -----------------------------------------------------------------------
        
@@ -464,9 +433,9 @@ C
 C        Nitrogen flux conversion from g per slab to kg/ha   
          nitrogenFlux= nitrogenFlux/gridWidth*10**5        !10^5= 10^4 m2/ha x 10^4 cm2/m2 / 10^3 g/kg
 C Calculate relative available water
-          ThetaRelative=RelativeWaterContent(X,Y, ThAvail,
-     &            NumNP, KX,NumELD, NumEl)
-     &        /ThetaFull
+              ThetaRelative=RelativeWaterContent(X,Y, ThAvail,ThFull,
+     &            rtwt, NumNP, KX, NumElD,NumEl, NMat, MatNumN)
+     
 C     Gas unit conversion to ugCo2/cm2
           Surface_Gas_Flux=Surface_Gas_Flux/gridWidth    ! Unit ugCo2 per plant area
                 
@@ -649,21 +618,25 @@ C calculate relative water content for profile to 100 cm
 C  returns the total cm of water in the domain - needs to be modified
 C  by grid width to get cm of water per cm of soil
 C this is  done after it is called
-  
+
        
       function RelativeWaterContent(X,Y, ThetaAvail,
-     !              NumNP, KX, NumElD, NumEl)
-      real X, Y, ThetaAvail, ThetaFull, ThetaRel,
-     !    cii, bii, AE,ThetaAvailAll, MaxY
+     !              ThetaFull,rtwt, NumNP, KX,  NumElD,
+     !             NumEl, NMat, MatNumN)
+      real X, Y, ThetaAvail, ThetaRel,ThetaFull,
+     !    cii, bii, AE,ThetaAvailAll, ThetaFull1All, 
+     !     rtwt
       integer NumNP, NMat, KX, NUS, K, i, j, l, n,
-     !        NumEl
+     !        NumElD,MatNumN
       
       
-      Dimension Y(NumNP), X(NumNP), KX(NumELD,4), 
-     !         ThetaAvail(NumNP), 
+      Dimension Y(NumNP), X(NumNP), KX(NumElD,4), 
+     !         ThetaAvail(NumNP), ThetaFull(NMat),
+     !         rtwt(NumNP),MatNumN(NumNP),
      !         cii(3), bii(3)
-            MaxY=maxVal(Y)
             RelativeWaterContent=0.0
+            ThetaFull1All=0.0
+            ThetaAvailAll=0.0
       Do n=1,NumEl
 		   NUS=4
 		   if(KX(n,3).eq.KX(n,4)) NUS=3
@@ -679,16 +652,26 @@ c*         Loop on subelements
 			 Bii(2)=y(l)-y(i)
 			 Bii(3)=y(i)-y(j)
 			 AE=(Cii(3)*Bii(2)-Cii(2)*Bii(3))/2.
-               if ((MaxY-y(i)).le.100.0
-     &          .and.(MaxY-y(j)).le.100.0
-     &           .and.(MaxY-y(l)).le.100.0) 
-     &            then 
-                    RelativeWaterContent=RelativeWaterContent+(AE*
-     &               (ThetaAvail(i)+ThetaAvail(j)+ThetaAvail(l))/3.0)
-                  endif
-		   Enddo
-C       get upper limit of water available            
+			
+			 Thi=ThetaFull(MatNumN(i))
+			 Thl=ThetaFull(MatNumN(l))
+			 Thj=ThetaFull(MatNumN(j))
+			 if (rtwt(i).le.1.0e-6) Thi=0.0
+			 if (rtwt(j).le.1.0e-6) Thj=0.0
+			 if (rtwt(l).le.1.0e-6) Thl=0.0
+			 ThetaFullAll=ThetaFullAll+AE*(Thi+Thj+Thl)/3.
+               
+               Thi=ThetaAvail(MatNumN(i))
+			 Thl=ThetaAvail(MatNumN(l))
+			 Thj=ThetaAvail(MatNumN(j))
+			 if (rtwt(i).le.1.0e-6) Thi=0.0
+			 if (rtwt(j).le.1.0e-6) Thj=0.0
+			 if (rtwt(l).le.1.0e-6) Thl=0.0
+               ThetaAvailAll=ThetaAvailAll+AE*(Thi+Thj+Thl)/3.
+     	   Enddo
        
-        Enddo      
+      Enddo 
+      RelativeWaterContent=
+     !      min(1.0,ThetaAvailAll/(ThetaFullAll+.0001))    
         Return
         End

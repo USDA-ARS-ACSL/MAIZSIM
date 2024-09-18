@@ -212,9 +212,7 @@ C     GR
 C
 C     Boundary conditions
 C
-      if (time> 38852.41) then
-        iii=1
-        endif
+
       Do 114 i=1,NumNP
       If(CodeT(i).ne.0) then
         Do 111 j=1,NumBP

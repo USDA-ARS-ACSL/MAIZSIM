@@ -75,7 +75,7 @@ BEGIN
 #else
             VALUE "FileDescription", "MZS with gas model and SOM (release)"
 #endif			
-            VALUE "FileVersion", "3.0.0.0"
+            VALUE "FileVersion", "3.1.2.0"
 #ifdef _DEBUG
             VALUE "InternalName", "2DSOIL_DEBUG"
 #else
@@ -88,7 +88,7 @@ BEGIN
 #else
             VALUE "ProductName", "MAIZSIM RELEASE"
 #endif
-            VALUE "ProductVersion", "3.0.0.0"
+            VALUE "ProductVersion", "3.1.2.0"
         END
     END
     BLOCK "VarFileInfo"

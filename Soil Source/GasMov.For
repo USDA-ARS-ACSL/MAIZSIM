@@ -121,10 +121,9 @@ cSB gSink(i,jjj) [ug o2/cm3 air/day]
 
           if (jjj.eq.2) gSink(i,jjj)= -(gSink_root(i,jjj)+ 
      !     gsink_OM(i,jjj))
-          if (jjj.eq.3) gSink(i,jjj)  = gSink_N2O(i,1)  !check this 
+          
+          if (jjj.eq.3) gSink(i,jjj)  = gSink_N2O(i,1) 
 
-
-                    
            Gc(i)= gSink(i,jjj)                                   ![ug co2/cm3 air/day]  
         Enddo
           

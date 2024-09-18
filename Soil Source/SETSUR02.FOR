@@ -59,7 +59,7 @@ C**  WIND-  windspeed at 2 meters (km hr-1).                          **
 C**                                                                   **
 C**  RH-    Relative Humidity, (%, i.e., 90.2)                        **
 C**                                                                   **
-C**  IRAV-  avg Rainfall intensity for the day, (mm/day, hr?)              **
+C**  IRAV-  avg Rainfall intensity for the day, (cm/hr)               **
 C**                                                                   **
 C**  TWET-  wet bulb temperature (oC).                                **
 C**                                                                   **
@@ -344,7 +344,7 @@ csb N2O concentration in atm 332 ppb=0.33 ppm
           
 
 Cdt
-c......................... Radiation submodel
+c.........Radiation submodel
 C
 C  CALCULATE SOLAR DECLINATION
 C
@@ -784,16 +784,20 @@ C
 C
 c..................Daily calculations for the precipitation
 C
+! dtRain is time in days to it takes for this amount to rain using the average hourly rainfall rate (IR)
+! check to see if this amount will be reached in the current hour
+! if it is too much for the hour, then the excess is carried over to the next hour
+! note that RINT has to be a 24 hour rainfall rate - cm/day. it is input as cm over the hour.
 
         If(Rain.ge.0.) then
-          DtRain=RAIN/IR
+          DtRain=RAIN/IR 
           Do i=24,1,-1
-            If(DtRain.ge.PERIOD) then
-              RINT(i)=IR
-              dtRain=dtRain-PERIOD
+            If(DtRain.ge.PERIOD*24.0) then
+              RINT(i)=IR*24.0
+              dtRain=dtRain-PERIOD*24.0
             Else
 cdt changed this from dtrain/ir 11/14/96
-              RINT(i)=DtRain*IR/period
+              RINT(i)=DtRain*IR*24.0
               goto 55
             Endif
           Enddo

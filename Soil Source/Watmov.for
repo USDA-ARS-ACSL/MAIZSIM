@@ -127,36 +127,6 @@ cccz directly take the sink and nodearea
          Fc(:)=Sink(:)
          Sc(:)=NodeArea(:)
     
-C calculate total available water in root zone.      
-      ThetaFullRZ=0.0
-      Do n=1,NumEl
-		   NUS=4
-		   if(KX(n,3).eq.KX(n,4)) NUS=3
-		   Sum1=0.
-		   Sum2=0.
-c*         Loop on subelements
-		   do k=1,NUS-2
-			 i=KX(n,1)
-			 j=KX(n,k+1)
-			 l=KX(n,k+2)
-			 Cii(1)=x(l)-x(j)
-			 Cii(2)=x(i)-x(l)
-			 Cii(3)=x(j)-x(i)
-			 Bii(1)=y(j)-y(l)
-			 Bii(2)=y(l)-y(i)
-			 Bii(3)=y(i)-y(j)
-			 AE=(Cii(3)*Bii(2)-Cii(2)*Bii(3))/2.
-			 m=MatNumN(i)
-			
-			 thAWi=ThFull(MatNumN(i))
-			 thAWl=ThFull(MatNumN(l))
-			 thAWj=ThFull(MatNumN(j))
-			 if (rtwt(i).le.1.0e-6) ThAWi=0.0
-			 if (rtwt(j).le.1.0e-6) ThAWj=0.0
-			 if (rtwt(l).le.1.0e-6) ThAWl=0.0
-			 ThetaFullRZ=ThetaFullRZ+AE*(ThAWi+ThAWj+ThAWl)/3.
-		   Enddo
-		Enddo
 
 C
 C  Start of an iteration
