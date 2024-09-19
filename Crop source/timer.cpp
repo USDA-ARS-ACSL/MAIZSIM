@@ -1,5 +1,3 @@
-//Timer.cpp
-//Member functions for Class Timer
 #include "stdafx.h"
 #include "timer.h"
 #include <cmath>
