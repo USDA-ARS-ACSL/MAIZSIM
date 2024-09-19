@@ -12,32 +12,67 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Dennis_Dbg|Win32 = Dennis_Dbg|Win32
+		Dennis_Dbg|x64 = Dennis_Dbg|x64
 		Kernel_dbg|Win32 = Kernel_dbg|Win32
+		Kernel_dbg|x64 = Kernel_dbg|x64
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Debug|Win32.Build.0 = Debug|Win32
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Debug|x64.ActiveCfg = Debug|x64
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Debug|x64.Build.0 = Debug|x64
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Dennis_Dbg|Win32.ActiveCfg = Dennis_Dbg|Win32
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Dennis_Dbg|Win32.Build.0 = Dennis_Dbg|Win32
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Dennis_Dbg|x64.ActiveCfg = Dennis_Dbg|x64
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Dennis_Dbg|x64.Build.0 = Dennis_Dbg|x64
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Kernel_dbg|Win32.ActiveCfg = Dennis_Dbg|Win32
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Kernel_dbg|Win32.Build.0 = Dennis_Dbg|Win32
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Kernel_dbg|x64.ActiveCfg = Dennis_Dbg|x64
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Kernel_dbg|x64.Build.0 = Dennis_Dbg|x64
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Release|Win32.ActiveCfg = Release|Win32
 		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Release|Win32.Build.0 = Release|Win32
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Release|x64.ActiveCfg = Release|x64
+		{E8E56F99-943A-4226-A0C8-24FF6419EAED}.Release|x64.Build.0 = Release|x64
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Debug|Win32.Build.0 = Debug|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Debug|x64.ActiveCfg = Debug|x64
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Debug|x64.Build.0 = Debug|x64
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Dennis_Dbg|Win32.ActiveCfg = Dennis_Dbg|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Dennis_Dbg|Win32.Build.0 = Dennis_Dbg|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Dennis_Dbg|x64.ActiveCfg = Dennis_Dbg|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Dennis_Dbg|x64.Build.0 = Dennis_Dbg|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Kernel_dbg|Win32.ActiveCfg = Kernel_dbg|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Kernel_dbg|Win32.Build.0 = Kernel_dbg|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Kernel_dbg|x64.ActiveCfg = Kernel_dbg|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Kernel_dbg|x64.Build.0 = Kernel_dbg|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Release|Win32.ActiveCfg = Release|Win32
 		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Release|Win32.Build.0 = Release|Win32
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Release|x64.ActiveCfg = Release|x64
+		{05500875-9B63-45CA-B7D6-FD6A5240ED1A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FF3BAE2-4654-40C6-B4C7-B847547F27DF}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://arsmdbe3320dta.usda.net/tfs/plantmodel
+		SccProjectUniqueName0 = Crop\u0020source\\Crop.vcxproj
+		SccProjectName0 = $/Maizsim/MaizeSim/DLL_VS9.1
+		SccAuxPath0 = https://arsmdbe3320dta.usda.net/tfs/plantmodel
+		SccLocalPath0 = Crop\u0020source
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccProjectUniqueName1 = Soil\u0020Source\\2dmaizsim.vfproj
+		SccProjectName1 = $/Maizsim/2DMaizsim/2DSOIL\u0020for\u0020MaizSim_VS9.1
+		SccAuxPath1 = https://arsmdbe3320dta.usda.net/tfs/plantmodel
+		SccLocalPath1 = Soil\u0020Source
+		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 	EndGlobalSection
 EndGlobal

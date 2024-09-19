@@ -51,7 +51,8 @@ local.properties
 *.user
 *.sln.docstates
 **/*.u2d
-
+/$tf1/
+/$tf/
 # Build results
 
 [Dd]ebug/
@@ -258,5 +259,5 @@ Test_Ver9.1/2dsoil.exe
 maizsim.dll
 /Soil Source/CopyToFOlder.bat
 
-/Crop source/$tf1/properties.tf1
+/Crop source/$tf1/*
 /Soil Source/2dsoil.u2d
