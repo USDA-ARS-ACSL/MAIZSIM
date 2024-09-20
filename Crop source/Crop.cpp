@@ -432,7 +432,7 @@ void crop(struct
 				// NitrogenUptake is g per slab, HourlyActualNFromSoil is grams per plant need to convert to g N m-2 to 
 				//be consistent with other U_# variables.
 				double HourlyActualNFromSoil = (NitrogenUptake - NitrogenUptakeOld)/PopSlab * pSC->getInitInfo().plantDensity*24.0;
-				double HourlyNitrogenDemand= max(min(U_P, U_M,U_N, U_D),0.0); //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
+				double HourlyNitrogenDemand= max(min(U_P, (min(U_M,min(U_N, U_D)))),0.0); //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
                 pSC->getPlant()->set_HourlyNitrogenSoilUptake(HourlyActualNFromSoil);
 				pSC->getPlant()->set_HourlyNitrogenDemand(HourlyNitrogenDemand);
 

@@ -248,7 +248,7 @@ cccz initialization finished here
 cccz ****************************************************************************************** 
 
 C if we have ponded water for infiltration, runoff will not need to be calculated
-        if (pondingByFlux.OR.PondingByHead) return
+        if ((PondingByFlux.eq.1).or.(PondingByHead.eq.1)) return
       
 cccz sometime the program go backwards, then we should avoid multiple computation of runoff
 cccz the simplist way is to track the time and do nothing if the time moves backwards
