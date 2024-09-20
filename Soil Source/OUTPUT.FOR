@@ -246,8 +246,8 @@ cccz changed varbw to Varbw_Air
             ActualSoilEvap=ActualSoilEvap-min(0.0,Q(n))*step
           endif
 c case for rainfall
-          if (abs(CodeW(n)).eq.4.or.((pondingByFlux.OR.
-     &         pondingByHead).eq.1)) then
+          if (abs(CodeW(n)).eq.4.or.(((pondingByFlux.eq.1).or.
+     &         (pondingByHead.eq.1)))) then
             ActualInfil=ActualInfil+max(0.0,Qact(n))*step
             ActualInfil_03=ActualInfil_03+max(0.0,Qact(n))*step
 cccz calculation of runoff

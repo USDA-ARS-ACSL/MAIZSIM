@@ -9,18 +9,20 @@
       Subroutine pondedIrrigationByHead()
       Include 'public.ins'
       Include 'nitvar.ins'
-      Include 'pusurface.ins'
+      Include 'PuSurface.ins'
       
+      integer :: pondTimeNum
       Parameter (PERIOD= 1./24., pondTimeNum=20)
+      Integer:: pondStarted, pondEnd,jj, irrigationApplied,
+     &         startHour(pondTimeNum), endHour(pondTimeNum),
+     &         irrigationTimes, modNum
+
       Character (len=10) :: startDate(pondTimeNum), endDate(pondTimeNum)
       Character (len=132) :: InString
       Real :: pondedDepth(pondTimeNum)
       Real :: startTime(pondTimeNum), endTime(pondTimeNum)
       Real :: pondedTime, pondedRate  
       Real :: thisTime
-      Integer:: pondStarted, pondEnd,jj, irrigationApplied,
-     &         startHour(pondTimeNum), endHour(pondTimeNum),
-     &         irrigationTimes, modNum
       
       
       Common /ponded_h/pondedDepth, pondedTime, 
