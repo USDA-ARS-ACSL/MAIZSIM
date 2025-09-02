@@ -14,7 +14,12 @@
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #endif
 #define comma ","
-#define MINUTESPERDAY (24.0*60.0);
+#define MINUTESPERDAY (24.0*60.0)
+#ifdef _WIN32
+const char* pathSymbol = "\\";
+#else
+const char* pathSymbol = "/";
+#endif
 
 // const a = 17.27; b = 237.7; //constant in deg C
 inline double E_sat(double T){return 0.6105*exp(17.27*T/(237.7+T));}
@@ -38,11 +43,11 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	// this is to determine the path and create output file names 
 	// for the debug and summary files
 
-	char* temp =       (char*)calloc(133, sizeof(char));
-	char* pathSymbol = (char*)calloc(133, sizeof(char));
+	char* temp =       (char*)calloc(256, sizeof(char));
+	char* pathSymbol = (char*)calloc(256, sizeof(char));
 	const char *ext_dbg="dbg";
 	std::string stressFile = "plantstress.crp";
-	pathSymbol =(char*) "/\\"; //for both Linux and Windows
+	//pathSymbol =(char*) "/\\"; //for both Linux and Windows
 	std::string basePath;
 	std::size_t found;
 	std::string cropFileAsString = cropFile;
@@ -111,8 +116,8 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.8.0.0 2023               *" << endl
-		<< " *                 2DSOIL version 3.0.0.0 2023             *" << endl
+		<< " *                     VERSION  1.8.1 9/22/2024            *" << endl
+		<< " *                 2DSOIL version 3.1.2.0 9/22/2024        *" << endl
 		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
