@@ -174,6 +174,7 @@ c dt
 	gSink_rootY=0.
 	gSink_rootM=0.
       gSink_N2O=0.
+      SOMMassRatio(:)=1.0
       
 
 * 

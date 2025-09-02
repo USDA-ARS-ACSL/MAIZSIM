@@ -1,19 +1,23 @@
-      Real kh0,kl0,km0,kd0,kn0,kh,kl,kd,kn,km,nq,
-     &    Nl,Nh,Nm,NNH4,NNO3_sol,
-     &    NNO3_old,NNH4_old,NL_old,Nm_old,Nh_old,
-     &    NO3mass_2_Nmass, NH4mass_2_Nmass,
+      Real kh0,kl0,km0,kd0,kn0,kh,kl,kd,kn,km,nq
+      Real r0,rL,rm,fa,fe,fh,cs
+      Real Nl,Nh,Nm,NO3_sol,
+     &    NO3_old,NH4_old,NL_old,Nm_old,Nh_old
+      Real Ch,CL,Cm,Ch_Old,CL_old,Cm_Old
+     &    NO3_from_residue, 
+     &    Denit_old, NO3_from_residue
+      Real NO3mass_2_Nmass, NH4mass_2_Nmass,
      &    nRootY, nRootM, cRoot,nRoot,
-     &    NO3_from_residue
+     &    TmprOld, NH4
      
       Common /NITVAR/
      &     kh0(NMatD),kl0(NMatD),kd0(NMatD),kn0(NMatD),km0(NMatD),
      &     fe(NMatD),fh(NMatD),r0(NMatD),rL(NMatD),rm(NMatD),
      &     fa(NMatD),nq(NMatD),cs(NMatD),
-     &    NL(NumNPD),Nh(NumNPD),Nm(NumNPD),NNH4(NumNPD),
+     &    NL(NumNPD),Nh(NumNPD),Nm(NumNPD),NH4(NumNPD),
      &    Ch(NumNPD),CL(NumNPD),Cm(NumNPD),
      &    cRoot(NumNPD), nRoot(NumNPD),
      &    Ch_Old(NumNPD),CL_old(NumNPD), Cm_Old(NumNPD),
-     &    NNO3_old(NumNPD),NNH4_old(NumNPD),NL_old(NumNPD),
+     &    NO3_old(NumNPD),NH4_old(NumNPD),NL_old(NumNPD),
      &    Nh_old(NumNPD),Nm_Old(NumNPD),NO3_from_residue(NumNPD),
      &    TmprOld(NumNPD),Denit(NumNPD),
      &    Denit_old(NumNPD),

@@ -16,6 +16,12 @@ c   will be transferred.
       
       Real BlkDn, FracSind, FracClay, FracOM, hCritS,hCritA
 	  Real nodeArea, gridWidth
+c       ! NodalPub_aux variables
+      Real rootRatioY, rootRatioM, SOMMassRatio 
+        
+      REAL Sink, cSink, gSink, tSink, RTWT,  RDenM,                                   
+     !   RMassY, RDenY, gSink_OM, gSink_root, gsink_N2O, gSink_rootY,         
+     !   gSink_rootM,cSink_OM
       Integer CodeW,CodeS,CodeT,CodeG,errPlant
 	  Integer MaxItO, OutPutSoilNo, OutPutSoilYes  
       Logical*1 lOrt
@@ -49,14 +55,14 @@ c   will be transferred.
      !       RO(NumNPD), hNew_org(NumNPD),QAct(NumNPD),ThetaAvailRZ, 
      !       ThetaFullRZ, ThAvail(NumNPD),ThFull(NMAtD),  lOrt,
      !       QGas(NumNPD,NumGD),ThetaAir(NumNPD)
-      Common /elem_public/Sink(NumNPD), 
+      Common /elem_public/ MatNumE(NumElD), Sink(NumNPD), 
      !       cSink(NumNPD,NumSD),gSink(NumNPD,NumGD),tSink(NumNPD),
      !       RTWT(NumNPD),
      !       RMassM(NumNPD),RDenM(NumNPD),
      !       RMassY(NumNPD), RDenY(NumNPD), 
-     !       MatNumE(NumElD),gSink_OM(NumNPD,NumGD),
+     !       gSink_OM(NumNPD,NumGD),cSink_OM(NumNPD,NumSD),
      !       gSink_root(NumNPD,NumGD),gSink_rootY(NumNPD,NumGD),
-     !       gSink_rootM(NumNPD,NumGD),gSink_N2O(NumNPD,NumGD)
+     !       gSink_rootM(NumNPD,NumGD), gSink_N2O(NumNPD,NumGD)
       Common /bound_public/ NumBP, NSurf, NVarBW,NVarBS,NVarBT,NVarBG,
      !       NumSurfDat, NSeep, NSP(NSeepD), NP(NSeepD,NumSPD),
      !       NDrain,NDR(NDrainD),ND(NDrainD,NumDR),
@@ -100,7 +106,8 @@ c   will be transferred.
 
      
 c the following blocks are not passed to the crop model
-       Common /Nodal_pub_Aux/ ROForInfil(NumBPD)
+       Common /Nodal_pub_Aux/ ROForInfil(NumBPD),
+     !       rootRatioY(NumNPD),rootRatioM(NumNPD), SOMMassRatio(NumNPD)
        
        Common /Materials/BlkDn(NMatD),FracSind(NMatD), FracClay(NMatD),
      !           FracOM(NMatD),TUpperLimit(NMatD), TLowerLimit(NMatD),

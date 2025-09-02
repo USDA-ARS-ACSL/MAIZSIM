@@ -165,9 +165,9 @@ c  organic N is in ug/cm3 of volume, don't need BD order to sum over volume
      &             +Cm(j)
      &             +Cm(l))/3.
 
-               NAmmoniaMean=NAmmoniaMean+AE*(NNH4(i)
-     &             +NNH4(j)
-     &             +NNH4(l))/3.
+               NAmmoniaMean=NAmmoniaMean+AE*(NH4(i)
+     &             +NH4(j)
+     &             +NH4(l))/3.
                NDenitrifyMean=NDenitrifyMean+AE*(Denit(i)
      &             +denit(j)
      &             +denit(l))/3.

@@ -43,7 +43,7 @@ c      Read(40,*,ERR=10) NL
       Read(40,*,ERR=10)
       im=im+1
       il=il+1
-      Read(40,*,ERR=10) epsi,lUpW,CourMax
+      Read(40,*,ERR=10) epsi,lUpW,CourMax!explicit if epsi =0
       Nlevel=1
       if(epsi.lt.0.999) NLevel=2      
       im=im+1
@@ -55,7 +55,7 @@ c      Read(40,*,ERR=10) NL
       im=im+1
       il=il+1
       Do jjj =1,NumSol
-         Read(40,*,err=10)SN, Dmol(jjj)
+         Read(40,*,err=10)SN, Dmol(jjj) !modelcular diffusion of each solute
          il=il+1
       enddo
       im=im+1
@@ -64,14 +64,14 @@ c      Read(40,*,ERR=10) NL
       Do NS=1,NumSol
           Do M= 1,NMat
             il=il+1
-            Read(40,*,ERR=10) SN,LN, Dlng(M,NS),Dtrn(M,NS)
+            Read(40,*,ERR=10) SN,LN, Dlng(M,NS),Dtrn(M,NS) !transverse and longitudinal dispersion coeff (for each solute and soil layer)
           enddo
       enddo
 c*       
       Do n=1,NumNP
         !convert concentration from ugNO3/g soil to ugNO3/cm2 water
         Conc(n,1)=Conc(n,1)/ThNew(n)*blkdn(MatNumN(n))
-        ConOld(n)=Con(n)
+        ConOld(n)=Con(n) !store old state variable
         hOld(n)=hNew(n)
         VxOld(n)=Vx(n)
         VzOld(n)=Vz(n)
@@ -85,25 +85,26 @@ C  Routine calculations
       tOld = Time
       t=Time
       dt = Step
+C   For each solute do 711      
       Do 711 jjj=1,NumSol                
         xMul=1.
         alf=1.-epsi
-
+C  Matrix initialization
         newjjj = MBand          
 	  Do 13 i=1,NumNP
-          DS(i)=0.
-          Gc(i)=0.
-          Sc(i)=0.
-          B(i) =0.
+          DS(i)=0.    !
+          Gc(i)=0.    !solute conc sink term
+          Sc(i)=0.    !node area term
+          B(i) =0.    !right hand side of the vector
 C        GR 
-          if(lOrt) B1(i)= Conc(i,jjj)
-          If(epsi.lt.0.001) then
-	      if(lOrt) newjjj = IADD(i)
-	       A(newjjj,i) = 0.
+          if(lOrt) B1(i)= Conc(i,jjj) !orthogonal mesh? B1=conc
+          If(epsi.lt.0.001) then      !if epsi<.001, means explicit scheme
+	      if(lOrt) newjjj = IADD(i) !
+	       A(newjjj,i) = 0.         !if explicit= A=0
           Else
 C GR
-            Do 12 j=1,MBandD
-              A(j,i)=0.
+            Do 12 j=1,MBandD          !For implicit scheme
+              A(j,i)=0.               !A(MBand, node)
 12          Continue
           Endif
 13      Continue
@@ -114,21 +115,27 @@ cccz
 cccz zhuangji adopt node based expression
 cccz zhuangji: the previous sink recast use a concentration-based weight for "sink average"
          Do n=1,NumNP
-            Gc(n)=cSink(n,jjj)
-            Sc(n)=NodeArea(n)
+            Gc(n)=cSink(n,jjj)  + cSink_OM(n,jjj)      !solute sink at each node and gas
+            Sc(n)=NodeArea(n)         !Node area at each node
          Enddo
 
 C
 C Assembling matrixes
-C
+C  calulating local element matrix (s(j1,j2= stiffness matrix (diffusion and advection) 
+C  F(i1= source/sink term vector)
+C  Assembling them in to global system matrix A(iB,i1) and right hand side B(i1)
+C  Apply boundary condition- update A and B
+C  AE- area of the element
+C  GcE average sink term
+C 
         Do 21 Level=1,NLevel
-          If(lUpW.eq.1) then
-            If(Level.eq.NLevel) then
+          If(lUpW.eq.1) then          !if upwind scheme
+            If(Level.eq.NLevel) then  !use current velocoties if final level
               Do i=1,NumNP
                 VxH(i)=Vx(i)
                 VzH(i)=Vz(i)
               Enddo
-            Else
+            Else                      !Use old velocity for intermediate level
               Do i=1,NumNP
                 VxH(i)=VxOld(i)
                 VzH(i)=VzOld(i)
@@ -136,27 +143,27 @@ C
             Endif
             Call Disper(jjj,NumNP,NMat,Dispxx,Dispzz,Dispxz,VxH,VzH,
      !               ThNew,hNew,Dmol,Dlng,Dtrn,NumSD,NMatD,MatNumN)
-            Call WeFact(NumNP,NumEl,NumElD,x,y,KX,WeTab,VxH,VzH,Dispxx,
+            Call WeFact(NumNP,NumEl,NumElD,x,y,KX,WeTab,VxH,VzH,Dispxx, ! weighing factor for finite element assembly
      !                    Dispzz,Dispxz)
           Endif
 
 
           Do 15 i=1,NumNP
-            F(i)=0.
-            If(Level.eq.NLevel) DS(i)=0.
+            F(i)=0.                       !residual vector F
+            If(Level.eq.NLevel) DS(i)=0.  !dispersion source term?
 15        Continue
 C
 C  Numerical stability
 C
 c          CourMax=1.
           Courant=0.
-          dtMx(2)=1.E+30
+          dtMx(2)=1.E+30  !max alow timestep
           dt1=1.E+30
           dt2=1.E+30
-          NumSEl=0
-          Do 19 n=1,NumEl
-            NUS=4
-            If(KX(n,3).eq.KX(n,4)) NUS=3
+          NumSEl=0        !number of sub element
+          Do 19 n=1,NumEl                 !n is each element
+            NUS=4                         !quadrilateral elem
+            If(KX(n,3).eq.KX(n,4)) NUS=3  !triangle elem
             Do 18 k=1,NUS-2
               NumSEl=NumSEl+1
               i=KX(n,1)
@@ -165,14 +172,14 @@ c          CourMax=1.
               List(1)=i
               List(2)=j
               List(3)=l
-              Ci(1)=x(l)-x(j)
+              Ci(1)=x(l)-x(j)                                 !element width, shape functions
               Ci(2)=x(i)-x(l)
               Ci(3)=x(j)-x(i)
-              Bi(1)=y(j)-y(l)
+              Bi(1)=y(j)-y(l)                                 !element height
               Bi(2)=y(l)-y(i)
               Bi(3)=y(i)-y(j)
-              AE=(Ci(3)*Bi(2)-Ci(2)*Bi(3))/2.
-              If(Level.eq.NLevel) then
+              AE=(Ci(3)*Bi(2)-Ci(2)*Bi(3))/2.                 !area of each element
+              If(Level.eq.NLevel) then                        !compute max allwble time step size- based on velocity and element dim
                 delX=amax1(abs(Ci(1)),abs(Ci(2)),abs(Ci(3)))
                 delY=amax1(abs(Bi(1)),abs(Bi(2)),abs(Bi(3)))
                 VxMax=amax1(abs(Vx(i))/ThNew(i),
@@ -181,24 +188,24 @@ c          CourMax=1.
                 VzMax=amax1(abs(Vz(i))/ThNew(i),
      !                  abs(Vz(j))/ThNew(j),
      !                  abs(Vz(l))/ThNew(l))
-                CourX=VxMax*dt/delX
+                CourX=VxMax*dt/delX                               !compute courant number in x and y direction
                 CourY=VzMax*dt/delY
                 Courant=amax1(Courant,CourX,CourY)
                 If(VxMax.gt.0.) dt1=CourMax*delX/VxMax
                 If(VzMax.gt.0.) dt2=CourMax*delY/VzMax
                 dtMx(2)=dmin1(dtMx(2),dt1,dt2)
               Endif
-              If(KAT.eq.1) xMul=2.*3.1416*(x(i)+x(j)+x(l))/3.
-              GcE=(Gc(i)+Gc(j)+Gc(l))/3.
-              If(Level.eq.NLevel) then
+              If(KAT.eq.1) xMul=2.*3.1416*(x(i)+x(j)+x(l))/3.     !if cylindrical ordinates
+              GcE=(Gc(i)+Gc(j)+Gc(l))/3.                          !average of the solute concentration sink term                          
+              If(Level.eq.NLevel) then                            !if final level- use current values 
                 Yb=hNew(i)*Bi(1)+hNew(j)*Bi(2)+hNew(l)*Bi(3)
                 Yc=hNew(i)*Ci(1)+hNew(j)*Ci(2)+hNew(l)*Ci(3)
-                DmE=Dmol(jjj)*(ThNew(i)*Tau(hNew(i))+
+                DmE=Dmol(jjj)*(ThNew(i)*Tau(hNew(i))+             !Tsu effect of the soil matrix on diffusion
      &                          ThNew(j)*Tau(hNew(j))+
-     &                          ThNew(l)*Tau(hNew(l)))/3.
-                ConE=(Con(i)+Con(j)+Con(l))/3.
+     &                          ThNew(l)*Tau(hNew(l)))/3.         !average of (theta*molecular diffusion)0each node of the element 
+                ConE=(Con(i)+Con(j)+Con(l))/3.                    !avg concentration
               Else
-                Yb=hOld(i)*Bi(1)+hOld(j)*Bi(2)+hOld(l)*Bi(3)
+                Yb=hOld(i)*Bi(1)+hOld(j)*Bi(2)+hOld(l)*Bi(3)      !if not final level- use old values 
                 Yc=hOld(i)*Ci(1)+hOld(j)*Ci(2)+hOld(l)*Ci(3)
                 DmE=Dmol(jjj)*(ThOld(i)*Tau(hOld(i))+
      &                        ThOld(j)*Tau(hOld(j))+
@@ -234,24 +241,26 @@ c          CourMax=1.
               Endif
               Do 17 j1=1,3
                 i1=List(j1)
-                F(i1)=F(i1) - FMul*(GcE+Gc(i1)/3.)
+                F(i1)=F(i1) - FMul*(GcE+Gc(i1)/3.)                !Source/sink vector
                 If(Level.eq.NLevel) DS(i1)=DS(i1)-AE/3.
                 Do 16 j2=1,3
                   i2=List(j2)
-                  S(j1,j2)=SMul1*(Bi(j1)*Bi(j2)+Ci(j1)*Ci(j2))*DmE
+                  S(j1,j2)=SMul1*(Bi(j1)*Bi(j2)+Ci(j1)*Ci(j2))*DmE  !sriffness matrix?- include diffusion and dispersion contributions
                   If(Vabs.gt.0.) then
                     S(j1,j2)=S(j1,j2)+Smul1*ConE*
      &              (Bi(j1)*Bi(j2)*(DisL*Yb2+DisT*Yc2)+
      &              (Bi(j1)*Ci(j2)+Bi(j2)*Ci(j1))*(DisL-DisT)*Yb*Yc+
      &              Ci(j1)*Ci(j2)*(DisL*Yc2+DisT*Yb2))/Vabs/2./AE
+                    
                     S(j1,j2)=S(j1,j2) -
      &              (-Bi(j1)*Yb-Ci(j1)*Yc)
      &              *(ConE+Con(i2)/3.)/4.*SMul1*xMul
+                    
                     If(lUpW.eq.1) S(j1,j2)=S(j1,j2)-xMul*
      !                (Bi(j2)/40.*Wx(j1)+Ci(j2)/40.*Wz(j1))
                   Endif
                   If(Level.ne.NLevel) then
-                    B(i1)=B(i1)-alf*S(j1,j2)*Conc(i2,jjj)
+                    B(i1)=B(i1)-alf*S(j1,j2)*Conc(i2,jjj)         !right hand side vector
                   Else
 C GR
 	              if (lOrt) then
@@ -260,22 +269,22 @@ C GR
 	              else
 	                 iB=MBand+i2-i1
 				  endif
-                    A(iB,i1)=A(iB,i1)+epsi*S(j1,j2)
+                    A(iB,i1)=A(iB,i1)+epsi*S(j1,j2)               !uses stiffness matrix
                   Endif
 16              Continue
 17            Continue
-18          Continue
-19        Continue
+18          Continue  !for each node associated with an element
+19        Continue    !for each element
 
           Do 20 i=1,NumNP
             If(Level.ne.NLevel) then
-              B(i)=B(i)-alf*F(i)
+              B(i)=B(i)-alf*F(i)                                  !intermidiate level. B includes sink terms and previous time step conc
             Else
-	        if (lOrt) newjjj=IADD(i)
+	        if (lOrt) newjjj=IADD(i)    
 
 C              A(MBand,i)=A(MBand,i)+DS(i)*ThNew(i)/dt
-              A(newjjj,i)=A(newjjj,i)+DS(i)*ThNew(i)/dt
-              B(i)=B(i)+DS(i)*ThOld(i)/dt*Conc(i,jjj)-epsi*F(i)
+              A(newjjj,i)=A(newjjj,i)+DS(i)*ThNew(i)/dt           !update A for the final level
+              B(i)=B(i)+DS(i)*ThOld(i)/dt*Conc(i,jjj)-epsi*F(i)   !update right hand side
             Endif
 20        Continue
 21      Continue
@@ -355,7 +364,7 @@ C  Neuman boundary condition
 C
             If(cKod.eq.2) then !This might apply also to a unit gradient condition
 	        if(lOrt) newjjj = IADD(i) 
-              A(newjjj,i)=A(newjjj,i) + epsi*Q(i)
+              A(newjjj,i)=A(newjjj,i) + epsi*Q(i)  !
               B(i)=B(i) - alf*Q(i)*Conc(i,jjj)
             Endif
           Endif   
@@ -367,13 +376,13 @@ C  SURFACE POND FOR TRANSPORT
           Do 313 i=1,NumBP
           n=KXB(i)
           k=CodeS(n)
-         If (iabs(k).eq.4) then		
-			HNEWS=DMAX1(hNew(N),0.0D0)
-		    HOLDS=DMAX1(hold(N),0.0D0)
+         If (iabs(k).eq.4) then	                        ! surface ponding	
+			HNEWS=DMAX1(hNew(N),0.0D0)                  ! ponding water height
+		    HOLDS=DMAX1(hold(N),0.0D0)                  
 		     newjjj=1	
 		     if (lOrt) newjjj = IADD(n)             
-              A(newjjj,n)=A(newjjj,n)+Width(i)*HNEWS/dt
-              B(n)=B(n)+Width(i)*Conc(n,jjj)*HOLDS/dt
+              A(newjjj,n)=A(newjjj,n)+Width(i)*HNEWS/dt   !update for ponded water
+              B(n)=B(n)+Width(i)*Conc(n,jjj)*HOLDS/dt     !update right hand side
           END IF
  313	  CONTINUE	 
 C
@@ -384,7 +393,7 @@ C
 
 C
 C  Solve the global matrix equation for transport
-C
+C  AC=B
         If(epsi.lt.0.001) then
           Do 22 i=1,NumNP
 C GR

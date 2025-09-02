@@ -17,6 +17,14 @@
       <Configuration>Dennis_Dbg</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_classim|Win32">
+      <Configuration>Release_classim</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_classim|x64">
+      <Configuration>Release_classim</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -43,7 +51,17 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -83,7 +101,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
@@ -116,6 +142,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dennis_Dbg|Win32'">
     <OutDir>$(ConfigurationName)\</OutDir>
@@ -132,8 +160,20 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -162,8 +202,10 @@
     </Link>
     <PostBuildEvent>
       <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
-        echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
-     </Command>
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Kansas"
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)MDEasternShore"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -179,12 +221,13 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <UndefinePreprocessorDefinitions>_INTERFACE</UndefinePreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>I:\vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
-      <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(platform)\$(configuration)\$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
       <SubSystem>Console</SubSystem>
@@ -193,9 +236,10 @@
       </DataExecutionPrevention>
     </Link>
     <PostBuildEvent>
-      <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Debug\$(TargetFileName)"
-        echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Debug\$(TargetName).lib"
-     </Command>
+      <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\$(Platform)\$(Configuration)\$(TargetFileName)"
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\$(Platform)\$(Configuration)\$(TargetName).lib"
+
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dennis_Dbg|Win32'">
@@ -286,8 +330,40 @@ echo f | xcopy /y "$(TargetPath)" "D:\Maizsim07\Crown"</Command>
       <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PostBuildEvent>
-      <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Release\$(TargetFileName)"
+      <Command>
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Release\$(TargetFileName)"
 echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Release\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\MAIZSIM Files"
+echo f | xcopy /y "$(TargetPath)" "C:\Users\dennis.timlin\Documents\Classim"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CROP_EXPORTS;%(PreprocessorDefinitions);_INTERFACE</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Release\$(TargetFileName)"
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Release\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\MAIZSIM Files"
+echo f | xcopy /y "$(TargetPath)" "C:\Users\dennis.timlin\Documents\Classim"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -308,11 +384,42 @@ echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Sourc
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ProgramDatabaseFile>$(SolutionDir)soil source\$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(platform)\$(configuration)\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PostBuildEvent>
-      <Command>echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\Release\$(TargetFileName)"
-echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\Release\$(TargetName).lib"
+      <Command>
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\$(Platform)\$(Configuration)\$(TargetName).dll"
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\$(Platform)\$(Configuration)\$(TargetName).lib"
+
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_classim|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CROP_EXPORTS;%(PreprocessorDefinitions);_INTERFACE</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ProgramDatabaseFile>$(SolutionDir)soil source\$(platform)\$(configuration)\$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+echo f | xcopy /y "$(TargetPath)" "$(SolutionDir)Soil Source\$(Platform)\$(configuration)\$(TargetFileName)"
+echo f | xcopy /y "$(OutDirFullPath)$(TargetName).Lib" "$(SolutionDir)Soil Source\$(Platform)\$(Configuration)\$(TargetName).lib"
+echo f | xcopy /y "$(TargetPath)" "X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\MAIZSIM Files"
+echo f | xcopy /y "$(TargetPath)" "%userprofile%\Documents\Classim"
+echo f | xcopy /y "$(TargetPath)" "%userprofile%\Documents\Classim_dev"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

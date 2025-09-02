@@ -17,7 +17,7 @@
 		  Real CLBefore,CLAfter,CLAvg
 		  Real CmBefore,CmAfter,CmAvg
 
-		  Real NNH4Before,NNH4After, NNH4Avg
+		  Real NH4Before,NH4After, NH4Avg
 		  Real DenitBefore,DenitAfter,DenitAvg
             
 		  Real TmprBefore,TmprAfter, TmprAvg
@@ -95,7 +95,7 @@
             ! Area weighted average redistribution of state variables over the tillage depth
             ! Area associated with each nodes are already estimated in Grid_Bnd (nodeArea(i) [cm2])
             ! State variables: (a) Water content(ThNew[-]), (b) pressure head(hNew[cm]),(c)temperature (Tmpr(i))
-            ! State variables: (C(L,H,M), N(L,H,M), conc(n,1),NNH4(n) 
+            ! State variables: (C(L,H,M), N(L,H,M), conc(n,1),NH4(n) 
             ! Perform the area weighted average over the unit of C and N in ug/cm3 of soil])
             ! P and K can be added later
 
@@ -148,14 +148,14 @@
 
 
       
-		      !----Nh,NL,Nm,Ch,CL,Cm,NNH4,Denit Redistribution [All units are ug/g of soil, nitrogen is in N form)------------
+		      !----Nh,NL,Nm,Ch,CL,Cm,NH4,Denit Redistribution [All units are ug/g of soil, nitrogen is in N form)------------
 		      NhBefore=0
 		      NLBefore=0
 		      NmBefore=0
 		      ChBefore=0
 		      CLBefore=0
 		      CmBefore=0
-		      NNH4Before=0
+		      NH4Before=0
 		      DenitBefore=0
                 
 cdt no need to use BD as units remain as g per unit volume
@@ -172,8 +172,8 @@ cdt no need to use BD as units remain as g per unit volume
      !              *CL(i)
                     CmBefore=CmBefore+nodeArea(node_tillApplied(i))
      !              *Cm(i)
-                    NNH4Before=NNH4Before+nodeArea(node_tillApplied(i))
-     !              *NNH4(i)
+                    NH4Before=NH4Before+nodeArea(node_tillApplied(i))
+     !              *NH4(i)
                     DenitBefore=DenitBefore
      !              +nodeArea(node_tillApplied(i))*denit(i)
                 end do
@@ -186,7 +186,7 @@ cdt no need to use BD as units remain as g per unit volume
 		      CLAvg=CLBefore/tillArea
 		      CmAvg=CmBefore/tillArea
 
-		      NNH4Avg=NNH4Before/tillArea
+		      NH4Avg=NH4Before/tillArea
 		      DenitAvg=DenitBefore/tillArea
 
 		  !Reassign this concentration back to the tilled nodes
@@ -199,7 +199,7 @@ cdt no need to use BD as units remain as g per unit volume
                     CL(i)=CLAvg
                     Cm(i)=CmAvg
 
-                    NNH4(i)=NNH4Avg
+                    NH4(i)=NH4Avg
                     Denit(i)=DenitAvg
                 end do
 		  !Find the difference in the total  N before and after [For Debug]
@@ -209,7 +209,7 @@ cdt no need to use BD as units remain as g per unit volume
 		      ChAfter=0
 		      CLAfter=0
 		      CmAfter=0
-		      NNH4After=0
+		      NH4After=0
 		      DenitAfter=0
                 do i=1, Num_tillNodes
                     NhAfter=NhAfter+nodeArea(node_tillApplied(i))
@@ -224,12 +224,12 @@ cdt no need to use BD as units remain as g per unit volume
      !          *CL(i)
                     CmAfter=CmAfter+nodeArea(node_tillApplied(i))
      !          *Cm(i)
-                    NNH4After=NNH4After+nodeArea(node_tillApplied(i))
-     !          *NNH4(i)
+                    NH4After=NH4After+nodeArea(node_tillApplied(i))
+     !          *NH4(i)
                     DenitAfter=DenitAfter+nodeArea(node_tillApplied(i))
      !          *denit(i)
                 end do
-		      !---End of Nh,NL,Nm,Ch,CL,Cm,NNH4,Denit Redistribution-------
+		      !---End of Nh,NL,Nm,Ch,CL,Cm,NH4,Denit Redistribution-------
 		  
       
       

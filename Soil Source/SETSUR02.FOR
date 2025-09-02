@@ -78,7 +78,7 @@ C**                                                                   **
       
       Parameter (PERIOD =1./24.)
       integer jday, m, DayofYear,CurYear, ModNum,ThisYear
-      Common /weather/ il,im,isol,ModNum, TMIN, TMAX,Gamma_psy,
+      Common /weatherD/ il,im,isol,ModNum, TMIN, TMAX,Gamma_psy,
      &   BEERS(24)
       
       double precision St,t
@@ -299,7 +299,8 @@ c
         TMAX = (CLIMAT(2) - ATEMP)/BTEMP
         TMIN = (CLIMAT(3) - ATEMP)/BTEMP
 c   dt have to fix this later as model cannot handle freezing temperatures
-        TMIN=max(TMIN,3.0)        
+        TMIN=max(TMIN,2.0)       
+        TMAX=max(TMAX,TMIN)
         RAIN = CLIMAT(4)*ERAIN
 
         If (MSW2.GT.0) then 
@@ -325,7 +326,7 @@ c   dt have to fix this later as model cannot handle freezing temperatures
 CDT
 
       If(MSW6.gt.0) then
-c        Rel_Humid=Climat(4+2*MSW1+MSW2+MSW3+ISOL+MSW6)
+c        Rel_Humid=Climat(4+2*MSW1+MSW2+MSW3+ISOL+MSW6)TMIN=max(TMIN,2.0)   
          Rel_Humid=min(Climat(4+2*MSW1+MSW2+MSW3+ISOL*MSW4+MSW6)
      &     /100.0,0.98)
           Rel_Humid=max(0.0,Rel_Humid)
@@ -479,9 +480,9 @@ C
 c       Minimum tomorrow temperature
         MDAY=Julday(date)
         If (MDAY.LT.JDLAST) then
-          TMINT = (CLIMAT(3) - ATEMP)/BTEMP
+          TMINT = MAX((CLIMAT(3) - ATEMP)/BTEMP,2.0)
         Else
-          TMINT = TMIN
+          TMINT = max(TMIN, 2.0)
         ENDIf
 C
 C  YESTERDAY DUSK TEMPERATURE
