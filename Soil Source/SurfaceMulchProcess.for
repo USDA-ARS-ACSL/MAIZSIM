@@ -218,8 +218,9 @@ c ------------------------------------------------------------------------------
 cccz control variables
 c    some dummy varibles that hold temperary values
        double precision aaaa,hhhh,a11,a12,a21,a22,b11,b12,
-     !    ThNewtemp,hNewtemp,Temptemp 
-      integer ModNum
+     !    ThNewtemp,hNewtemp,Temptemp,WQ_CERES_MULCH,
+     !    WH_CERES_MULCH,WC_CERES_MULCH
+       integer ModNum
 c    parameters for shrinking the grid
        double precision PriorStep,          ! record the previous time step
      !    thickPerLayer_temp(NumMulHLD)

@@ -265,11 +265,11 @@ C at this point we assume the that bottom and top boundaries have the same width
         
 cccz ------------------ The Carbon/Nitrogen Component ---------------------------------
 c
-c     Nh(NumNP)   [ug/g soil]     ELEMENTAL N in soil humus
-c     Nl(NumNP)   [ug/g soil]     ELEMENTAL N in soil litter
-c     Nm(NumNP)   [ug/g soil]     ELEMENTAL N in soil organic fertilizer
-c     NNH4(NumNP) [ug/g soil]     Mineral N pool in the form of ammonium
-c     NNO3(NumNP) [ug/g soil]     Mineral N pool in the form of nitrate
+c     Nh(NumNP)   [ug/cm3 soil]     ELEMENTAL N in soil humus
+c     Nl(NumNP)   [ug/cm3 soil]     ELEMENTAL N in soil litter
+c     Nm(NumNP)   [ug/cm3 soil]     ELEMENTAL N in soil organic fertilizer
+c     NH4(NumNP) [ug/cm3 soil]     Mineral N pool in the form of ammonium
+c     NO3(NumNP) [ug/cm3 soil]     Mineral N pool in the form of nitrate
 c
 c     Cl(NumNP)   [ug/cm3]     ELEMENTAL C in the litter component of soil organic matter    
 c     Cm(NumNP)   [ug/cm3]     ELEMENTAL C in manure component of soil organic matter  
@@ -278,30 +278,22 @@ cccz ---------------------------------------------------------------------------
 
         Do j=1,NumNP
           il=il+1
-          Read(41,*,ERR=10)i,Nh(i),Ch(i),NL(i),CL(i),Nm(i),Cm(i),NNH4(i)
+          Read(41,*,ERR=10)i,Nh(i),Ch(i),NL(i),CL(i),Nm(i),Cm(i),NH4(i)
      &      ,(Conc(i,jjj),jjj=1,NumSol),Tmpr(i),hNew(i),
      &      (g(i,jjj),jjj=1,NumG), RTWT(i)                         ! g(i,jjj):Read the initial CO2, O2 and N2O concentration in the soil
-          Ch_old(i)=Ch(i)
-          Nh_old(i)=Nh(i)
-          CL_old(i)=CL(i)
-          NL_old(i)=NL(i)
-          Cm_old(i)=Cm(i)
-          Nm_old(i)=Nm(i)
+
 C     right now conc is input as ug NO3 per g soil. further conversions will be done in the solute mover initialization routine when we have water contents.
 
 C   ammonia is input as ppm or ug /g soil 
 
 cccz --------------------------------------------------------------------------------------------------------------------
-cccz update the assignment
-cccz the unit of Conc(i,1) is input as  "ug NO3 per g soil", will be updated 
-c        to "ug NO3 per cm^3 soil water" in solmov
-cccz the unit of Conc is initially ug/g soil of NO3. Units of NNO3_old(i) is "ug N as NO3 per cm3 volume", 
+cccz the unit of Conc is initially ug/g soil of NO3. Units of NO3_old(i) is "ug N as NO3 per cm3 volume", 
 c     multiply by BD to get ug/ cm3 volume. then by molar mass to get N
-          NNO3_old(i)=Conc(i,1)*NO3mass_2_Nmass*Blkdn(MatNumN(i))
-cdt       NNH4 is input as ug/g soil (ppm). it is converted to ug /cm3 of soil for calculations          
-cccz the unit of NNH4(i) and NNH4_OLD(i) should be "ug N per cm3 volume", conversion needed, i.e.,
-          NNH4(i)=NNH4(i)*NH4mass_2_Nmass*Blkdn(MatNumN(i))
-          NNH4_old(i)=NNH4(i)
+          NO3_old(i)=Conc(i,1)*NO3mass_2_Nmass*Blkdn(MatNumN(i))
+cdt       NH4 is input as ug/g soil (ppm). it is converted to ug /cm3 of soil for calculations          
+cccz the unit of NH4(i) and NH4_OLD(i) should be "ug N per cm3 volume", conversion needed, i.e.,
+          NH4(i)=NH4(i)*NH4mass_2_Nmass*Blkdn(MatNumN(i))
+          NH4_old(i)=NH4(i)
 cccz --------------------------------------------------------------------------------------------------------------------
           TmprOld(i)=Tmpr(i)
           Denit(i)=0.0D0

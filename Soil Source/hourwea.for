@@ -90,7 +90,7 @@ c inputs hourly data
       real Interval, HRAIN,HSR,HTEMP, HTEMPY,HWIND,Rel_Humid,
      &     BEERS 
       character*10 date
-      Common /weather/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
+      Common /weatherH/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
      &     HWIND(24), Rel_Humid(24),isol,Date1,ModNum,
      &     Interval, TWET(24),TDRY(24), AVP(24), GAMMA_psy(24),
      &     SVPW(24),TMIN, TMAX,BEERS(24)

@@ -6,6 +6,7 @@
       Integer n,n1,e,SW10,SW20,SW30,SW40
       Real*4  WeightNeighbor(4),LeftDist, RightDist,TopDist,BottomDist,
      !		alphaR, Q10MR
+      Real MolO2Available, MolCO2_root
       
                              
       t=sngl(Time)
@@ -134,6 +135,8 @@ csun Tmpr(n) soil temperature
 csun Q10MR oomis and Amthor (1999) Crop Sci 39:1584-1596
 Csun need to get the air porosity through ThNew(NumNPD) 
 csun 2.65 is used as a rule of thumb based on the average bulk density of rock with no pore space.
+
+
 	
        alphaR = 1100                              !Calibrated value for Maize crop
 	 Q10MR =2.0
@@ -146,12 +149,20 @@ csun mature root respiration,assume half root respiration rate of young roots
      &    (Q10MR**((Tmpr(i) - 10.0)/10.0))
 	  
 	   gSink_root(i,1) = (gSink_rootM(i,1) +gSink_rootY(i,1))
-	   gSink_root(i,2) = gSink_root(i,1)/44.0*32.0 ! calculate moles of O2 consumed - 1 mole CO2=1 mole O2
-                                                      ! /44 converts from g to moles of CO2 and *32.0 converts moles of O2 to ug O2
+	   gSink_root(i,2) = gSink_root(i,1)/44.0*32.0 ! calculate umoles of O2 consumed - 1 mole CO2=1 mole O2
+                                                      ! /44 converts from g to umoles of CO2 and *32.0 converts umoles of O2 to ug O2
          gSink_root(i,1) = gSink_root(i,1)*amax1(1/soilair(i),0.0) ! convert to ug CO2 cm-3 air. (i,1) refers to co2 gas
 	   gSink_root(i,2) = gSink_root(i,2)*amax1(1/soilair(i),0.0) ! convert to ug CO2 cm-3 air. (i,2) refers to o2 gas
          
          Enddo	  
+!      Calculate availability of O2 in the soil
+       MolCO2_root=gSink_root(i,1)*step/44.0              ! umol of CO2 respired  in this node by roots
+       MolO2Available=g(i,2)/32.0*soilair(i)*(1-SOMMassRatio(i))  ! convert ug/cm3 of O2 to total umol of O2 in the soil pore air this is the maximum amount of  O2 available for respiration in umol
+
+       ! these next lines for debugging and testing, remove later
+       if (MolO2Available.lt.MolCO2_OM) then
+           iii=1
+       endif
 	 	
 
 

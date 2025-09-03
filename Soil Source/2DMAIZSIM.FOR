@@ -3,7 +3,7 @@
 *     2DSOIL  - Numerical model of two-dimensional soil environment    *
 *                           for field crops                            *
 *                                                                      *
-*                              Release 3.1.2.0                              *
+*             Release 3.1.2.0    9/24/2024                             * 
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
 
       Include 'public.ins'
@@ -12,7 +12,7 @@
 	Include 'nitvar.ins'
       Include 'PuSurface.ins'
       	
-	character*132 RunDat
+	character*256 RunDat
 	integer len, status
 	RunFile="Run.Dat"	
 	Call get_command_argument(1, RunDat, len, status)

@@ -136,7 +136,7 @@
 			     RMassM[NumNPD],RDenM[NumNPD],
 			     RMassY[NumNPD], RDenY[NumNPD] ;
 		    int    MatNumE[NumElD];
-			float gSink_OM[NumGD][NumNPD],
+			float gSink_OM[NumGD][NumNPD], cSink_OM[NumGD][NumNPD],
 				gSink_root[NumGD][NumNPD], gSink_rootY[NumGD][NumNPD],
 				gSink_rootM[NumGD][NumNPD], gSink_N2O[NumGD][NumNPD];
  };

@@ -22,7 +22,7 @@ C summary output variables
       Real SeasonRainfall, SeasonPotenTranspiration,
      &     SeasonActualTranspiration, SeasonPotenSoilEvap,
      &     SeasonActualSoilEvap,SeasonActualInfil,
-     &     SumArrayTh, MaxY
+     &     SumArrayTh, MaxY, Cumulative_OM_N_sink
       Character*10 date, Stime
 cccz output for runoff module
       double precision SurInput_Flux,Surface_Flux,Bottom_Flux,
@@ -45,7 +45,7 @@ cccz output for runoff module
      &     Period, ETO, ActualTrans1,ActualSoilEvap,
      &     pot_ET,pot_ET_EO,bottomFlux, timer,
      &     FluxAct,PotentialSoilEvaporation,
-     &     CumRain,
+     &     CumRain,Cumulative_OM_N_sink,
      &     SeasonRainfall, SeasonPotenTranspiration,
      &     SeasonActualTranspiration, SeasonPotenSoilEvap,
      &     SeasonActualSoilEvap,SeasonActualInfil,CumulativeFlux,
@@ -110,7 +110,7 @@ cccz
 	  pot_ET=0.0
 	  pot_ET_EO=0.0
         nitrogenFlux=0.0
-        
+        Cumulative_OM_N_sink=0.0
         
 cccz initialize these only for runoff output file
         SurInput_Flux=0.0
@@ -138,7 +138,7 @@ c NodeGrpahics
       Write(81,5) "Date_time,", "Date,", "X,", "Y,", "hNew,","thNew,",
      &  "Vx,", "Vy,", "Q,", "NO3N,", "NH4N,","Temp,","Area,", 
      &  "CO2Conc," , "O2Conc,", "N2OConc"
-
+c Element Graphics 
       Write(82,6) "Date_time,", "Date,", "X,", "Y,", "Node,", 
      &      "RMassM,","RMassY,", "RDenM,", "RDenY,",
      &      "WaterSink,", "NitSink,", "GasSink"
@@ -217,6 +217,8 @@ cccz	           CumRain=CumRain+varBW(i,1)*width(i)*step
 cccz          if (codeW(n).eq.-4) Then
             CumRain=CumRain+Varbw_Air(i,1)*width(i)*step
             SurInput_Flux=SurInput_Flux+Varbw_Mulch(i,1)*width(i)*step
+            Cumulative_OM_N_sink=Cumulative_OM_N_sink+cSink_OM(i,1)
+     &         *width(i)* step*thNew(i)*NO3mass_2_Nmass
 cccz         endif
 	  enddo
 	
@@ -310,7 +312,7 @@ cccz calculation is done, just do an assignment
         call caldat(iday,mm,id,iyyy) 
         write (date,'(i2.2,A1,i2.2,A1,i4.4)') mm,'/',id,'/',iyyy  
           Call ArrNodOut (Date,x,y,NumNP,t,hNew,
-     !      ThNew,vz,vx,Q,Conc(1,1),NNH4,Tmpr,g(1,1), g(1,2),
+     !      ThNew,vz,vx,Q,Conc(1,1),NH4,Tmpr,g(1,1), g(1,2),
      !      g(1,3),ugGasCm3air_to_ppm,NumG, NodeArea)
         iitime=int(time)
         diff=abs(time-int(time))
@@ -397,7 +399,7 @@ cccz
 * output is mm/cm2
 * 
 
-       
+           Cumulative_OM_N_sink=Cumulative_OM_N_sink/gridWidth*10.0
            CurrentTrans=(AWUPSS-ActualTrans1)/gridWidth*10.0
            p_ET=(potential_T-pot_ET)/gridWidth*10.0
 c pot_ET_EO is the EO summation from the previous time step.           
@@ -475,7 +477,7 @@ cccz output for node-base values
         enddo
       endif        
 cccz ---------------------- finish mulch printing --------------------------
-
+!        write(*,*) Cumulative_OM_N_sink   
           
         if (DailyOutput.eq.1) then
              SumArrayTh=0.0
