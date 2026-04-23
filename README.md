@@ -33,6 +33,8 @@ https://github.com/precision-sustainable-ag/BuildMaizsim
 
 More documention is being prepared. See the "how to run model" file for information on how to set up the input files and run the executable from the command line. 
 
+The community is explicitly encouraged to engage in the responsible disclosure of vulnerabilities to promote collaboration and improve code security.
+
 
 See the ExcelInterface repository for an excel based interface and example input files.
 https://github.com/USDA-ARS-ACSL/ExcelInterface
