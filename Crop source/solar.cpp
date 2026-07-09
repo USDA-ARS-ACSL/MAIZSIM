@@ -58,6 +58,7 @@ using fractions.
 #include <cmath>
 #include <algorithm>
 #include "solar.h"
+#include <iostream>
 
 using namespace std;
 
@@ -298,7 +299,7 @@ void CSolar::SetPotentialPAR()
 // potential PAR calculations (visible light)
 // According to Weiss and Norman (1985)
 {
-
+	//cout << CosTheta << '   ' << m() << endl;
 	PotentialPARDirect= 600.0*exp(-0.185*m())*CosTheta;
     PotentialPARDiffuse= 0.4*(600.0-PotentialPARDirect)*CosTheta;
 	PotentialPARTotal=PotentialPARDirect+ PotentialPARDiffuse;

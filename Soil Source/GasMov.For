@@ -1,18 +1,26 @@
       subroutine GasMover()
       Include 'public.ins'
       Include 'puweath.ins'
-      Double precision A,A_1,B,C,P,Sum,CGFLux
+      Double precision A(MBandD,NumNPD),B,C,P,Sum,CGFLux,
+     !  A_1(MBandD,NumNPD)
+      !Real, allocatable :: A_1(:,:), A(:,:)
+
+
+      Double Precision t, dt
       Real bTort
       Integer gKod,newjjj
-      Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
-     !          A_1(MBandD,NumNPD)
+      Dimension B(NumNPD),F(NumNPD),DS(NumNPD)
+
           
       Common /GasM/ ThOld(NumNPD),ThANew(NumNPD),ThAOld(NumNPD),
      !          ThTot(NMatD),bTort,
      !          Dair(NumGD),
      !          NLevel,epsi, S(3,3),Ci(3),Bi(3),List(3),
      !          Diff(NumNPD),Ac(NumNPD),Gc(NumNPD),Sc(NumNPD),
-     !          g_1(NumNPD,NumGD)   
+     !          g_1(NumNPD,NumGD)
+      
+      !allocate (A(MBandD,NumNPD))
+      !allocate (A_1(MBandD,NumNPD))
       
       CGFLux=0.0
       If (lInput.eq.0) goto 11
@@ -71,14 +79,13 @@ C
       End do 
            
 11    continue 
-      tOld = Time
       t=Time
       dt = Step
       Do 711 jjj=1,NumG	 	 
         call DiffCoeff(jjj,NumNP,NMat,NumGD,NMatD,Diff,Tmpr,
      !           ThAOld,ThOld,ThTot,ThATr,bTort,ThAMin,Dair,MatNumN)  !Returns Diff, the diffusion coefficient in soil air [cm2/day]
       xMul=1.0D0
-      alf=1.0D0-epsi
+      alf=1.0-epsi
       newjjj=MBand             
 c	 
         Do 13 i=1,NumNP
@@ -287,17 +294,18 @@ c  Implicit formulation
             P=1./A(MBand,k)
             kk=k+1
             kc=MBand
-            Do 211 i=kk,NumNP
+            Do 2110 i=kk,NumNP
               kc=kc-1
               If(kc.le.0) goto 212
               C=-P*A(kc,i)
               A(kc,i)=C
               ii=kc+1
               L=kc+MBand-1
-              Do 211 j=ii,L
+              Do 2111 j=ii,L
                 jj=j+MBand-kc
                 A(j,i)=A(j,i)+C*A(jj,k)
-211         Continue
+2111          Continue
+2110         Continue
 212       Continue
           Do 214 i=2,NumNP
             jj=MBand+1-i

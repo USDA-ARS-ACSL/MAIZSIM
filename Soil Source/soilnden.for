@@ -4,7 +4,7 @@ c second new comment
       Include 'public.ins'
       Include 'nitvar.ins'
       Include 'PuSurface.ins'
-      common /nitrog/ModNum, ThOld(NumNPD)
+      common /nitrog/ModNum, ThOld(NumNPD),NH4_init
       Real*4 BCh,BNh, BCl,BNl,BCm,BNm,BNH4,BNO3,BDENIT
       Real*4 BNO3_Added
       REAL*4 P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, 
@@ -17,8 +17,9 @@ c second new comment
       Real*8 wfPore,O2_mol  !water filled pore space, moles of O2
 
 	 
-      Logical enough
+      Logical enough, NH4_init
        t=time
+       
        If(lInput.eq.1) then
         im=400
         il=0
@@ -45,8 +46,9 @@ c second new comment
 
         Close(40)
         NumSol=1
+        NH4_init=.false.
         !Call SetAbio(ew,et,ed,0,0.,0.)
-        Call SetAbio_O2(ew,eO2,et,ed,0,0.,0.,0.D0,0.D0)    
+        Call SetAbio_O2(ew,eO2,et,ed,0,0.,0.,1.D0,0.D0)    
         dtmx(4)=1./24
        Else  ! not the first time step
 C
@@ -56,7 +58,13 @@ C               The two are equivalent (both numerator and denominator differ by
 C        
 C           Conc is input as ppm, then converted to ug/cm3 in solmov initialization
 
-
+        if (.not.NH4_init) then
+          NH4_init=.true.
+          do i=1, NumNP
+           m=MatNumN(i)
+           NH4(i)=NH4(i)*Blkdn(m)
+          enddo
+         endif
         Do i=1,NumNP
         cSink_OM(i,1)=0.0
         m=MatNumN(i)
@@ -148,8 +156,8 @@ C Q1415 is immobilization vie the organic fertilizer pool
             Q45act  = Q45pot
             Q1415act= Q1415pot
           else
-            Q45act  =fa(m)*Present*Q45pot  /(Q45pot+Q1415pot)
-            Q1415act=fa(m)*Present*Q1415pot/(Q45pot+Q1415pot)
+            Q45act  =fa(m)*Present*Q45pot  /(Q45pot+Q1415pot+.00001)
+            Q1415act=fa(m)*Present*Q1415pot/(Q45pot+Q1415pot+.00001)
           endif
 
 C
@@ -243,7 +251,7 @@ cDT removed BlkDn, it is not needed.
 Csb: Sink for N2O      
 Csb: 1ugN=44/14 ug N2O	
 Csb: unit of Q7 [ug N g soil day-1]  
-Csb: unit of gsink_N2O [ug N2O cm=3 air]         
+Csb: unit of gsink_N2O [ug N2O cm3]         
          
          gsink_N2O(i,1)=Q7*(44.0/14.0)*amax1(1.0/soilair(i),0.0)!ug N to ug N2O +convert to ug N2O cm-3 air	
 

@@ -1,6 +1,7 @@
       subroutine HeatMover ()
       Include 'public.ins'
       Double precision A,B,C,P,Sum
+      Double precision dt,t
       Real VSind, VClay, VOrgM, ThTot
       Integer tKod
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD) 
@@ -43,7 +44,6 @@ C
 C  Routine calculations
 C
 11    Continue 
-      tOld = Time
       t=Time
       dt = Step
       Call Thermal(HCS,MatNumN,NMatD,NumNP,VSind,VClay,VOrgM,ThNew,
@@ -341,10 +341,11 @@ cSolve
               A(kc,i)=C
               ii=kc+1
               L=kc+MBand-1
-              Do 211 j=ii,L
+              Do 210 j=ii,L
                jj=j+MBand-kc
                A(j,i)=A(j,i)+C*A(jj,k)
-211           Continue
+210           Continue
+211        Continue
 212       Continue
           Do 214 i=2,NumNP
             jj=MBand+1-i

@@ -1,5 +1,7 @@
+//
 #include "stdafx.h"
 #include "plant.h"
+//#include "gas_exchange.h"
 #include "radtrans.h"
 #include "timer.h"
 #include <cmath>
@@ -492,7 +494,15 @@ double CPlant::calcTotalLeafMass()
 	{
 		Mass = nodalUnit[i].get_leaf()->get_mass();
 		Area = nodalUnit[i].get_leaf()->get_area();
-		nodalUnit[i].get_leaf()->set_SLA(Area/Mass); // Set SLA from current leaf area and mass, SK
+		if (Mass > 0.0)
+		{ 
+			nodalUnit[i].get_leaf()->set_SLA(Area/Mass); // Set SLA from current leaf area and mass, SK
+		}
+		else
+		{
+			nodalUnit[i].get_leaf()->set_SLA(0.0); // if leaf mass is zero, set SLA to zero
+		}
+		
 		TotalMass += Mass;
 	}
 	leafMass=TotalMass; //this should equal to activeLeafMass + droppedLeafMass;
@@ -707,7 +717,7 @@ void CPlant::C_allocation(const TWeather & w)
 	
 	// this is the same as (PhyllochronsSinceTI - lvsAtTI/(totalLeaves - lvsAtTI)
 	shootPart = __max(0,Yg*(Fraction*(C_supply-maintRespiration))); // gCH2O partitioned to shoot
-	rootPart = __max(0,Yg*((1-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
+	rootPart = __max(0,Yg*((1.0-Fraction)*(C_supply-maintRespiration))); // gCH2O partitioned to roots
 
     if (!develop->Germinated())
    {
@@ -719,7 +729,7 @@ void CPlant::C_allocation(const TWeather & w)
 	   { 
 // give a half of carbon from shoot needed to meet root demand? SK
 	      shootPart_real = __max(0, shootPart-(w.pcrs-rootPart_old)); //than take the difference between the two out of the carbon allocation to shoot at time step t
-		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);  //and put that amount of carbon into carbon allocation to root at time step t.          
+		  rootPart_real = rootPart+ (w.pcrs-rootPart_old);  //and put that amount of carbon into carbon allocation to root at time step t.    	  
 	   }
 	   else 
 	   {

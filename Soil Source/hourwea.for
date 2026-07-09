@@ -491,7 +491,8 @@ C
         IHPERD = IPERD/2
         Do 20, J = 1,IHPERD
           HRANG(J) = PI/12.0*(12 - J + 0.5)
- 20     HRANG(IPERD - J + 1) = HRANG(J)
+          HRANG(IPERD - J + 1) = HRANG(J)
+ 20     Continue
         DDIf = DAYLNG - (2.0*IfIX(DAYLNG/2))
         IUP = 13 - IfIX(DAYLNG/2)
         IDN = 12 + (13 - IUP)

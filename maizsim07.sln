@@ -60,19 +60,4 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FF3BAE2-4654-40C6-B4C7-B847547F27DF}
 	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://arsmdbe3320dta.usda.net/tfs/plantmodel
-		SccProjectUniqueName0 = Crop\u0020source\\Crop.vcxproj
-		SccProjectName0 = $/Maizsim/MaizeSim/DLL_VS9.1
-		SccAuxPath0 = https://arsmdbe3320dta.usda.net/tfs/plantmodel
-		SccLocalPath0 = Crop\u0020source
-		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName1 = Soil\u0020Source\\2dmaizsim.vfproj
-		SccProjectName1 = $/Maizsim/2DMaizsim/2DSOIL\u0020for\u0020MaizSim_VS9.1
-		SccAuxPath1 = https://arsmdbe3320dta.usda.net/tfs/plantmodel
-		SccLocalPath1 = Soil\u0020Source
-		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-	EndGlobalSection
 EndGlobal

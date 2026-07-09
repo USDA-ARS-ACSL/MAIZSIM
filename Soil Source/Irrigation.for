@@ -11,6 +11,7 @@
       Character InString*132
       Real Amount_Irrig_Applied,AvgIrrRate,IrrigRate
       Parameter (PERIOD =1./24.)
+      Double Precision t, dt
       Common /Irrig/ tApplIrrig(Max_Irrig_times),
      !         StopIrrig(Max_Irrig_times),
      !         Amount_Irrig_Applied(Max_Irrig_times),
@@ -73,6 +74,14 @@ c
          i=1
          precision_threshold=0.0001
         Do While (DtIrrig > precision_threshold)
+c catch condition where total irrigation exceeds 24 hours in a day        
+         if (i.eq.24.and.(DtIrrig>PERIOD*24)) then
+          
+          Write(*,*) "Error: Irrigation hours exceed 24 hours in a day"
+          Write(*,*) "total irrigation = ", 24.0 * AvgIrrRate
+          Write(*,*) "remaining irrigation will be ignored"
+          DtIrrig=0.0      ! this will drop the loop into the else condition below   
+         end if
            If((DtIrrig).gt.PERIOD*24.0) then            !period is 1/24
             IrrigRate(i)=AvgIrrRate             !cm/hour
             DtIrrig=DtIrrig-PERIOD*24             !how many more hours of irrigation is pending
@@ -87,13 +96,14 @@ c
             IrrigHour=1
            Endif !! if DtIrrig>precision_threshold 
          i=i+1
-         End Do
+        
+         End Do !! Do While (DtIrrig .gt. precision_threshold)
         Endif  !! if day of irrigiation
        End if  !! end of !skip if no  irrigation
    
       
 
-655    If(Abs(time-tNext(ModNum)).lt.0.001*Step) then          !If its the day and time to irrigate
+       If(Abs(time-tNext(ModNum)).lt.0.001*Step) then          !If its the day and time to irrigate
           jj=IrrigationApplied
           if (time.LT.StopIrrig(jj)) then                     !from start to the stop time
           

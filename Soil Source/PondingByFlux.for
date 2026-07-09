@@ -22,8 +22,7 @@
       Real :: pondedDepth(pondTimeNum)
       Real :: startTime(pondTimeNum), endTime(pondTimeNum)
       Real :: pondedTime, pondedRate(pondTimeNum)  
-      Real :: thisTime
-      Double Precision :: CriticalHSave
+      Double Precision :: CriticalHSave, thisTime
 
       
       

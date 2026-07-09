@@ -36,7 +36,7 @@ cccz
 
        if (AutoIrrigateF.eq.0.and.lInput.lt.1)  tNext(ModNum)=1.0e10
        
-11     If(abs(time-tNext(ModNum)).lt.0.001*Step.and.
+       If(abs(time-tNext(ModNum)).lt.0.001*Step.and.
      & AutoIrrigateF.gt.0) then
 cccz reset to zero every time to prevent "infinite irrigation"         
         do i=1,NumNPD
