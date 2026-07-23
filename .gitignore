@@ -51,8 +51,8 @@ local.properties
 *.user
 *.sln.docstates
 **/*.u2d
-/$tf1/
-/$tf/
+
+**/$tf/
 # Build results
 
 [Dd]ebug/
