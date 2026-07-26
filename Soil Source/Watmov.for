@@ -15,6 +15,8 @@
       Double precision A,B,C, B_1, A_1
       Double precision dt,dtOld,t,tOld,PI,DPI,F2
       real ATG,HSP
+CDT use allocate for large arrays      
+      !Real, allocatable :: A_1(:,:), A(:,:)
 cccz move it to "PuSurface.ins" for public use 
 cccz  Double precision CriticalH, CriticalH_R
       Logical Explic,ItCrit,FreeD
@@ -30,6 +32,8 @@ cccz  Double precision CriticalH, CriticalH_R
      !                MaxIt,TolTh,TolH,dt,dtOld,tOld,
      !                thR(NMatD),hSat(NMatD),
      !                isat(NumBPD),FreeD
+      !allocate (A(MBandD,NumNPD))
+      !allocate (A_1(MBandD,NumNPD))
       If (lInput.eq.0) goto 11  
         FreeD=.true.
         CriticalH=5.1D0
@@ -378,7 +382,10 @@ c    pond  on  the soil-atmosphere surface
 cMisha 18/9 2006
 cMK----------------------------------------------------------------------------------     
  
-
+C This code implements a physically realistic, numerically stable boundary condition for ponded infiltration at the soil surface. 
+C It uses smooth approximations of the Heaviside and Dirac delta functions to handle the transition between non-ponded and ponded conditions, 
+C ensuring the model can handle the sudden onset of surface ponding without numerical instability. 
+C The updates to A and B ensure the finite element system correctly represents the water flux due to ponding at the boundary.
 
 		if ((CodeW(n).eq.-4).and.(q(n).gt.0)) then
 c Ponded infiltration measurement is from Misha Kouznetzov

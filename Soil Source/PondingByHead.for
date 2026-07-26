@@ -22,7 +22,7 @@
       Real :: pondedDepth(pondTimeNum)
       Real :: startTime(pondTimeNum), endTime(pondTimeNum)
       Real :: pondedTime, pondedRate  
-      Real :: thisTime
+      Double Precision :: thisTime
       
       
       Common /ponded_h/pondedDepth, pondedTime, 

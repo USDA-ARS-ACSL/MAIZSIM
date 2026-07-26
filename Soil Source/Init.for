@@ -3,7 +3,6 @@
       Include 'puweath.ins'
       Include 'puplant.ins'
 	Character*10 Sowing, Ending, Date4,Date1  ! date1 is dummy for beginDay until we modify the itnerface
-	Character*256 RootName,T1,T2
       Character*256 extract_path, path,logFile
       Character*80 Indates,test
       integer iapos, Quote_COUNT, begindate
@@ -234,15 +233,15 @@ c dt
 
        len = len_trim(filename)
        path = ""
-    ! Find the last occurrence of the directory separator '\'
+    ! Find the last occurrence of the directory separator '\' need to test this with a write statement
        
        do i = len, 1, -1
           if ((filename(i:i) == '\').OR.(filename(i:i) == '/')) then
               path = filename(1:i)
-              if (filename(i:i) == '/') then   ! if windows
+              if (filename(i:i) == '/') then   ! if linux
                   path=path // '/'
                else 
-                 path=path // '\'               ! if linux
+                 path=path // '\'               ! if windows
               end if
              exit
           end if

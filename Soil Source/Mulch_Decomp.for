@@ -109,6 +109,7 @@ c         bbbb                    dummy variable, receive unwanted data.
        double precision 
      !   PC_mulch, PN_mulch, alpha_F,
      !   K_CARB, K_CELL, K_LIGN,
+
      !   K_CARB_temp, K_CELL_temp, K_LIGN_temp,       
      !   ThetaV_2_ThetaM, 
      !   INKG, CNR,
@@ -133,7 +134,8 @@ c         bbbb                    dummy variable, receive unwanted data.
      !   Nim_total_decomp,Nmine_total_decomp,Nhumi_total_decomp,
      !   Nim_cumu_decomp,Nmine_cumu_decomp,Nhumi_cumu_decomp,
      !   Mulch_Decompose,local_soil_mass,
-     !   totalMulchC_final, totalMulchN_final  
+     !   totalMulchC_final, totalMulchN_final,
+     !   FOMN_Humi,CO2_to_Air
        double precision N_Quan_Left,N_Quan_Right,
      !   Length_Left_Frac,Length_Right_Frac  
        Character InString_mulch*132
@@ -245,7 +247,7 @@ c    just need to run the function once
           bbbb=WQ_CERES_MULCH(-100.0D0,0.1D0,0.1D0,-1)
           LocalFlag_MulchDecomp_Start=0 
           LocalFlag_MulchDecomp_FinalAssign=0
-         if(Crit_Level.eq.0) then ! that means we do not want to have decomposition
+         if(Crit_Level.le.1.0D-5) then ! that means we do not want to have decomposition
              DecompCtrl=0
          endif    
       EndIf
@@ -253,7 +255,7 @@ c    just need to run the function once
 c---------------------------- finish the input --------------------------------------------------------------------------------
 cccz initialization step 2: REAL INITIALIZATION, occur once when the mulch starting time is hitted
 c    the residue mulch is established at this time step
-c    the trager will be  "MulchDecompIni.eq.1"
+c    the trigger will be  "MulchDecompIni.eq.1"
 
        IF(MulchDecompIni.eq.1
      &     .and.LocalFlag_MulchDecomp_Start.eq.0) then               ! double ensure this seciton will be only executed once

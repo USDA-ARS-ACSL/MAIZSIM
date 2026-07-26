@@ -1,18 +1,22 @@
       subroutine Root_Mover()
       Include 'public.ins'
       Include 'puplant.ins'
-      Double precision A,B,C,P,Sum
+ 
+      Double Precision A,B,C,P,Sum
       Character InString*132
       Integer newjjj
+      Real dt,DS, F, Gc, Sc, Fc,RMassOld,RDenTotal
+
+      
 C  AD added RMass, RMassM, MRL into Public.ins 2011-08-01 
 C AD 12-2-2011 this code from MaizSim10.11 is based on Yakov Pachepsky's diffusion code
       
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
      &            Gc(NumNPD),Sc(NumNPD),Fc(NumNPD),
-     &            MRL(NumNPD),RDenTotal(NumNPD)
+     &             RDenTotal(NumNPD)
       Common /RootM/  DMolx,DMolz,Vel,Ac(NumNPD),
-     !                NLevel,dt,epsi,CourMax,lUpW,
-     !                S(3,3),Wz(3),Wx(3),Ri(3),Ci(3),Bi(3),List(3),
+     !                NLevel,epsi,CourMax,lUpW,
+     !                S(3,3),Ci(3),Bi(3),List(3),
      !                Dispzz(NumNPD),Dispxx(NumNPD),Dispxz(NumNPD),
      !                RMassOld(NumNPD),RDenTotal
       If (lInput.eq.0) goto 11
@@ -56,18 +60,18 @@ C  No Plant = No Root Activity
       If(NShoot.eq.0) Return
       
       
-      t=Time
-      dt = Step
-      xMul=1.0D0
-      alf=1.0D0-epsi
+      !t=Time
+      dt = sngl(Step)
+      xMul=1.0
+      alf=1.0-epsi
       newjjj=MBand
 c  	 
       Do 13 n=1,NumNP
-       DS(n)=0.0D0
-       Gc(n)=0.0D0
-       Sc(n)=0.0D0
+       DS(n)=0.0
+       Gc(n)=0.0
+       Sc(n)=0.0
        B(n) =0.0D0
-       Fc(n)=0.0D0
+       Fc(n)=0.0
 c          Ac(i)=0.
          If(lOrt) B1(n)=RMassY(n)
          
@@ -156,11 +160,11 @@ C
 19        Continue
           Do 20 i=1,NumNP
             If(Level.ne.NLevel) then
-              B(i)=B(i)-alf*F(i)
+              B(i)=sngl(B(i))-alf*F(i)
             Else
               if (lOrt) newjjj=IADD(i)
-              A(newjjj,i)=A(newjjj,i)+DS(i)/dt
-              B(i)=B(i)+DS(i)/dt*RMassY(i)-epsi*F(i)
+              A(newjjj,i)=sngl(A(newjjj,i))+DS(i)/dt
+              B(i)=sngl(B(i))+DS(i)/dt*RMassY(i)-epsi*F(i)
             Endif
 20        Continue
 21      Continue
@@ -196,9 +200,10 @@ C
               A(kc,i)=C
               ii=kc+1
               L=kc+MBand-1
-              Do 211 j=ii,L
+              Do 210 j=ii,L
                 jj=j+MBand-kc
                 A(j,i)=A(j,i)+C*A(jj,k)
+210           Continue  
 211         Continue
 212       Continue
           Do  214 i=2,NumNP
@@ -245,8 +250,8 @@ c set up for next step
       Do i=1,NumNP 
         RMean=(RMassY(i)+RMassOld(i))/2.0d0
         RTWT(i)=(RMassM(i)+RMassY(i))
-        RMassM(i)=RMassM(i)+ALPY*RMassY(i)*Step
-        RMassY(i)=RMassY(i)*(1.0-ALPY*Step)
+        RMassM(i)=RMassM(i)+ALPY*RMassY(i)*dt
+        RMassY(i)=RMassY(i)*(1.0-ALPY*dt)
         RDenM(i)=RMassM(i)/RTWL
         RDenY(i)=RMassY(i)/RTWL
         RDenTotal(i)=RDenM(i)+RDenY(i)

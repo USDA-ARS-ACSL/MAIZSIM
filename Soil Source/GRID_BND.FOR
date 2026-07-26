@@ -22,6 +22,7 @@ csb: following are for converting the ppm to ugco2/cm3 air. This value needs to 
       ugGasCm3air_to_ppm(2)=700.6                            !See below text: convert the atm O2 in [ppm]  to [ug O2/cm3 air]      
       ugGasCm3air_to_ppm(3)=508.6                            !See below text: convert the atm N2O in [ppm]  to [ug N2O/cm3 air]
 
+!For Carbon dioxide 
 !Unit conversion of [ppm] to [micro gram co2/ cm3 of air]
 !1 ppm [parts per million on a volume basis]= 1 umol CO2/mol of air
 !At STP gas occupies:  1mol/22.4 Liter = 1 mol/22400 cm3
@@ -101,9 +102,9 @@ C
         CodeS(n)=idummy(2)
         CodeT(n)=idummy(3)      !CodeT=1 means constant temperature
         CodeG(n)=idummy(4)      !CodeG=1 means constant gas concentration
-        Do j=1,4
-          If(idummy(j).ne.0) Movers(j)=1
-        Enddo
+!        Do j=1,5
+!!          If(idummy(j).ne.0) Movers(j)=1
+!        Enddo
       Enddo
 C
 C  Reading seepage face information
@@ -249,10 +250,9 @@ C at this point we assume the that bottom and top boundaries have the same width
       do i=1, nsurf
          gridWidth=gridWidth+width(i)
       end do 
-      
-      
+! need an alternate method when there are no bc      
+       if (nsurf.eq.0) gridWidth=maxval(x) -minval(x)
         NumSol=1
-
         im=450
         il=0
       Open(41,File=NodeGeomFile,ERR=10)
@@ -281,19 +281,17 @@ cccz ---------------------------------------------------------------------------
           Read(41,*,ERR=10)i,Nh(i),Ch(i),NL(i),CL(i),Nm(i),Cm(i),NH4(i)
      &      ,(Conc(i,jjj),jjj=1,NumSol),Tmpr(i),hNew(i),
      &      (g(i,jjj),jjj=1,NumG), RTWT(i)                         ! g(i,jjj):Read the initial CO2, O2 and N2O concentration in the soil
+         
 
 C     right now conc is input as ug NO3 per g soil. further conversions will be done in the solute mover initialization routine when we have water contents.
 
 C   ammonia is input as ppm or ug /g soil 
 
 cccz --------------------------------------------------------------------------------------------------------------------
-cccz the unit of Conc is initially ug/g soil of NO3. Units of NO3_old(i) is "ug N as NO3 per cm3 volume", 
-c     multiply by BD to get ug/ cm3 volume. then by molar mass to get N
-          NO3_old(i)=Conc(i,1)*NO3mass_2_Nmass*Blkdn(MatNumN(i))
-cdt       NH4 is input as ug/g soil (ppm). it is converted to ug /cm3 of soil for calculations          
-cccz the unit of NH4(i) and NH4_OLD(i) should be "ug N per cm3 volume", conversion needed, i.e.,
-          NH4(i)=NH4(i)*NH4mass_2_Nmass*Blkdn(MatNumN(i))
-          NH4_old(i)=NH4(i)
+cccz the unit of Conc and NH4 is initially ug/g soil of NO3 and NH4. 
+c  convert to N basis for NH4     
+cdt   
+          NH4(i)=NH4(i)*NH4mass_2_Nmass
 cccz --------------------------------------------------------------------------------------------------------------------
           TmprOld(i)=Tmpr(i)
           Denit(i)=0.0D0
@@ -316,6 +314,7 @@ cccz ---------------------------------------------------------------------------
 ! READING FROM Nodal_N.dat alternative file.  BY GR EDN      
       Write(*,*) 'Reading Grid Done'
       Return
-10    Call errmes(im,il)
+10    Write(*,*) 'error reading grid file'
+      Call errmes(im,il)
       End
 

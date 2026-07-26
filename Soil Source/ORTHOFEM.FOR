@@ -306,8 +306,9 @@ C GR
 *     INITIALIZE B
 
       DO 10 I=1,NN
-        DO 10 J=1,MAXNB
+        DO 100 J=1,MAXNB
           B(J,I) = 0.0D0
+100     Continue
    10 CONTINUE
 
 *     LOOP OVER NODES

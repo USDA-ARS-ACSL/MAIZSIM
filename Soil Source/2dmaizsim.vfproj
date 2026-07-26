@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{05500875-9B63-45CA-B7D6-FD6A5240ED1A}" SccProjectName="SAK" SccLocalPath="SAK" SccAuxPath="SAK" SccProvider="SAK">
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{05500875-9B63-45CA-B7D6-FD6A5240ED1A}">
 	<Platforms>
 		<Platform Name="Win32"/>
 		<Platform Name="x64"/>
@@ -47,28 +47,6 @@
 			<Tool Name="VFPreLinkEventTool"/>
 			<Tool Name="VFPreBuildEventTool" CommandLine="echo &quot;%userprofile%\Documents\CLASSIM\2DMAIZSIM.EXE&quot;"/>
 			<Tool Name="VFPostBuildEventTool"/>
-			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
-		</Configuration>
-		<Configuration Name="Release_classim|Win32" UseCompiler="ifortCompiler" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
-			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" ReentrantCode="reentrancyThreaded" WarnShape="true" LocalSavedScalarsZero="true" InitArrays="true" RoundFloatingPointResults="true" FloatingPointStackCheck="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true"/>
-			<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies=" &quot;$(SolutionDir)Crop Source\Release\maizsim.lib&quot;"/>
-			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/2dsoil.tlb"/>
-			<Tool Name="VFCustomBuildTool"/>
-			<Tool Name="VFPreLinkEventTool"/>
-			<Tool Name="VFPreBuildEventTool"/>
-			<Tool Name="VFPostBuildEventTool" CommandLine="echo F|xcopy /y &quot;$(TargetPath)&quot; &quot;X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\Maizsim files\2DMAIZSIM.EXE&quot;&#xA;echo F|xcopy /y &quot;$(TargetPath)&quot; &quot;C:\Users\dennis.timlin\Documents\CLASSIM\2DMAIZSIM.EXE&quot;"/>
-			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
-		</Configuration>
-		<Configuration Name="Release_classim|x64" UseCompiler="ifxCompiler" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
-			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" ReentrantCode="reentrancyThreaded" WarnShape="true" LocalSavedScalarsZero="true" InitArrays="true" RoundFloatingPointResults="true" FloatingPointStackCheck="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true"/>
-			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/2dsoil.pdb" SubSystem="subSystemConsole" AdditionalDependencies=" &quot;$(SolutionDir)Crop Source\$(PlatformName)\$(ConfigurationName)\maizsim.lib&quot;"/>
-			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(OUTDIR)/2dsoil.tlb"/>
-			<Tool Name="VFCustomBuildTool"/>
-			<Tool Name="VFPreLinkEventTool"/>
-			<Tool Name="VFPreBuildEventTool"/>
-			<Tool Name="VFPostBuildEventTool" CommandLine="echo F|xcopy /y &quot;$(TargetPath)&quot; &quot;X:\Modeling\MAIZSIMInterface\Interface programs and files\Crop Models\Maizsim files\2DMAIZSIM.EXE&quot;&#xA;echo F|xcopy /y &quot;$(TargetPath)&quot; &quot;%userprofile%\Documents\CLASSIM\2DMAIZSIM.EXE&quot;&#xA;echo F|xcopy /y &quot;$(TargetPath)&quot; &quot;%userprofile%\Documents\CLASSIM_DEV\2DMAIZSIM.EXE&quot;"/>
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
 	</Configurations>

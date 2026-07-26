@@ -49,7 +49,7 @@
 	double NitrogenUptakeOld=0;
 	double CumulativeNitrogenDemand=0.0; //grams plant-1
 	double CumulativeActualNFromSoil=0.0; //grams plant-1
-    double U_N, U_M, U_P, U_D; //U_N  maximum observed N uptake rate (g N m-2 ground d-1) (Lindquist et al, 2007) YY
+    double U_N=0.01, U_M, U_P, U_D; //U_N  maximum observed N uptake rate (g N m-2 ground d-1) (Lindquist et al, 2007) YY
 	                           //U_M maximum uptake rate as limited by maximum N fraction per unit (Equation 2 in Lindquist et al., 2007)
                                // U_P potential rate of N accumulation (g N m-2 ground d-1) (Lindquist et al. 2007)
                                //U_D U uptake rate (g N m-2 d-1) as limited by the difference between potential and actual amount of N 

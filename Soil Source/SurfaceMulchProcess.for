@@ -730,7 +730,7 @@ cccz Calculate the area and geometry of each node and element
         y3=mulchNodeCoord(n3,2)
         y4=mulchNodeCoord(n4,2)  
         
-        if(x3.eq.x4.and.y3.eq.y4) then
+        if((x3-x4).lt.1e-6.and.(y3-y4).lt.1e-6) then
 cccz triangle shape element
 cccz triangle element is hard to be implement here, so far we decided not to implement triangular element
 CDT TODO I guess we need to address this at some point 
@@ -823,8 +823,8 @@ cccz here we need to use "SurNodeIndex" rather than "SurNodeIndex_M" because it 
 
 cccz determine if the ponded water reach which 'element-based layer': and mark the node of layer using 'SubmergeIndex', right under the water surface
        SubmergeIndex=0
-       DiffSubmerge=0
-       PerOccupation=0
+       DiffSubmerge=0.0
+       PerOccupation=0.0
        if(h_Pond_max.lt.h_Pond_max_thre) then
          SubmergeIndex=0
          DiffSubmerge=0
@@ -840,7 +840,7 @@ cccz determine if the ponded water reach which 'element-based layer': and mark t
        endif
        if(SubmergeIndex.eq.0) then                !cccz no ponding water
          PerOccupation=-1.0D0
-       elseif(SubmergeIndex.eq.mulchLayer+1) then !cccz all the mulch is submerged
+       elseif (abs(SubmergeIndex-dble(mulchLayer+1)) <0.0001) then !cccz all the mulch is submerged
          PerOccupation=3.0D0                                      
        else
         if(DiffSubmerge.le.thresholdThick) then   !cccz the current layer is submerged so deep, such that this layer is numerically considered as fully submerged
@@ -1378,7 +1378,7 @@ c        alpha_s=0.5D0*(alpha_np+alpha_nq)
         qRight=SurfMulchNodeSubIndex(i+1)
         alpha_s=0.0D0
         do jjj=qLeft,qRight
-         if(h_Pond(jjj).eq.0.0D0) then 
+         if(abs(h_Pond(jjj)-0.0D0).lt.1e-6) then 
            alpha_s=alpha_s
      &       +0.25D0-0.05D0*ThNew(SurfNodeNodeIndexH(jjj))            ! soil surface albedo
          else
@@ -1511,7 +1511,8 @@ c         hNew_Sur(n)=0.5D0*(hNew(qLeft)+hNew(qRight))
      &     0.61D0*exp((17.27D0*Tmpr_Sur(n))/(Tmpr_Sur(n)+237.3D0))
      &     *RelaHumid_Sur(n)*1000.0D0                ! unit in Pa
        enddo   
-      elseif(SubmergeIndex.gt.0.and.PerOccupation.eq.3.0D0) then    ! this is the totally submerged case refer to "goto 2500"
+      elseif(SubmergeIndex.gt.0.and.
+     &    abs(PerOccupation-3.0D0).lt.0.0001D0) then    ! this is the totally submerged case refer to "goto 2500"
        do n=1,SurNodeIndex_M-1
          Tmpr_Sur(n)=AirTemp_Wea 
          hNew_Sur(n)=0.0D0
@@ -1524,7 +1525,7 @@ cccz!! Note change relative humidity from 1 to 0.999999 can make ~0.05 changes i
      &     *RelaHumid_Sur(n)*1000.0D0                                    ! unit in Pa
        enddo 
       elseif(SubmergeIndex.eq.mulchlayer
-     &   .and.PerOccupation.eq.2.0D0) then    ! this is the partially submerged case, but treated as "totally submerge" refer to "goto 2500"
+     &   .and.abs(PerOccupation-2.0D0).lt.0001D0) then    ! this is the partially submerged case, but treated as "totally submerge" refer to "goto 2500"
        do n=1,SurNodeIndex_M-1
          Tmpr_Sur(n)=AirTemp_Wea  
          hNew_Sur(n)=0.0D0
@@ -1732,10 +1733,11 @@ c    process the computaiton of fluxes and conversation laws
 c    separate the three casess: no ponded water; partially filled; mulch submerged under ponded water
       if(SubmergeIndex.le.0) then                                 ! this is the unsubmerged case
           goto 2300
-      elseif(SubmergeIndex.gt.0.and.PerOccupation.eq.3.0D0) then    ! this is the totally submerged case
+      elseif(SubmergeIndex.gt.0.and.
+     &      abs(PerOccupation -3.0D0).lt.0.0001d0) then    ! this is the totally submerged case
           goto 2500
       elseif(SubmergeIndex.eq.mulchlayer
-     &   .and.PerOccupation.eq.2.0D0) then    ! this is the partially submerged case, but treated as "totally submerge"
+     &   .and.abs(PerOccupation-2.0D0).lt.0001D0) then    ! this is the partially submerged case, but treated as "totally submerge"
           goto 2500
       else                                                            ! this is the partially submerged case
           goto 2400
@@ -2878,7 +2880,7 @@ c    computation has three steps: under ponded water surface/ponded water surfac
         HeatDiff_mulch(k,n)=0.0D0
        enddo 
        k=SubmergeIndex                    !cccz right @ water level
-       if(PerOccupation.eq.2.0D0) then        ! the water level is high enough, this layer is now a water layer
+       if (abs(PerOccupation-2.0D0) < 0.0001D0) then        ! the water level is high enough, this layer is now a water layer
         RelaHumid_mulch(k,n)=1.0D0
         VaporSat_mulch(k,n)=1.0D6        ! density of liquid water, we do not use this value anyway
         VaporAct_mulch_D(k,n)=1.0D6 
@@ -2980,7 +2982,7 @@ cccz ------------------ water (vapor) fluxes within mulch-----------------------
 c    only vapor flux occur, but allow some liquid water stored in the mulch solid materials.
 c    downward and leftward fluxes are positive
 c    unit of water vapor flux: g/m^2/day
-      if(PerOccupation.eq.2.0D0) then ! the water level is high enough, this layer is now a water layer, zero the vapor fluxes for all the under water layers
+      if (abs(PerOccupation-2.0D0) < 0.0001D0) then ! the water level is high enough, this layer is now a water layer, zero the vapor fluxes for all the under water layers
        do n=1,SurNodeIndex_M
         do k=1,SubmergeIndex+1
          g_vapor(2*k-1,n)=0.0D0
@@ -3465,7 +3467,7 @@ cccz -----------------------Latent heat flux------------------------------------
 c    downward and leftward are positive, energy income
 c    calculate the fluxes based on the upwind direction of water
 c    unit "J/m^2/day"    
-      if(PerOccupation.eq.2.0D0) then     ! the water level is high enough, this layer is now a water layer, zero all the under water layers
+      if (abs(PerOccupation-2.0D0) < 0.0001D0) then     ! the water level is high enough, this layer is now a water layer, zero all the under water layers
        do k=1,SubmergeIndex+1
         do n=1,SurNodeIndex_M
          g_Heat_Latent(2*k-1,n)=0.0D0
@@ -3594,7 +3596,7 @@ c    unit "J/m^2/day"
 cccz ---------------Diffusion/Convective Heat Flux(Sensible Heat)----------------------
 c    downward and leftward are positive, i.e., energy income
 c    unit (J/m^2/day) 
-      if(PerOccupation.eq.2.0D0) then ! the water level is high enough, this layer is now a water layer, zero all the under water layers
+      if (abs(PerOccupation-2.0D0) < 0.0001D0) then ! the water level is high enough, this layer is now a water layer, zero all the under water layers
        do k=1,SubmergeIndex+1
         do n=1,SurNodeIndex_M
          g_Heat_Sensi(2*k-1,n)=0.0D0
@@ -3893,7 +3895,7 @@ c     &      /(log(LayerHeight(k)/(0.079D0*LayerHeight(k)))**2.0D0)
       layer_need_fix=0
              
 cccz -------------Establish Governing Equations (solve mulch temperature and moisture)------------------------------------- 
-2410   if(PerOccupation.eq.2.0D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
+2410   if (abs(PerOccupation-2.0D0) < 0.0001D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
        do n=1,SurNodeIndex_M-1
         do k=1,SubmergeIndex   
          MulchElehNew_temp2(k,n)=ThreHnew_UnderWater
@@ -4069,7 +4071,7 @@ cccz reset/initialize the error measurements
       maxhNewDiff=0.0D0
       maxTmprDiff=0.0D0
       if(ForceForwards.eq.1) then
-        if(PerOccupation.eq.2.0D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
+        if (abs(PerOccupation-2.0D0) < 0.0001D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
           kklow=SubmergeIndex+1
         else
           kklow=SubmergeIndex
@@ -4102,7 +4104,7 @@ cccz reset/initialize the error measurements
          if(LocalStep.gt.minLocalStep) then
           goto 2407                              ! keep reducing the time step
          else
-          if(PerOccupation.eq.2.0D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
+          if (abs(PerOccupation-2.0D0) < 0.0001D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
            kklow=SubmergeIndex+1
           else
            kklow=SubmergeIndex
@@ -4174,7 +4176,7 @@ c         MulchElehNew_temp(k,n)=MulchElehNew_temp2(k,n)
           MulchEleThNew_temp(k,n)=f_mulch_pore     ! saturated part
         enddo
         k=SubmergeIndex
-        if(PerOccupation.eq.2.0D0) then
+        if (abs(PerOccupation-2.0D0) < 0.0001D0) then
           MulchEleThNew_temp(k,n)=f_mulch_pore   !cccz we avoid calculate the water content for water-filled layer
         else
           MulchEleThNew_temp(k,n)=
@@ -4199,7 +4201,7 @@ c         MulchElehNew_temp(k,n)=MulchElehNew_temp2(k,n)
          if(LocalStep.gt.minLocalStep) then
           goto 2407                              ! keep reducing the time step
          else
-          if(PerOccupation.eq.2.0D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
+          if (abs(PerOccupation-2.0D0) < 0.0001D0) then  ! the water level is high enough, this layer is now a water layer, fix all the values under water surface
            kklow=SubmergeIndex+1
           else
            kklow=SubmergeIndex
@@ -4286,7 +4288,7 @@ cccz
           MulchEleThNew_temp(k,n)=f_mulch_pore
         enddo
         k=SubmergeIndex
-        if(PerOccupation.eq.2.0D0) then
+        if (abs(PerOccupation-2.0D0) < 0.0001D0) then
           MulchEleThNew_temp(k,n)=f_mulch_pore
         else
           MulchEleThNew_temp(k,n)=
@@ -4339,7 +4341,7 @@ cccz_try force forwards here to get rid of Picard Iteration when step=minLocalSt
             MulchEleThNew_temp(k,n)=f_mulch_pore
           enddo
           k=SubmergeIndex
-          if(PerOccupation.eq.2.0D0) then
+          if (abs(PerOccupation-2.0D0) < 0.0001D0) then
             MulchEleThNew_temp(k,n)=f_mulch_pore
           else
             MulchEleThNew_temp(k,n)=
@@ -4362,7 +4364,7 @@ cccz ----------------Update the water and energy fluxes across soil surface (Who
 c    first do the vapor flux calculation
 c    unit within this module will be g/day/m^2
 c    unit taken in watermov module is g/day/cm^2
-2402  if(PerOccupation.eq.2.0D0) then
+2402  if (abs(PerOccupation-2.0D0) < 0.0001D0) then
           kk=2*SubmergeIndex+1
       else
           kk=2*SubmergeIndex-1
@@ -4474,99 +4476,18 @@ c    unit taken in watermov module is g/day/cm^2
        enddo  
       enddo 
       
-cccz old code      
-c      if(PerOccupation.eq.2.0D0) then
-c       kk=SubmergeIndex+1
-c      else
-c       kk=SubmergeIndex
-c      endif
-c      do n=1,SurNodeIndex-1
-c       if(n.eq.1) then
-c        kSurL=SurfNodeSurfIndexH(n)
-c        VarBT(kSurL,1)=AirTemp_Wea
-c        VarBT(kSurL,2)=g_Heat_CD_total(1,n)
-c        VarBT(kSurL,3)=VarBT(kSurL,2)*AirTemp_Wea
-c        VarBT(kSurL,4)=0.0D0
-c        varBT_Mulch(kSurL,1)=VarBT(kSurL,1)
-c        varBT_Mulch(kSurL,2)=VarBT(kSurL,2)
-c        varBT_Mulch(kSurL,3)=VarBT(kSurL,3)
-c        varBT_Mulch(kSurL,4)=VarBT(kSurL,4)
-c       elseif(n.eq.(SurNodeIndex-1)) then
-c        kSurL=SurfNodeSurfIndexH(n)
-c        kSurR=SurfNodeSurfIndexH(n+1)
-cc        VarBT(kSurL,1)=(MulchEleTmpr_temp(kk,n-1)*widthPerMulchUnit(n-1)
-cc     &    +MulchEleTmpr_temp(kk,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-cc        VarBT(kSurL,2)=(g_Heat_CD_total(1,n-1)*widthPerMulchUnit(n-1)
-cc     &    +g_Heat_CD_total(1,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-cc        VarBT(kSurL,3)=VarBT(kSurL,2)*VarBT(kSurL,1)
-cc        VarBT(kSurL,4)=(netRad(kk,n-1)*widthPerMulchUnit(n-1)
-cc     &    +netRad(kk,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))*8.64D0       ! 8.64D0=86400D0/10000D0
-c        VarBT(kSurL,1)=AirTemp_Wea
-c        VarBT(kSurL,2)=(g_Heat_CD_total(1,n-1)*widthPerMulchUnit(n-1)
-c     &    +g_Heat_CD_total(1,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-c        VarBT(kSurL,3)=VarBT(kSurL,2)*VarBT(kSurL,1)
-c        VarBT(kSurL,4)=0.0D0
-cc        VarBT(kSurR,1)=MulchEleTmpr_temp(kk,n)
-cc        VarBT(kSurR,2)=g_Heat_CD_total(1,n)
-cc        VarBT(kSurR,3)=VarBT(kSurR,2)*MulchEleTmpr_temp(kk,n)
-cc        VarBT(kSurR,4)=netRad(kk,n)*8.64D0                            ! 8.64D0=86400D0/10000D0
-c        VarBT(kSurR,1)=AirTemp_Wea
-c        VarBT(kSurR,2)=g_Heat_CD_total(1,n)
-c        VarBT(kSurR,3)=VarBT(kSurR,2)*MulchEleTmpr_temp(kk,n)
-c        VarBT(kSurR,4)=0.0D0                            ! 8.64D0=86400D0/10000D0
-c        varBT_Mulch(kSurL,1)=VarBT(kSurL,1)
-c        varBT_Mulch(kSurL,2)=VarBT(kSurL,2)
-c        varBT_Mulch(kSurL,3)=VarBT(kSurL,3)
-c        varBT_Mulch(kSurL,4)=VarBT(kSurL,4)
-c        varBT_Mulch(kSurR,1)=VarBT(kSurR,1)
-c        varBT_Mulch(kSurR,2)=VarBT(kSurR,2)
-c        varBT_Mulch(kSurR,3)=VarBT(kSurR,3)
-c        varBT_Mulch(kSurR,4)=VarBT(kSurR,4)
-c       else
-c        kSurL=SurfNodeSurfIndexH(n)
-cc        VarBT(kSurL,1)=(MulchEleTmpr_temp(kk,n-1)*widthPerMulchUnit(n-1)
-cc     &    +MulchEleTmpr_temp(kk,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-cc        VarBT(kSurL,2)=(g_Heat_CD_total(1,n-1)*widthPerMulchUnit(n-1)
-cc     &    +g_Heat_CD_total(1,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-cc        VarBT(kSurL,3)=VarBT(kSurL,2)*VarBT(kSurL,1)
-cc        VarBT(kSurL,4)=(netRad(kk,n-1)*widthPerMulchUnit(n-1)
-cc     &    +netRad(kk,n)*widthPerMulchUnit(n))
-cc     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))*8.64D0       ! 8.64D0=86400D0/10000D0
-c        VarBT(kSurL,1)=AirTemp_Wea
-c        VarBT(kSurL,2)=(g_Heat_CD_total(1,n-1)*widthPerMulchUnit(n-1)
-c     &    +g_Heat_CD_total(1,n)*widthPerMulchUnit(n))
-c     &    /(widthPerMulchUnit(n-1)+widthPerMulchUnit(n))
-c        VarBT(kSurL,3)=VarBT(kSurL,2)*VarBT(kSurL,1)
-c        VarBT(kSurL,4)=0.0D0       ! 8.64D0=86400D0/10000D0
-c        varBT_Mulch(kSurL,1)=VarBT(kSurL,1)
-c        varBT_Mulch(kSurL,2)=VarBT(kSurL,2)
-c        varBT_Mulch(kSurL,3)=VarBT(kSurL,3)
-c        varBT_Mulch(kSurL,4)=VarBT(kSurL,4)
-c       endif
-c      enddo
       
       do k=1,SurNodeIndex_M-1
        do n=1,mulchLayer+1
         RainFallInput(n,k)=RainFallInput_temp(n,k)
        enddo      
       enddo
-cccz old code      
-c      do k=1,SurNodeIndex-1
-c       do n=1,mulchLayer+1
-c        RainFallInput(n,k)=RainFallInput_temp(n,k)
-c       enddo
-c      enddo
+
       goto 2406           ! to the final assignment
       
 cccz ------------------------Update the water and energy fluxes across soil surface (For Each Time Segment)--------------------------      
 c    for each time segment during the iteration, use the same scheme showed following 'Index 2402'
-2403  if(PerOccupation.eq.2.0D0) then
+2403  if (abs(PerOccupation-2.0D0) < 0.0001D0) then
         kk=2*SubmergeIndex+1
       else
         kk=2*SubmergeIndex-1
@@ -4623,7 +4544,7 @@ c    for each time segment during the iteration, use the same scheme showed foll
       
      
     
-      if(PerOccupation.eq.2.0D0) then
+      if (abs(PerOccupation-2.0D0) < 0.0001D0) then
        kk=SubmergeIndex+1
       else
        kk=SubmergeIndex

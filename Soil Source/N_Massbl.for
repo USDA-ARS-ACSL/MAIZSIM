@@ -17,6 +17,7 @@ C variables to hold mulch C and N totals
      &    t_Mulch_Thick,
      &    humusC, litterC, manureC, 
      &    All_C, CHumusMean,CLitterMean, CManureMean
+        Double Precision t
      
         common /N_BAL/ModNum,CFlux,CFluxPrevious,C_RespirationOM,
      !    C_RespirationRoot
@@ -85,8 +86,8 @@ cccz why "mg"??????????????????????????????????????????????????????
 csun Calculate the co2 the units are ug
 	   do i=1,NumNP
 C gsink_OM and gSink_root unit is ug CO2 cm-3 air, need to calculate all C_RespirationOM (ugC/domain)		   
-		   C_RespirationOM=C_RespirationOM+gsink_OM(i,1)*Step*12.0*nodeArea(i)
-     !       *soilair(i)/(44.0)
+		   C_RespirationOM=C_RespirationOM+gsink_OM(i,1)*
+     !        Step*12.0*nodeArea(i)*soilair(i)/(44.0)
              C_RespirationRoot=C_RespirationRoot+gSink_root(i,1)*
      !       Step*12.0*nodeArea(i)*soilair(i)/(44.0)
 	   enddo

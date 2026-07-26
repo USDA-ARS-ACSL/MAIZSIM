@@ -15,7 +15,7 @@
 #ifndef FLOAT_EQ
 #define EPSILON 0.001   // floating point comparison tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
-#define MINUTESPERDAY (24.0*60.0);
+#define MINUTESPERDAY (24.0*60.0)
 #endif
 
 
@@ -28,8 +28,8 @@ private:
 	// cdt 12/06/2010 - I had to increase the size of these from 132 to 133. We couldn't use
 	// strcpy in vs 2008 so I changed to strcpy_s but apparently it requires enough space for the null
 	// terminatino character in the destination string
-	char varietyFile[133], outputFile[133], cropFile[133], logFile[133],LeafFile[133];
-	//char DebugFile[133], SummFile[133];
+	char varietyFile[256], outputFile[256], cropFile[256], logFile[256],LeafFile[256];
+	//char DebugFile[256], SummFile[256];
 	std::string DebugFile, SummFile;
 	int iCur, // current record number
 		errorFlag;

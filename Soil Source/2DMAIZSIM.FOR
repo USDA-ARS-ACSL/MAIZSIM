@@ -3,7 +3,7 @@
 *     2DSOIL  - Numerical model of two-dimensional soil environment    *
 *                           for field crops                            *
 *                                                                      *
-*             Release 3.1.2.0    9/24/2024                             * 
+*             Release 3.1.3.0    7/23/2026                             * 
 *||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
 
       Include 'public.ins'
@@ -60,6 +60,9 @@ cccz surface mulch (physical perspective)
 cccz surface water
       Call Surface_Water_Balance_Adjustment()
       Call SoilNitrogen()
+      if (time>41859.3) then
+          ii=1
+          endif
       Call WaterMover()
       Call SoluteMover()
       Call HeatMover()

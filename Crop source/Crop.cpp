@@ -149,6 +149,7 @@ void crop(struct
 			// calculate error for demand and actual uptake, if negative, demand is greater then uptake
 			CurrentNUptakeError=NitrogenUptake/PopSlab-pSC->getPlant()->get_CumulativeNitrogenDemand();
 			CumulativeNUptakeError+=CurrentNUptakeError;
+			
 
 			TWeather wthr;
 			{
@@ -174,6 +175,7 @@ void crop(struct
 				wthr.LeafWP = SHOOTR->LeafWP/10;  //and leaf water potential information into MAIZESIM Yang 8/15/06 MPa
 				wthr.pcrl=SHOOTR->PCRL/PopSlab/24.;
 				wthr.pcrq=SHOOTR->PCRQ/PopSlab/24.;
+				//cout << "pcrl" << wthr.pcrl << endl;
 				//since LeafWP in 2dsoil is in bar but in maizesim is in MPa, so, have to
 				//divide it by 10 to convert it into MPa before passing the value to Maizesim 1 bar=10kPa
 
@@ -432,8 +434,9 @@ void crop(struct
 				// NitrogenUptake is g per slab, HourlyActualNFromSoil is grams per plant need to convert to g N m-2 to 
 				//be consistent with other U_# variables.
 				double HourlyActualNFromSoil = (NitrogenUptake - NitrogenUptakeOld)/PopSlab * pSC->getInitInfo().plantDensity*24.0;
+				U_N = max(U_N, HourlyActualNFromSoil * 24.0);
 				double HourlyNitrogenDemand= max(min(U_P, (min(U_M,min(U_N, U_D)))),0.0); //Determine the nitrogen demand (equation 1 Lindquist et al. 2007) in grams plant-1
-                pSC->getPlant()->set_HourlyNitrogenSoilUptake(HourlyActualNFromSoil);
+				pSC->getPlant()->set_HourlyNitrogenSoilUptake(HourlyActualNFromSoil);
 				pSC->getPlant()->set_HourlyNitrogenDemand(HourlyNitrogenDemand);
 
                 // now do cumulative amounts

@@ -14,7 +14,6 @@
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #endif
 #define comma ","
-#define MINUTESPERDAY (24.0*60.0)
 #ifdef _WIN32
 const char* pathSymbol = "\\";
 #else
@@ -47,18 +46,26 @@ CController::CController(const char* filename, const char* outfile, const char* 
 	char* pathSymbol = (char*)calloc(256, sizeof(char));
 	const char *ext_dbg="dbg";
 	std::string stressFile = "plantstress.crp";
-	//pathSymbol =(char*) "/\\"; //for both Linux and Windows
 	std::string basePath;
 	std::size_t found;
 	std::string cropFileAsString = cropFile;
-// find last path separator and break path from file name	
-	found=cropFileAsString.find_last_of(pathSymbol);
-	basePath = cropFileAsString.substr(0, found);
+	std::string fileName;
+	std::string root;
+    // find last path separator and break path from file name	
+	// Find the last occurrence of either '/' or '\\'
+	// works for both linux or windows
+	found = cropFileAsString.find_last_of("/\\");
+	if (found != std::string::npos) {
+		basePath = cropFileAsString.substr(0, found);
+	}
+	else {
+		basePath = "."; // fallback to current directory if no separator found
+	}
 // now get filename to use as a root
-	std::string fileName = cropFileAsString.substr(found + 1);
-	std::string root = fileName.substr(0,fileName.length() - 3);
+	fileName = cropFileAsString.substr(found + 1);
+	root = fileName.substr(0,fileName.length() - 3);
 // create summFile and debug file  names
-// first have to determine if we are linux or windows
+
 	SummFile  = basePath.append("/"+ stressFile);
 	DebugFile = basePath.append("/" + root + ext_dbg);
 
@@ -116,8 +123,8 @@ void CController::initialize()
 	cout <<setiosflags(ios::left) << endl
 		<< " ***********************************************************" << endl
 		<< " *          MAIZSIM: A Simulation Model for Corn           *" << endl
-		<< " *                     VERSION  1.8.1 9/22/2024            *" << endl
-		<< " *                 2DSOIL version 3.1.2.0 9/22/2024        *" << endl
+		<< " *                     VERSION  1.8.2.0 7/23/2026          *" << endl
+		<< " *                 2DSOIL version 3.1.3.0, 7/23/2026       *" << endl
 		<< " *   USDA-ARS, Adaptive Cropping Sysems Laboratory         *" << endl
 		<< " *   U of Washington, Environmental and Forest Sciences    *" << endl
 		<< " ***********************************************************" << endl
@@ -475,10 +482,10 @@ void CController::outputToCropFile()
 				<< setw(12) << setprecision(4) << plant->get_shaded_gs() << comma
 #endif
 			    << setw(9) << setprecision(3) << vpd << comma
-				<< setw(10) << setprecision(4) << plant->get_Leaf_N_Content() << comma
-				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma
-				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake() << comma
-				<< setw(10) << setprecision(4) << plant->get_LeafN() << comma //return mass of N in leaves YY
+				<< setw(10) << setprecision(4) << plant->get_Leaf_N_Content() << comma //leaf_N as g N /m2 of leaf
+				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenDemand() << comma //units are grams of N per plant
+				<< setw(10) << setprecision(4) << plant->get_CumulativeNitrogenSoilUptake() << comma //units are grams of N per plant
+				<< setw(10) << setprecision(4) << plant->get_LeafN() << comma //return mass of N in leaves YY grans of N per gram of leaf
 				//<< setw(10) << setprecision(4) << plant->
 				<< setw(10)<< setprecision(4)<< plant->get_roots()->get_ActualCarboIncrement() << comma
 				<< setw(8) << setprecision(3) << plant->get_mass() << comma

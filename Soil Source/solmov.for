@@ -1,7 +1,8 @@
       subroutine SoluteMover()
       Include 'public.ins'
       Include 'puplant.ins'
-      Double precision A,B,C,P,Sum,dt1,dt2
+      Double precision A,B,C,P,Sum
+      Double precision dt,dt1,dt2,t
       Integer cKod
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD),
      &            Gc(NumNPD),Sc(NumNPD)
@@ -82,7 +83,6 @@ c*
 C        
 C  Routine calculations 
 11    Continue 
-      tOld = Time
       t=Time
       dt = Step
 C   For each solute do 711      
@@ -423,9 +423,10 @@ C
               A(kc,i)=C
               ii=kc+1
               L=kc+MBand-1
-              Do 211 j=ii,L
+              Do 210 j=ii,L
                 jj=j+MBand-kc
                 A(j,i)=A(j,i)+C*A(jj,k)
+210           Continue
 211         Continue
 212       Continue
           Do  214 i=2,NumNP

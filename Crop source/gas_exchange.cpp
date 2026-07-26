@@ -187,9 +187,13 @@ class CGasExchange
 		
 		double CriticalNitrogen;
 		CriticalNitrogen = __max(0.25, lfNContent);
-		double Vcm25_L = sParms.Vcm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1);
-		double Jm25_L = sParms.Jm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1);
-		double Vpm25_L = sParms.Vpm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1); //in Sinclair and Horie, 1989 Crop sciences, it is 4 and 0.2; 
+		double n_effect = (2 / (1 + exp(-2.9 * (CriticalNitrogen - 0.25))) - 1);
+		//double Vcm25_L = sParms.Vcm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1);
+		//double Jm25_L = sParms.Jm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1);
+		//double Vpm25_L = sParms.Vpm25*(2 / (1 + exp(-2.9*(CriticalNitrogen - 0.25))) - 1); //in Sinclair and Horie, 1989 Crop sciences, it is 4 and 0.2; 
+		double Vcm25_L = sParms.Vcm25* n_effect;
+		double Jm25_L = sParms.Jm25* n_effect;
+		double Vpm25_L = sParms.Vpm25 * n_effect; //in Sinclair and Horie, 1989 Crop sciences, it is 4 and 0.2; 
 
 
 		Vpmax = Vpm25_L*exp(sParms.EaVp*(Tleaf-25)/(298*R*(Tleaf+273)));

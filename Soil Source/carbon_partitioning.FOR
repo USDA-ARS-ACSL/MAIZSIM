@@ -113,6 +113,7 @@ c DT 12/7/2018 removed element file reading     Only need to initialize root wei
       Close(41)
 
 cccz Assume that RTWT is node based root mass (g)
+cDT this code is only used by models that initialize root growth
       TotalRootWeight=0.0D0      
       TotalArea=0.0D0
       do n=1,NumNP
@@ -274,7 +275,7 @@ C   PARTIAL PRESSURE OF SOIL OXYGEN
 C
         RGCF3= oxyStress(g(n,2)*ugGasCm3air_to_ppm(2)/10000.)
         
-        t1=(RGCF3.lt.1.0)
+      !  t1=(RGCF3.lt.1.0) for testing
         
 cccz the distance effects
         xDist = abs(x(n)-xBSTEM)

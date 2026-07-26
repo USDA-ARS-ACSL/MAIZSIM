@@ -18,8 +18,8 @@
       Include 'nitvar.ins'
       Include 'PuSurface.ins'
       Integer Max_fert_times,Fert_times,Num_nodes,node_Applied,
-     &  fertilizerApplied
-      Parameter (Max_fert_times=75, Max_fert_nodes=300)
+     &  fertilizerApplied,e
+      Parameter (Max_fert_times=175, Max_fert_nodes=300)
       Dimension Bi(3),Ci(3)
       Character*10 Date(Max_fert_times)
       Character InString*132
