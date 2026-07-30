@@ -27,6 +27,7 @@ The repository includes two subprojects:
 * Dennis Timlin — USDA‑ARS
 * David Fleisher — USDA‑ARS
 * V. R. Reddy — USDA‑ARS
+* Zhuangji Wang - Colorado State Univesity
 
 ### Additional Contributors
 
