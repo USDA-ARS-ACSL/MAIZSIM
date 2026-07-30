@@ -1,60 +1,148 @@
-MAIZSIM is a corn simulation model developed by the USDA-ARS Adaptive Cropping Systems Laboratory and Univ. of Washington School of Environmental and Forest Sciences. Note that the dev branch is used to hold recent code. After testing, it will be merged with the master branch.  If you want to collaborate, please fork the code, make your changes and  then create a pull request.
+# MAIZSIM
 
-The developers are 
+A mechanistic model of maize growth, development, and yield  
+Developed by the USDA‑ARS Adaptive Cropping Systems Laboratory and the University of Washington School of Environmental and Forest Sciences
 
-Soo-Hyung Kim of the Univ of Washington
-Dennis Timlin, David Fleisher, and V.R. Reddy of the USDA-ARS
+***
 
-others who have collaborated include:
-Yang Yang, now at Dow Agrosciences
+## Overview
 
-Annette Dathe Cornell University, Ithaca, NY
- diffusive root model
- 
-Jong-Ahn Chun APEC Climate Center, Korea
- CO2 and water
- 
-Sahila Beegum, Univ of Nebraska
- gas transport and respiration
- 
-Wenguang Sun, Colorado State Univ.
- gas transport and respiration
- 
+MAIZSIM is a mechanistic model of maize growth, development, and yield.  
+The crop system is written in **C++**, and the soil system is written in **Fortran**.  
+The crop model is integrated with **2DSOIL**, a two‑dimensional simulator of soil water and heat movement and solute transport.  
+**2DSOIL is the main driver model**, calling the crop model as a subroutine.
 
-MAIZSIM is a mechanistic model of maize growth, development and yield. It is written in C++ (crop) and FORTRAN (soil). 
+The repository includes two subprojects:
 
-The model is interfaced with 2DSOIL, a two dimensional simulator of soil water and heat movement, and solute transport. This model is written in FORTRAN and is the main model. 2DSOIL calls the crop model as a subroutine. There are two subprojects, Crop Source and Soil Source.
+* **Crop Source**
+* **Soil Source**
 
-The code compiles in visual studio.net. We used Intel Fortran (OneAPI-2023.2) and Visual Studio Professional 2022. Macros will copy the compiled libraries dll's for the crop mode to the folder with the soil's code if you make sure to keep your soil and crop source code in the original folders ('crop source' and 'soil source') which are the two subprojects.
+***
 
-It has recently been revised to compile under Linux by Kyungdahm Yun of the Univ. of Washington. See below for a link to a docker image with a makefile and the compilers. There is a makefile and instructions contained in a docker image. The link is at this repository. The link contains a docker image so you can test it in a Windows environment using WSL2.
+## Developers
 
-https://github.com/precision-sustainable-ag/BuildMaizsim
+### Primary Developers
 
-More documention is being prepared. See the "how to run model" file for information on how to set up the input files and run the executable from the command line. 
+* Soo‑Hyung Kim — University of Washington
+* Dennis Timlin — USDA‑ARS
+* David Fleisher — USDA‑ARS
+* V. R. Reddy — USDA‑ARS
 
-The community is explicitly encouraged to engage in the responsible disclosure of vulnerabilities to promote collaboration and improve code security.
+### Additional Contributors
+
+* Yang Yang — Dow Agrosciences
+* Annette Dathe — Cornell University *(diffusive root model)*
+* Jong‑Ahn Chun — APEC Climate Center, Korea *(CO₂ and water)*
+* Sahila Beegum — University of Nebraska *(gas transport & respiration)*
+* Wenguang Sun — Colorado State University *(gas transport & respiration)*
+
+The MAIZSIM community encourages **responsible disclosure of vulnerabilities** to improve security and reliability.
+
+***
+
+## Branch Structure
+
+* **dev** — holds recent code updates
+* **master** — stable version  
+  Changes are tested in **dev** and merged into **master** after verification.
+
+**To collaborate:**
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+***
+
+## Building the Model
+
+### Windows Build (Visual Studio + Intel Fortran)
+
+MAIZSIM builds successfully using:
+
+* **Visual Studio Professional 2022**
+* **Intel Fortran OneAPI‑2023.2**
+
+Macros copy the compiled crop DLLs into the soil project's directory.  
+To ensure proper library linking, the directory structure must remain:
+
+```
+crop source/
+soil source/
+```
+
+### Linux Build (Docker)
+
+Linux compatibility was added by **Kyungdahm Yun** (University of Washington).  
+A Docker image containing compilers and makefiles is available:
+
+👉 <https://github.com/precision-sustainable-ag/BuildMaizsim>
+
+This image may be used under Linux or through **WSL2** on Windows.
+
+***
+
+## Running the Model
+
+More documentation is in preparation.  
+See **how to run the model** in the repository for details on:
+
+* Preparing input files
+* Running the executable
+* Command‑line usage
+
+***
+
+## Excel Interface
+
+An Excel‑based interface, including example input files, is available here:
+
+👉 <https://github.com/USDA-ARS-ACSL/ExcelInterface>
+
+This interface supports the most recent MAIZSIM version.
+
+***
+
+## Updates Since 2025
+
+| Date                      | Description                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| **7/7/2026 12:17:33 PM**  | Increased max fertilizer applications to 175                                              |
+| **3/23/2026 3:11:46 PM**  | Updated version number in splash screens                                                  |
+| **3/20/2026 9:52:28 AM**  | Redid NH₄ changes (previous updates pulled from incorrect repo)                           |
+| **3/20/2026 9:23:31 AM**  | Fixed NH₄ initialization error caused by BD not yet read                                  |
+| **9/24/2025 11:59:52 AM** | Added comment                                                                             |
+| **9/24/2025 11:59:14 AM** | Harmonized single/double precision; fixed NaN from `dt` being double; cleaned unused vars |
+| **8/12/2025 5:09:25 PM**  | Added safeguard for excessive daily infiltration                                          |
+| **7/23/2025 4:10:22 PM**  | Linux compatibility fixes; removed outdated Fortran constructs                            |
+| **5/13/2025 9:53:02 AM**  | Added date to header                                                                      |
+| **5/13/2025 9:52:26 AM**  | Added double descriptor to `abio` call for Linux                                          |
+| **5/13/2025 9:51:05 AM**  | Renamed weather structure to avoid Linux conflicts                                        |
+| **5/13/2025 9:33:46 AM**  | Updated weather common block name                                                         |
+| **3/7/2025 9:13:15 AM**   | Added more comments                                                                       |
+| **1/15/2025 1:18:14 PM**  | Added constraints for Tmin/Tmax when below 0°C                                            |
+
+***
+
+## License
+
+*CC0 1.0 Universal (Public Domain Dedication)
+--------------------------------------------
+
+To the extent possible under law, the authors have waived all copyright
+and related or neighboring rights to MAIZSIM. This work is published
+from the United States.
+
+You may copy, modify, distribute, and perform the work, even for
+commercial purposes, all without asking permission.
+For full details, see: https://creativecommons.org/publicdomain/zero/1.0/*
+
+***
+
+## Contact
+
+For questions, improvements, and collaboration, please open an issue or pull request on GitHub.
+
+***
 
 
-See the ExcelInterface repository for an excel based interface and example input files.
-https://github.com/USDA-ARS-ACSL/ExcelInterface
-
-The most recent updates for the excel interface work with the most recent version of maizsim
-test for readme. Use the same tag number
-
-Updates since 2025
-Date – Comment
-7/7/2026 12:17:33 PM – increased max fert times to 175
-3/23/2026 3:11:46 PM – updated version number in splash screens
-3/20/2026 9:52:28 AM – redoing NH4 related changes - used the wrong repo for source previously
-3/20/2026 9:23:31 AM – fixed issue where NH4 was set to 0 after input because BD had not been read in yet
-9/24/2025 11:59:52 AM – added a comment
-9/24/2025 11:59:14 AM – harmonized the single/double precision calculations. was getting NaN when dt was declared a double precision. Declared more variables and removed some that were no longer needed
-8/12/2025 5:09:25 PM – added code to catch case where there was too much water to infiltrate in one day
-7/23/2025 4:10:22 PM – removed or modified code to compile in linux and removed outdated fortran expressions
-5/13/2025 9:53:02 AM – added date to header
-5/13/2025 9:52:26 AM – added double descriptor to call for abio to allow it to work in linux
-5/13/2025 9:51:05 AM – renamed weather structure to make it compatible with linux (hourly weather had this same named block)
-5/13/2025 9:33:46 AM – changed weather common block name to be compatible with linux
-3/7/2025 9:13:15 AM – added more comments
-1/15/2025 1:18:14 PM – when temps went <0 only minimum temperature was constrained. Added constraint to 2C for max temp also. Also constrained TminT
