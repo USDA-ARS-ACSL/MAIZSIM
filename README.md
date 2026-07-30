@@ -140,6 +140,24 @@ For full details, see: https://creativecommons.org/publicdomain/zero/1.0/*
 
 ***
 
+## Vulnerability Disclosure Policy
+**The community is explicitly encouraged to engage in the responsible disclosure of vulnerabilities to promote collaboration and improve code security.**
+If you discover a security vulnerability, please report it responsibly:
+1.	**Email:** name.lastname@usda.gov with subject "Security Vulnerability - Probit Tool"
+1.	**Provide details:** Description, steps to reproduce, potential impact
+1.	**Confidential handling:** We will respond within 48 hours
+1.	**Recognition:** Contributors acknowledged (with permission) after resolution
+
+**Please do not publicly disclose vulnerabilities until they have been addressed.**
+**Vulnerability Response Timeline**
+When vulnerabilities are identified:
++	**Critical vulnerabilities:** Patched within 7 days or application taken offline
++	**High vulnerabilities:** Addressed within 14 days
++	**Medium/Low vulnerabilities:** Resolved within 30 days
++	**Users notified:** Via GitHub releases and repository notices
++	**Workarounds provided:** If immediate fixes are not possible
+**If vulnerabilities cannot be timely resolved, a prominent warning will be added to this README and the application may be temporarily taken offline until fixes are implemented.**
+
 ## Contact
 
 For questions, improvements, and collaboration, please open an issue or pull request on GitHub.
