@@ -620,6 +620,7 @@ c  hNew will always be the same as hOld?
       Enddo
       
 cdt - calculate actual boundary fluxes to see what we have
+      QAct=0.0
       Do 1299 n=1,NumNP
         If ((CodeW(n).eq.-4).or.(CodeW(n).eq.1)) then
         QN=B_1(n)+DS(n)+F(n)*(ThNew(n)-ThOld_1(n))/dt 

@@ -49,7 +49,7 @@ C than the sowing day then this will be an error condition.
         Endif
       Else
         t=Time
-        tRigid=1.E+30
+        tRigid=1.0D+30
         Do j=1,NumMod
           if(tNext(j).lt.tRigid) tRigid = tNext(j)
         Enddo

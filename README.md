@@ -108,6 +108,21 @@ This interface supports the most recent MAIZSIM version.
 
 | Date                      | Description                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------- |
+| 10/16/2026                | initialized tRigid as double precision |
+| 10/16/2026                | initialized qact array to 0 |
+| 10/16/2026                | Removed oxystress in the lInput=1 loop (bcoz oxystress is not yet estimated at this stage; RVR was too large) |
+| 10/9/2026                 | added temporary debugging code                                                                      |
+| 10/9/2026                 | removed dtmx(4) from SoilNDen                                                                       |
+| 10/5/2026                 | Improved Root death routine. Converted stress= 0 (high stress) and 1.0 (no stress)                               |
+| 10/5/2026                 | cleaned up commented code |
+| 10/5/2026                 | corrected typo: RVLR corrected to RVRL |
+| 10/2/2026                 | changed water stress factor to be closer to 1 in the wet range so that O2 stress is a stronger factor for wet soils |
+| 10/2/2026                 | rewrote the calculations for gas flux from the boundary. The recommended way is to compute boundary fluxes from the b... |
+| 9/18/2026                 | updated release number to 3.1.3.1 after fixing error in irrigation.for |
+| 9/17/2026                 | Intialised IrrigRate(1:24) to zero before each irrigation event |
+| 9/17/2026                 | Initialised IrrigRate(1to24) to zero before a new irrigation event |
+| 7/23/2026                 | updated version numbers |
+| 7/7/2026                  | increased max fert times to 175 |
 | **7/7/2026 12:17:33 PM**  | Increased max fertilizer applications to 175                                              |
 | **3/23/2026 3:11:46 PM**  | Updated version number in splash screens                                                  |
 | **3/20/2026 9:52:28 AM**  | Redid NH₄ changes (previous updates pulled from incorrect repo)                           |
@@ -122,6 +137,7 @@ This interface supports the most recent MAIZSIM version.
 | **5/13/2025 9:33:46 AM**  | Updated weather common block name                                                         |
 | **3/7/2025 9:13:15 AM**   | Added more comments                                                                       |
 | **1/15/2025 1:18:14 PM**  | Added constraints for Tmin/Tmax when below 0°C                                            |
+
 
 ***
 

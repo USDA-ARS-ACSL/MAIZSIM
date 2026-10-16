@@ -72,6 +72,10 @@ c
          
          DtIrrig=Amount_Irrig_Applied(jj)/10./AvgIrrRate  !gives number of hours in a day with irrigation [/10.0 to convert mm to cm]
          i=1
+         do k=1,24
+         IrrigRate(k)=0.
+         end do
+         
          precision_threshold=0.0001
         Do While (DtIrrig > precision_threshold)
 c catch condition where total irrigation exceeds 24 hours in a day        

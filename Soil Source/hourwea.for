@@ -89,11 +89,12 @@ c inputs hourly data
       double precision St,t, GAMMA_psy
       real Interval, HRAIN,HSR,HTEMP, HTEMPY,HWIND,Rel_Humid,
      &     BEERS 
+      real qSum1,qSumAct,time_sum
       character*10 date
       Common /weatherH/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
      &     HWIND(24), Rel_Humid(24),isol,Date1,ModNum,
      &     Interval, TWET(24),TDRY(24), AVP(24), GAMMA_psy(24),
-     &     SVPW(24),TMIN, TMAX,BEERS(24)
+     &     SVPW(24),TMIN, TMAX,BEERS(24),qSum1,qSumAct,time_sum
       
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
      &           SARANG(24),
@@ -113,8 +114,11 @@ CYAP
 CYAPEND
       t=Time
       St=0.1D0*Step
+
       If (lInput.eq.0) goto 11
-      
+       Qsum1=0.0
+       QsumAct=0.0
+       time_sum=0.0
 cccz
 cccz initialized surface water income  
       do i=1,NumBPD
@@ -812,10 +816,14 @@ c........................End of daily calculations
 C
 C     Further we have hourly calculations
 
-C
+      qSum1=qSum1+q(1)*STEP/WIDTH(1)*10.
+      qsumAct=qSumAct+qAct(1)*STEP/WIDTH(1)*10.
+      time_Sum=time_Sum+STEP
 55    If(Abs(Time-tNext(ModNum)).lt.0.001*Step.or.lInput.eq.1) then
           
-     
+       Qsum1=0.0
+       QsumAct=0.0
+       time_Sum=0.0
        ITIME=Idint(dMOD(t+St,1.D0)/PERIOD+1)
        Do i=1, NumBP
          do j=1, 4
@@ -917,7 +925,8 @@ C gives you the .149
      &            /((DEL(ITIME)/GAMMA_psy(ITIME)) + 1.0)
 
 c   IF THE NODE IS EXPOSED THEN
-c
+c 
+        ESO=0.0 !debugging
           If(PSh.gt.0.) then
 
 C

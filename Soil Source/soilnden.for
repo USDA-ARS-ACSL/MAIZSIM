@@ -49,7 +49,7 @@ c second new comment
         NH4_init=.false.
         !Call SetAbio(ew,et,ed,0,0.,0.)
         Call SetAbio_O2(ew,eO2,et,ed,0,0.,0.,1.D0,0.D0)    
-        dtmx(4)=1./24
+
        Else  ! not the first time step
 C
 C               Soil water concentration is ug NO3 cm-3 of water  (multiply by water to get ug N per cm3 of soil) 
@@ -98,10 +98,11 @@ CEH  Rate constants: Note 1)ew and eO2 are to account for dry and wet soil water
           ! 3)Use SOMMassRatio(i) to get O2 available for OM decomposition
           !   => g(n,2)*SOMMassRatio(i)*ugGasCm3air_to_ppm(2)/10000.  !10000 to convert ppm to percent
           O2_mol = g(i,2)/32.0*soilair(i)*SOMMassRatio(i)
+
           Call SetAbio_O2(ew,eO2,et,ed,    
      &       m,(ThNew(i)+ThOld(i))/2.,(Tmpr(i)+TmprOld(i))/2.
      &       ,O2_mol, wfPore*100) !*100 to convert to percent
-          
+
 !C  Rate constants
 
 C  Dehumification rate (day-1)
@@ -312,12 +313,13 @@ CEH: Rate correction factors for tempeature and soil water content AND O2 availa
       Subroutine SetAbio_O2(ew,eO2,et,ed,m,theta,T,O2_mol,wfPore)
       Include 'public.ins'
       Common /Abio/ dThH,dThL,es,Th_m,tb,QT,dThD,Th_D
-      Real*8 kMO2, kMW,O2_mol, wfPore
+      Real*8 kMO2, kMW,O2_mol, wfPore, xWF, Kew, ew_n
 
       !kMO2 = 33.157 ! Michaelis constant for oxygen  [%] from Sierra (2017) Biogeosciences 14.3 (2017): 703-710.
-      kMO2 = 2.0   ! Michaelis constant for O2 concentration [O2 moles in soil pores]
+      kMO2 = 3.0   ! Michaelis constant for O2 concentration [O2 moles in soil pores]
       kMW = 76.026 ! Michaelis constant for water filled pore space  [%], theta/Th_sat*100 => mean values in Table 1
-  
+      Kew= 30.0   !half saturation constant for ew, moisture dependent substrate availability  this value is equivalent to water filled porosity in percent, theta/Th_sat*100
+      ew_n= 4.0
       If(lInput.eq.1) then
         im=420
         il=0
@@ -356,8 +358,9 @@ CEH: Rate correction factors for tempeature and soil water content AND O2 availa
         Return
       else
         eO2 = O2_mol/(kMO2 + O2_mol)    
-        ew = wfPore/(kMW + wfPore)         
-        eT=QT**((T-tb)/10.)               !eT and ed controls denitrification
+c        ew = wfPore/(kMW + wfPore)  
+        ew=wfPore**ew_n / (wfPore**ew_n + Kew**ew_n)
+        eT=QT**((T-tb)/10.)               !eT controls temperature and ed controls denitrification
         ThD=TUpperLimit(m)-dThD
         if(Theta.GT.ThD) then
           ed=((Theta-ThD)/(TUpperLimit(m)-ThD))**Th_d

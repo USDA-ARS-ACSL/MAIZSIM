@@ -7,7 +7,7 @@
 
 
       Double Precision t, dt
-      Real bTort
+      Real bTort, QGas_Resid
       Integer gKod,newjjj
       Dimension B(NumNPD),F(NumNPD),DS(NumNPD)
 
@@ -17,7 +17,8 @@
      !          Dair(NumGD),
      !          NLevel,epsi, S(3,3),Ci(3),Bi(3),List(3),
      !          Diff(NumNPD),Ac(NumNPD),Gc(NumNPD),Sc(NumNPD),
-     !          g_1(NumNPD,NumGD)
+     !          g_1(NumNPD,NumGD),
+     !          QGas_Resid(NumNPD,NumGD)
       
       !allocate (A(MBandD,NumNPD))
       !allocate (A_1(MBandD,NumNPD))
@@ -348,14 +349,58 @@ c  Implicit formulation
 
 !  Gas FLux calculation from the matrix
 !  This should work for -4, 1, 3, 6 
+
+C --- Boundary fluxes (outward positive) ---
+      Do n = 1, NumNP
+         QGas(n,jjj) = 0.0
+      End Do
+
+      Do j = 1, NumBP
+         i = KXB(j)
+
+C        Robin/Cauchy BC: q = Pg*g - Qg
+         If ((CodeG(i).eq.-4) .or. (CodeG(i).eq.-6)) Then
+            If (CodeG(i).eq.-6) Then
+               Qg = VarBG(j,jjj,3)
+               Pg = VarBG(j,jjj,2)
+            Else
+               Qg = VarBG(j,jjj,3) * Width(j)
+               Pg = VarBG(j,jjj,2) * Width(j)
+            End If
+            QGas(i,jjj) = Pg*g(i,jjj) - Qg
+         End If
+
+C        Dirichlet BC: diffusive flux using nearest interior neighbor
+         If (CodeG(i).eq.1) Then
+            nb = 0
+            Do k = 1, IADN(i)
+               ii = IAD(k,i)
+               If (CodeG(ii).eq.0) Then
+                  nb = ii
+                  Exit
+               End If
+            End Do
+
+            If (nb.gt.0) Then
+               dx = x(i) - x(nb)
+               dy = y(i) - y(nb)
+               dn = sqrt(dx*dx + dy*dy)
+               If (dn.gt.1.0e-12) Then
+                  Deff = 0.5*(Diff(i) + Diff(nb))
+                  QGas(i,jjj) = Deff*(g(nb,jjj)-g(i,jjj))/dn * Width(j)
+               End If
+            End If
+         End If
+      End Do
       
       Do  n=1,NumNP
+          QGas_Resid(n,jjj)=0.0
           If ((CodeG(n).eq.-4).or.(CodeG(n).eq.1)) then
               QG =F(n)+(DS(n)*(g(n,jjj)-g_1(n,jjj))/dt )
               do   j=1,IADN(n)
                   QG=QG+A_1(j,n)*g(IAD(j,n),jjj)       
               end do
-              QGas(n,jjj)=QG
+              QGas_Resid(n,jjj)=QG
           End if
       
       end do
