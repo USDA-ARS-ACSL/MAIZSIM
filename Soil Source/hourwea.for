@@ -926,7 +926,6 @@ C gives you the .149
 
 c   IF THE NODE IS EXPOSED THEN
 c 
-        ESO=0.0 !debugging
           If(PSh.gt.0.) then
 
 C
