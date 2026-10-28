@@ -40,6 +40,7 @@ cccz output for runoff module
      &     Runoff_02,    ! cccz: runoff leave the surface: for the whole surface, treat rainfall as input and count the water leave the surface, then distributed evenly along the surface, DO NOT INCLUDE REPEAT CALCULATION, BUT for furrow, CAN BE ZERO even surface water flow inside the domain ----------  Good if you think runoff effects out of your soil domain
      &     Runoff_03     ! cccz: runoff contribution @ each node: for each surface node, treat rainfall (exclude water income from upper-stream), the real runoff contribution for each node, then average over the soil surface ------- Good for the local runoff, but eventually averaged
 
+
       Common /Outcom/NumPoint(2000),NodNum(2000,60),
      &     NumCell(1000),NumElPrint(1000,60),ModNum,
      &     Period, ETO, ActualTrans1,ActualSoilEvap,
@@ -69,7 +70,7 @@ C
 C  Initialize 
 C
         If (DailyOutput.eq.1) Period=1.0
-        If (HourlyOutput.eq.1) Period=1.0/24.0D0
+        If (HourlyOutput.eq.1) Period=1.0/24.0
         NumMod=NumMod+1
         ModNum=NumMod
         tNext(ModNum) = time
@@ -304,8 +305,16 @@ cccz calculation is done, just do an assignment
              SumArrayTh=SumArrayTh + ThNew
              hourCount=hourCount+1
            endif
+           
+           
+       qSum1_o=qSum1_o+q(1)*STEP/WIDTH(1)*10.
+       qsumAct_o=qSumAct_o+qAct(1)*STEP/WIDTH(1)*10.
+       time_Sum_o=time_Sum_o+STEP
 11    If(abs(time-tNext(ModNum)).lt.0.001*Step.OR.lInput.eq.1) then
           iday=int(t)
+            Qsum1_o=0.0
+            QsumAct_o=0.0
+            time_Sum_o=0.0
           if (DailyOutput.eq.1) then
              SumArrayTh=SumArrayTh/Real(hourCount)
            endif
@@ -340,7 +349,7 @@ cccz calculation is done, just do an assignment
             
           Call ArrOrganicMatterOut(Date,x,y,NumNP,t,Ch,Nh,
      !       Cl,Nl, Cm, Nm, cRoot, nRoot)
-        tNext(ModNum) = time + Period
+        tNext(ModNum) = time + Period -0.0001
 C      
 * This code operates hourly to output data on the surface nodes
 	  

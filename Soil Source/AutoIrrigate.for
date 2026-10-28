@@ -25,7 +25,7 @@ C  Initialize
 C
         NumMod=NumMod+1
         ModNum=NumMod
-        tNext(ModNum) = time + 1
+        tNext(ModNum) = time + 1.0D0  !start the next day
 cccz initialize to zero
         do i=1,NumNPD
           Qautoirrig(i)=0.0D0
@@ -96,7 +96,7 @@ C TODO need to check code this was partially merged between the gas exchange and
            do k=1, NumBp
             i=KXB(k)
             If(abs(CodeW(i)).eq.4) then
-             if (Q(i).lt.0) then 
+             if (Q(i).le.0) then 
               CodeW(i)=4
 cccz since we treat auto-irrigation as rainfall, we directly change the varbw terms
 cccz so varbw_air will be rainfall+autoirrigation
