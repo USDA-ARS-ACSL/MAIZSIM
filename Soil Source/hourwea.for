@@ -83,18 +83,17 @@ c inputs hourly data
       Include 'puweath.ins'
       Include 'PuSurface.ins'
       
-      Parameter (PERIOD =1./24.)
+      !Parameter (PERIOD =1./24.)
       integer jday,m,DayOfYear,CurYear,Modnum, ThisYear,
      &         isol, HOUR, iperd
       double precision St,t, GAMMA_psy
       real Interval, HRAIN,HSR,HTEMP, HTEMPY,HWIND,Rel_Humid,
-     &     BEERS 
-      real qSum1,qSumAct,time_sum
+     &     BEERS, PERIOD 
       character*10 date
       Common /weatherH/ il,im,HRAIN(24),HSR(24),HTEMP(24),HTEMPY(24), 
      &     HWIND(24), Rel_Humid(24),isol,Date1,ModNum,
      &     Interval, TWET(24),TDRY(24), AVP(24), GAMMA_psy(24),
-     &     SVPW(24),TMIN, TMAX,BEERS(24),qSum1,qSumAct,time_sum
+     &     SVPW(24),TMIN, TMAX,BEERS(24),PERIOD
       
       Dimension CLIMAT(20),SDERP(9),SINALT(24),SINAZI(24),HRANG(24),
      &           SARANG(24),
@@ -148,6 +147,7 @@ c
         tNext(ModNum)=time
         Interval=1.0D0/24.0D0
         IRAV=3.5D0 !default for autoirrigate
+        PERIOD=1./24.0
 
 c
       im=160
@@ -183,7 +183,7 @@ C
 c     if the BC for solute are 0 in the grid file, movers(2) at this point
 c     will also be 0 such that ISOL will be 0, removed movers(2)
       ISOL=NumSol*(MSW4)
-      AutoIrrigAmt=IRAV*BIR
+      AutoIrrigAmt=IRAV*BIR*24.0
 cdt  9/10/2014 added CO2 as a weather variable. Made this line consistent
 Cdt   with the same line from the daily weather file 
 CDT    TODO this needs to be tested fully
@@ -926,6 +926,7 @@ C gives you the .149
 
 c   IF THE NODE IS EXPOSED THEN
 c 
+         !ESO=0.0 !debugging
           If(PSh.gt.0.) then
 
 C
@@ -1184,8 +1185,9 @@ c................... End of the furrow irrigation
    
 c................... This is the end of hourly calculations
       Wind=HWIND(Itime) ! save hourly value of wind to pass to crop model
-      tNext(ModNum)=Time+period
-      
+C Sahila's fix for summation of infiltration in the g05 file not matching rainfall
+      tNext(ModNum)=(dint(Time*24.0D0)+1.0D0)/24.0D0+1.0D-4
+
       do i=1,NumBPD
 cccz extract useful variables for surface physical processes
 cccz water input from air-mulch interface
