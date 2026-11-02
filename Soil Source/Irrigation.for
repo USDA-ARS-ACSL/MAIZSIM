@@ -10,13 +10,15 @@
       Character*10 Date(Max_Irrig_times)
       Character InString*132
       Real Amount_Irrig_Applied,AvgIrrRate,IrrigRate
+      Double Precision StopIrrig, PERIOD,tApplIrrig,IrrgStartHour
       Parameter (PERIOD =1./24.)
       Double Precision t, dt
       Common /Irrig/ tApplIrrig(Max_Irrig_times),
      !         StopIrrig(Max_Irrig_times),
      !         Amount_Irrig_Applied(Max_Irrig_times),
      !         Irrig_times,IrrigationApplied,ModNum,
-     !         AvgIrrRate, IrrigRate(24),IrrigHour
+     !         AvgIrrRate, IrrigRate(24),IrrigHour,
+     !         IrrgStartHour
       
       t=time
       IrrgStartHour=6.0                   ! irrigation start hour 6 AM   !if we want we can make this as an input by the user. 
@@ -95,8 +97,9 @@ c catch condition where total irrigation exceeds 24 hours in a day
             IrrigRate(i)=DtIrrig*AvgIrrRate/(PERIOD*24.0)     !hour/daycm/hour /(1hour/24)= cm/hour
             DtIrrig=0.0                !no more irrigation
             HoursIrrigated=HoursIrrigated+1
-            tNext(ModNum)=tApplIrrig(jj)+IrrgStartHour*period
-            StopIrrig(jj)=tNext(ModNum)+HoursIrrigated*period
+                 tNext(ModNum)=tApplIrrig(jj) +
+     &                    IrrgStartHour/24.D0+1.D-4
+            StopIrrig(jj)=tNext(ModNum)+dble(HoursIrrigated*period)
             IrrigHour=1
            Endif !! if DtIrrig>precision_threshold 
          i=i+1
@@ -115,12 +118,13 @@ c catch condition where total irrigation exceeds 24 hours in a day
             do k=1, NumBp
               i=KXB(k)
               If(abs(CodeW(i)).eq.4) then             !checking if the surface boundary is either head or flux based
-                  if (Q(i).lt.0) then                 !Flow out of the soil
+    
                   CodeW(i)=4                          !Constant head
 cccz since we treat irrigation as rainfall, we directly change the varbw terms
 cccz so varbw_air will be rainfall+irrigation
               Varbw_Air(k,1)=Varbw_Air(k,1)+IrrigRate(IrrigHour)/period
-          Varbw_Mulch(k,1)=Varbw_Mulch(k,1)+IrrigRate(IrrigHour)/period
+              Varbw_Mulch(k,1)=Varbw_Mulch(k,1)+IrrigRate(IrrigHour)
+     &                         /period
               VarBW(k,1)=Varbw(k,1)+IrrigRate(IrrigHour)/period
 cccz then re-calculation of Q, folloiwng VarBW and the starndard method show in weather
               VarBW_Air(k,3)=VarBW_Air(k,2)-VarBW_Air(k,1)
@@ -129,20 +133,20 @@ cccz then re-calculation of Q, folloiwng VarBW and the starndard method show in 
               Q(i)=-Width(k)*VarBW(k,3)       
 cccz now the irrigation is recorded by the "varbw flux temrs"
 cccz                   if (Q(i).gt.0.0) CodeW(i)=-4   ! make sure bc changes if Qn goes > 0 (infiltration)
-                  End if    !Q(i) <0
               End if   ! CodeW=4
             End Do
             !End of passing the flux      
             
-              tNext(ModNum)=time + PERIOD                     !once irrigated in one hour, next irrigation is in next hour
+              tNext(ModNum)=(dint(Time*24.0D0)+1.0D0)/24.0D0 +1.0D-4  !once irrigated in one hour, next irrigation is in next hour
               IrrigHour=IrrigHour+1                           !this count the number of irrigation in a day
-          Else
-              IrrigationApplied=IrrigationApplied+1           !when irrigation is stopped on a perticular day of irrigation
+          Else                                                ! this step for the last amount of irrigation for the event
+              IrrigationApplied=IrrigationApplied+1           !when irrigation is stopped on a particular day of irrigation
                   if (IrrigationApplied.gt.Irrig_times) then
                           tNext(ModNum)=1.E+32
                   else
                       tNext(ModNum)=tApplIrrig(IrrigationApplied)+  ! this set the tnext to the next day of irrigation start time
-     !                IrrgStartHour*period
+     !                IrrgStartHour*period +1.0D-4
+
                   end if
           Endif
       End if

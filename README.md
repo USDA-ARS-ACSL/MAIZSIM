@@ -108,6 +108,14 @@ This interface supports the most recent MAIZSIM version.
 
 | Date                      | Description                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------- |
+|11/2/2026 	                |	removed dtMX selection for time step since solutemover does not adjust the time step	|
+|11/2/2026        	        |	Aditya found an error in the eqn to calculate head from water content - this was only used when initializeing soil wa...	|
+|11/2/2026 	                |	made all time parameters double precision changes logic to allow autoirrig for both q <0 adn q=0	|
+|11/2/2026 	                |	first check in not complete. fixed bug where the correct amount was not registered as infiltration. allowed irrigaton...	|
+|11/2/2026 	                |	fixed bug where the correct amount was not registered as infiltration. allowed irrigaton to occur on days with rainfa...	|
+|11/1/2026 	                |	refactoring into three subroutines. not working yet	|
+|10/30/2026              	|	two changes checked if q le 0, from lt 0 so it would catch all fluxes even if 0, 	|
+|10/30/2026              	|	Fully implemented Sahila's fix for tnext to fix issue with rainfall not summing to infil in the G05 file. removed cod...	|
 | 10/16/2026                | initialized tRigid as double precision |
 | 10/16/2026                | initialized qact array to 0 |
 | 10/16/2026                | Removed oxystress in the lInput=1 loop (bcoz oxystress is not yet estimated at this stage; RVR was too large) |

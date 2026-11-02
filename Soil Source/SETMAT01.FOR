@@ -84,7 +84,7 @@ c calculate MP from water content if wc is given as an initial
              mm=MatNum(n)
              VG_m=(1-1/(par(6,mm)))*(-1)
              thetaRel=(hNew(n)-par(1,mm))/(par(2,mm)-par(1,mm))
-             hNew(n)=(ThetaRel**(1/Vg_m))**(1/par(6,mm))-1
+             hNew(n)=(ThetaRel**(1/Vg_m)-1)**(1/par(6,mm))
              hNew(n)=hNew(n)/par(5,mm) * (-1)
            endif
          enddo

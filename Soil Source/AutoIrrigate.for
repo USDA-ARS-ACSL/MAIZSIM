@@ -13,6 +13,7 @@ C it is called once a day, at 5:00 am
        Real ThetaAvail50, ThetaFull50,AvailWaterRatio
        Real Thi, Thj, Thl, ThFl_i,ThFl_j, ThFl_l
        Real Bii(3),Cii(3), AE, Sum1, Sum2
+       Double Precision PERIOD
        Integer i, j, l
        Common /Auto/ ModNum
        
