@@ -8,13 +8,14 @@ C it is called once a day, at 5:00 am
        include 'public.ins'
        include 'puweath.ins'
        include 'PuSurface.ins'
-       Parameter (PERIOD =1./24.)
+ 
 
        Real ThetaAvail50, ThetaFull50,AvailWaterRatio
        Real Thi, Thj, Thl, ThFl_i,ThFl_j, ThFl_l
        Real Bii(3),Cii(3), AE, Sum1, Sum2
        Double Precision PERIOD
-       Integer i, j, l
+       Integer i, j, l 
+       Parameter (PERIOD =1./24.)
        Common /Auto/ ModNum
        
        

@@ -193,7 +193,7 @@ c          CourMax=1.
                 Courant=amax1(Courant,CourX,CourY)
                 If(VxMax.gt.0.) dt1=CourMax*delX/VxMax
                 If(VzMax.gt.0.) dt2=CourMax*delY/VzMax
- 
+                dtMx(2)=dmin1(dtMx(2),dt1,dt2)
               Endif
               If(KAT.eq.1) xMul=2.*3.1416*(x(i)+x(j)+x(l))/3.     !if cylindrical ordinates
               GcE=(Gc(i)+Gc(j)+Gc(l))/3.                          !average of the solute concentration sink term                          
