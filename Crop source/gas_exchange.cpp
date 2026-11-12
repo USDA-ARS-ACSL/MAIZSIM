@@ -255,7 +255,7 @@ class CGasExchange
 
 	{
 		const long Lambda = 44000; //latent heat of vaporization of water J mol-1 - not used in this implementation
-		const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air, J mol-1 C-1
+		const double Cp = 29.3; // thermodynamic psychrometer constant and specific heat of air, J mol-1 K-1 or C-1
 		const double psc = 6.66e-4; //psycrometric constant units are C-1
 		//psc=Cp/Lambda = 29.3/44000 See Campbell and Norman, pg 232, after eq 14.11
 
@@ -271,7 +271,7 @@ class CGasExchange
 		int    iter;
 		bool badval = false;
 
-		HeatConductance = BoundaryLayerConductance*(0.135/0.147);  // heat conductance, HeatConductance = 1.4*.135*sqrt(u/d), u is the wind speed in m/s} Boundary Layer Conductance to Heat
+		HeatConductance = BoundaryLayerConductance * (0.135 / 0.147);  // heat conductance, HeatConductance = 1.4*.135*sqrt(u/d), u is the wind speed in m/s} Boundary Layer Conductance to Heat
 		// Since BoundaryLayerConductance is .147*sqrt(u/d) this scales to 0.135*sqrt(u/d) - HeatConductance on page 109 of Campbell and Norman, 1998
 		// Wind was accounted for in BoundaryLayerConductance already  as BoundaryLayerConductance (turbulent vapor transfer) was calculated from CalcTurbulentVaporConductance() in GasEx. 
 		// units are J m-2 s-1 
@@ -285,21 +285,34 @@ class CGasExchange
 		// iterative version
 		newTi=-10;
 		iter=0;
-		lastTi=Tleaf;
+		double Tleaf_itr=-10.0;
 		double Res, dRes; //temporary variables
 		double thermal_leaf;
+		double temp1, temp2, temp3, temp4,temp5; //temporary variables
 		Ea = Es(Tair)*RH; // ambient vapor pressure
-		while ((abs(lastTi-newTi)>0.001) && (iter <maxiter)) 
+		newTi = Tair; //+(R_abs - thermal_air - Lambda * VaporConductance * this->VPD / Press) / (Cp * RadiativeAndHeatConductance + Lambda * Slope(Tair) * VaporConductance); // eqn 14.6a
+		while ((abs(Tleaf_itr-newTi)>0.001) && (iter <maxiter)) 
 		{
-			lastTi=newTi;
-			
+			//lastTi=newTi;
+			Tleaf_itr = newTi;
+
 				 // the commented line is from the original but doesn't make much difference for dry matter
-            Tleaf= Tair + (R_abs- thermal_air-Lambda*VaporConductance*this->VPD/Press)/(Cp*RadiativeAndHeatConductance+Lambda*Slope(Tair)*VaporConductance); // eqn 14.6a
-			if (std::isnan(Tleaf)) badval = true;
-			thermal_leaf=epsilon*sbc*pow(Tleaf+273,4)*2;
-			Res = R_abs - thermal_leaf - Cp*HeatConductance*(Tleaf - Tair) - Lambda*VaporConductance*0.5*(Es(Tleaf)-Ea)/Press; // Residual function: f(Ti), KT Paw (1987)
-			dRes= -4*epsilon*sbc*pow(273+Tleaf,3)*2-Cp*HeatConductance*Tleaf-Lambda*VaporConductance*Slope(Tleaf); // derivative of residual: f'(Ti)
-			newTi = Tleaf + Res/dRes; // newton-rhapson iteration
+            			if (std::isnan(Tleaf_itr)) badval = true;
+			temp1 = Cp* HeatConductance* (Tleaf_itr - Tair);
+			temp2 = Lambda * VaporConductance * (Es(Tleaf_itr) - Ea);
+			temp3 = Slope(Tleaf_itr);
+			temp4 = epsilon * sbc * pow(273 + Tleaf_itr, 3);
+			temp5 = Lambda * VaporConductance * Slope(Tleaf_itr);
+			thermal_leaf=epsilon*sbc*pow(Tleaf_itr+273,4)*2;
+			Res = R_abs
+				- thermal_leaf
+				- Cp * HeatConductance * (Tleaf_itr - Tair)
+				- Lambda*VaporConductance*(Es(Tleaf_itr)-Ea)/Press; // Residual function: f(Ti), KT Paw (1987) J. therm. Biol. Vol. 12, No. 3, pp. 227-233, 1987
+			dRes = -4.0 * epsilon * sbc * pow(273 + Tleaf_itr, 3) * 2.0
+				- Cp * HeatConductance
+			    - Lambda*VaporConductance*Slope(Tleaf_itr); // derivative of residual: f'(Ti)
+			newTi = Tleaf_itr - Res/dRes; // newton-rhapson iteration
+
 			iter++;
 		}
 		Tleaf=newTi;

@@ -19,7 +19,7 @@
 C
 C  Initialization here
 C          
-      Nlevel=1
+      Nlevel=2
       Do i=1,NMat
         VSind(i)=BlkDn(i)*FracSind(i)/2.65
         VClay(i)=BlkDn(i)*FracClay(i)/2.65
