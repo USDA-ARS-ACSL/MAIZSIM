@@ -19,7 +19,8 @@
 C
 C  Initialization here
 C          
-      Nlevel=2
+	Nlevel=1
+      If(epsi_heat.lt.0.999) NLevel=2      
       Do i=1,NMat
         VSind(i)=BlkDn(i)*FracSind(i)/2.65
         VClay(i)=BlkDn(i)*FracClay(i)/2.65
