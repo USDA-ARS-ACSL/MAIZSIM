@@ -322,7 +322,7 @@ c   dt have to fix this later as model cannot handle freezing temperatures
             CPREC(i)=CLIMAT(4+2*MSW1+MSW2+MSW3+i)
           Enddo
         Endif
-        AutoIrrigAmt=IR   ! used in AutoIrrigation if carried out.
+        AutoIrrigAmt=IR*24.0   ! used in AutoIrrigation if carried out.
 CDT
 
       If(MSW6.gt.0) then
@@ -1147,7 +1147,7 @@ c................... Gas movement
  
 c................... End gas movement      
 c................... This is the end of hourly calculations
-      tNext(ModNum)=tNext(ModNum)+PERIOD
+      tNext(ModNum)=(dint(Time*24.0D0)+1.0D0)/24.0D0+1.0D-4
       
       do i=1,NumBPD
 cccz extract useful variables for surface physical processes
