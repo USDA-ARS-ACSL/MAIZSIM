@@ -340,7 +340,7 @@ cccz calculation is done, just do an assignment
             
           Call ArrOrganicMatterOut(Date,x,y,NumNP,t,Ch,Nh,
      !       Cl,Nl, Cm, Nm, cRoot, nRoot)
-        tNext(ModNum) = time + Period -0.0001D0
+        tNext(ModNum) = time + Period
 C      
 * This code operates hourly to output data on the surface nodes
 	  
