@@ -108,6 +108,7 @@ This interface supports the most recent MAIZSIM version.
 
 | Date                      | Description                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------- |
+|11/26/2026                 | fixed error in calculation of molecular wt of N2O in soilNDen
 |11/16/2026                 | removed debugging code from hourlywea.for and declared Nlevel as an integer to heatmov.for  
 |11/13/2026 	             |  applied tnext fix , multiplied irrigamt by 24           |
 |11/12/2026                | 	made NLeve dependent on EPSI_heat                       |
@@ -171,7 +172,7 @@ For full details, see: https://creativecommons.org/publicdomain/zero/1.0/*
 ## Vulnerability Disclosure Policy
 **The community is explicitly encouraged to engage in the responsible disclosure of vulnerabilities to promote collaboration and improve code security.**
 If you discover a security vulnerability, please report it responsibly:
-1.	**Email:** name.lastname@usda.gov with subject "Security Vulnerability - Probit Tool"
+1.	**Email:** Dennis.Timlin@usda.gov with subject "Security Vulnerability - Probit Tool"
 1.	**Provide details:** Description, steps to reproduce, potential impact
 1.	**Confidential handling:** We will respond within 48 hours
 1.	**Recognition:** Contributors acknowledged (with permission) after resolution
