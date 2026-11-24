@@ -250,11 +250,11 @@ cDT removed BlkDn, it is not needed.
          
          
 Csb: Sink for N2O      
-Csb: 1ugN=44/14 ug N2O	
+Csb: 1ugN=44/28 ug N2O	
 Csb: unit of Q7 [ug N g soil day-1]  
 Csb: unit of gsink_N2O [ug N2O cm3]         
          
-         gsink_N2O(i,1)=Q7*(44.0/14.0)*amax1(1.0/soilair(i),0.0)!ug N to ug N2O +convert to ug N2O cm-3 air	
+         gsink_N2O(i,1)=Q7*(44.0/28.0)*amax1(1.0/soilair(i),0.0)!ug N to ug N2O +convert to ug N2O cm-3 air	
 
   				 
 C End of iterations
