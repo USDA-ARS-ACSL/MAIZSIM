@@ -113,11 +113,8 @@ CYAP
 CYAPEND
       t=Time
       St=0.1D0*Step
-
       If (lInput.eq.0) goto 11
-       Qsum1=0.0
-       QsumAct=0.0
-       time_sum=0.0
+      
 cccz
 cccz initialized surface water income  
       do i=1,NumBPD
@@ -816,14 +813,9 @@ c........................End of daily calculations
 C
 C     Further we have hourly calculations
 
-      qSum1=qSum1+q(1)*STEP/WIDTH(1)*10.
-      qsumAct=qSumAct+qAct(1)*STEP/WIDTH(1)*10.
-      time_Sum=time_Sum+STEP
 55    If(Abs(Time-tNext(ModNum)).lt.0.001*Step.or.lInput.eq.1) then
           
-       Qsum1=0.0
-       QsumAct=0.0
-       time_Sum=0.0
+
        ITIME=Idint(dMOD(t+St,1.D0)/PERIOD+1)
        Do i=1, NumBP
          do j=1, 4
@@ -926,7 +918,6 @@ C gives you the .149
 
 c   IF THE NODE IS EXPOSED THEN
 c 
-         !ESO=0.0 !debugging
           If(PSh.gt.0.) then
 
 C
