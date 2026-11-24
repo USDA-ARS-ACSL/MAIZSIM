@@ -3,7 +3,7 @@
       Double precision A,B,C,P,Sum
       Double precision dt,t
       Real VSind, VClay, VOrgM, ThTot
-      Integer tKod
+      Integer tKod, Nlevel
       Dimension A(MBandD,NumNPD),B(NumNPD),F(NumNPD),DS(NumNPD) 
       Common /HeatM/ ThOld(NumNPD),
      !                NLevel,dt,
