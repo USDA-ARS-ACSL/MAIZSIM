@@ -108,6 +108,10 @@ This interface supports the most recent MAIZSIM version.
 
 | Date                      | Description                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------- |
+|11/16/2026                 | removed debugging code from hourlywea.for and declared Nlevel as an integer to heatmov.for  
+|11/13/2026 	             |  applied tnext fix , multiplied irrigamt by 24           |
+|11/12/2026                | 	made NLeve dependent on EPSI_heat                       |
+|11/12/2026                |  Nlevel needed to be intialized to 2, otherwise the iteration was missing part of the source   |
 |11/2/2026 	                |	removed dtMX selection for time step since solutemover does not adjust the time step	|
 |11/2/2026        	        |	Aditya found an error in the eqn to calculate head from water content - this was only used when initializeing soil wa...	|
 |11/2/2026 	                |	made all time parameters double precision changes logic to allow autoirrig for both q <0 adn q=0	|
